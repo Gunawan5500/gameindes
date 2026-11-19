@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balai Kenalan Tidewrack: Prototipe Generator NPC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e7eaec;--pn:#f7f8f9;--tx:#1c2228;--mu:#5b6670;--ac:#b4620a;--ac2:#18786d;--ln:#c5cbd0;--bad:#a6362f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171b1f;--pn:#20262c;--tx:#e5e1d8;--mu:#97a1aa;--ac:#f0a145;--ac2:#52b8aa;--ln:#343c44;--bad:#e8776e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#171b1f;--pn:#20262c;--tx:#e5e1d8;--mu:#97a1aa;--ac:#f0a145;--ac2:#52b8aa;--ln:#343c44;--bad:#e8776e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Source Sans 3",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+h1,h2{font-family:Bitter,Georgia,serif;margin:0}
+h1{font-size:1.9rem;font-weight:800}
+h2{font-size:1.15rem;margin-bottom:6px}
+.sub{color:var(--mu);margin:2px 0 12px;max-width:66ch}
+#hud{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px;background:var(--pn);border:1px solid var(--ln);border-radius:6px;margin-bottom:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:4px;padding:8px 14px;border:1px solid var(--ac);background:var(--ac);color:#fff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) button{color:#1a1208}}
+:root[data-theme="dark"] button{color:#1a1208}
+button.alt{background:transparent;color:var(--ac)}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:780px){main{grid-template-columns:1fr}}
+.pn{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:14px;margin-bottom:12px}
+.pc{background:var(--pn);border:2px solid var(--ac);border-radius:6px;padding:14px;margin-bottom:12px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.pc>*:not(.av){grid-column:2}.pc .av{grid-row:1/4}
+.av{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;color:#fff;font:700 1.1rem Bitter,serif;flex:none}
+.av.big{width:64px;height:64px;font-size:1.7rem}
+.n{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:12px;margin-bottom:10px}
+.n.Kunci{border-left:5px solid var(--ac)}.n.Calon{border-left:5px solid var(--ac2)}
+.h{display:flex;gap:10px;align-items:center}.h>div{flex:1}
+.st{font-size:.85rem;border:1px solid var(--ln);border-radius:10px;padding:0 8px;color:var(--mu)}
+.m{color:var(--mu);margin:2px 0;font-size:.95rem}
+.a{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.b{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:center;font-size:.88rem;color:var(--mu)}
+.b i{display:block;height:7px;background:var(--ln);border-radius:4px;overflow:hidden}.b u{display:block;height:100%;background:var(--ac2)}
+select{font:inherit;padding:7px;background:var(--bg);color:var(--tx);border:1px solid var(--ln);border-radius:4px;max-width:100%}button:disabled{opacity:.45;cursor:not-allowed}pre{overflow-x:auto;font-size:.8rem;background:var(--bg);padding:8px;border-radius:4px}
+summary{cursor:pointer;font-weight:600;margin-top:6px}
+.log p{margin:3px 0;font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Balai Kenalan Tidewrack</h1>
+<p class="sub">Prototipe generator NPC dan promosi. Temui warga yang dirakit dari data, kenali mereka, lalu lihat siapa yang naik menjadi NPC kunci. Coba urutan ini: temui beberapa warga, ngobrol sampai dikenal, lanjut hari, lalu naikkan salah satu jalur promosi.</p>
+<div id="hud"></div>
+<div class="ctl"><button data-a="meet">Temui warga baru</button><button class="alt" data-a="day">Lanjut satu hari</button><button class="alt" data-a="ev">Picu event dunia</button></div>
+<div class="pn"><h2>Lokasi dan sensus</h2><div class="a" style="margin:0 0 8px"><select id="lok" aria-label="Lokasi saat ini"></select><label class="m">Impor lokasi (CSV): <input type="file" id="fc" accept=".csv,.txt"></label></div><div id="sensus"></div></div>
+<div id="promo"></div>
+<main>
+<section id="list" aria-label="Daftar NPC"></section>
+<section><div class="pn log" aria-live="polite"><h2>Kabar</h2><div id="log"></div></div>
+<div class="pn"><h2>Aturan di prototipe</h2><p class="m">Ngobrol: maksimal 2 kali per NPC per hari (+1), hadiah 1 kali per hari (+2), kedekatan sampai 99. Dikenal: 3 pertemuan. Calon: dikenal dan kedekatan 20, maksimal 5. Promosi: 2 permintaan pribadi, atau kedekatan 70, atau 2 event bakat, mana yang dulu. Jeda 10 hari, maksimal 12 NPC kunci. Jumlah warga dan profesi dibatasi oleh tipe lokasi (Desa 8, Kota kecil 20, Kota sedang 40, Kota besar 80). Semua angka contoh dan data tidak tersimpan.</p></div></section>
+</main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const rng=s=>{let a=s>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const P={
+gaya:{laut:[["Lio","Tavi","Nara","Beni"],["Marsh","Brask","Corvin","Dale"]],keras:[["Hald","Brom","Kessa","Ruld"],["Stonehand","Voss","Ironvale","Marek"]],nomad:[["Hask","Qira","Tolu","Jarek"],["Ruan","Dessa","Khorun","Salim"]],alam:[["Oriel","Lunara","Fenn","Ilse"],["Vance","Mossgrave","Pinelark","Thalen"]]},
+faksi:[["Liga Saltgrave","laut",60,["kernet kapal:melaut","pedagang:menawar","penyelundup:menawar","nelayan:melaut"]],["Kerajaan Briarfall","keras",12,["prajurit:berkelahi","juru tulis:menawar","pemburu:berburu"]],["Wyrmspine","keras",8,["penambang:menempa","pandai besi:menempa"]],["Klan Ashwind","nomad",8,["pedagang karavan:menawar","pemanah:berburu"]],["Dewan Elderwake","alam",7,["tabib:meramu","pemburu:berburu"]],["Suku Frostpine","alam",5,["penjejak:berburu","penyamak kulit:meramu"]],["Hierarki Iblis","laut",3,["pembisik:menawar","penyihir rawa:meramu"]],["Ordo Emberwaste","nomad",4,["pendeta api:meramu","perajin kaca:menempa"]],["Sisa Mahkota Beku","keras",3,["kesatria:berkelahi","pelayan istana:menawar"]],["Suku Thornback","alam",4,["dukun tulang:meramu","pegulat:berkelahi","pemburu:berburu"]],["Penjaga Barrow","keras",3,["penjaga makam:berkelahi","pembaca nisan:menawar"]]],
+sifat:["ramah","pelit","bangga","penasaran","setia","licin","ceria","murung","berani","penakut","teliti","ceroboh","sabar","pemarah","dermawan","curiga","ambisius","pemalas","jenaka","serius"],
+lawan:[["ramah","pemarah"],["pelit","dermawan"],["berani","penakut"],["ceria","murung"],["sabar","pemarah"],["ceroboh","teliti"],["pemalas","ambisius"],["curiga","ramah"]],
+skill:["menempa","menawar","melaut","berburu","meramu","berkelahi"],
+tujuan:[["melunasi hutang perahu","Pisau nelayan murah yang tidak berkarat","Bahan Pengikat untuk memperbaiki perahu"],["membuka kedai kecil","Pisau dapur yang tajam","Lonceng pintu dari logam"],["mencari saudara yang hilang","Belati untuk perjalanan jauh","Peta kulit yang tahan air"],["meneliti Fusi","Inti elemen untuk percobaan","Wand tiruan untuk uji coba"],["mengumpulkan bahan langka","Carikan Serpihan Beku","Tukar bahan Uncommon"],["menjadi pelaut ulung","Kapak kecil untuk tali","Dagger untuk berjaga"]],
+kuirk:["bersiul saat takut","menimbang barang dengan tangan","mengoleksi cangkang","mencium bijih sebelum membeli","bicara dengan burung camar","menghitung langkah"]};
+const EV=[["Kapal karam butuh pertolongan","melaut"],["Pasar butuh penawar ulung","menawar"],["Wabah demam di desa","meramu"],["Serigala mengancam ternak","berburu"],["Perampok di jalan","berkelahi"],["Pesanan darurat kerajaan","menempa"]];
+const ARC={Mentor:["teliti","sabar","serius","bangga"],Rival:["ambisius","bangga","pemarah","berani"],Sahabat:["ramah","setia","ceria","jenaka"],"Pelanggan Setia":["setia","dermawan","ceria"],"Romansa Ringan":["ramah","penasaran","jenaka"],Informan:["penasaran","licin","curiga"],"Pemasok Langka":["teliti","penasaran","sabar"],Pelindung:["berani","setia","serius"]};
+const PERAN={Mentor:"mentor",Rival:"rival","Pelanggan Setia":"pelanggan","Pemasok Langka":"pemasok",Informan:"informan"};
+const S={n:0,day:1,last:-10,npc:[],pend:null,log:[],nada:{Ramah:0,Tegas:0,Jenaka:0},ord:0,lok:0,rem:{}};
+const K={talk:2,gift:1,dT:1,dG:2,calon:20,promo:70};
+const TIPE={"Desa":8,"Kota kecil":20,"Kota sedang":40,"Kota besar":80};
+const EX=[["pedagang:menawar","pandai besi:menempa","tabib:meramu","pemburu:berburu","nelayan:melaut"],["pemilik kedai:menawar","penjaga:berkelahi","juru tulis:menawar","perajin kulit:meramu"],["saudagar:menawar","prajurit:berkelahi","tukang kayu:menempa","penambang:menempa"],["pejabat:menawar","perajin kaca:menempa","kurir:berburu","pelaut:melaut"]];
+const PROF={};[...EX.flat(),...P.faksi.flatMap(f=>f[3])].forEach(s=>{const a=s.split(":");PROF[a[0]]=a[1]});
+const LOK=[];
+const CSV0=`Lokasi,Tipe,Area,Wilayah,Level,Faksi,Kapasitas,Trait,Kepentingan,Unggulan
+Desa Whitepine,Desa,Hollowfrost Range,Whitepine Foothills,1-10,Sisa Mahkota Beku,8,,,
+Desa Rimeclaw,Desa,Hollowfrost Range,Rimeclaw Pass,11-20,Sisa Mahkota Beku,8,,,
+Pos Glacierhold,Desa,Hollowfrost Range,Glacier Throne,21-30,Sisa Mahkota Beku,5,,,
+Desa Gullrock,Desa,Cinderwatch Isles,Gullrock Shore,1-10,Liga Saltgrave,8,,,
+Desa Fogbell,Desa,Cinderwatch Isles,Fogbell Cliffs,11-20,Liga Saltgrave,8,,,
+Pos Cinderwatch,Desa,Cinderwatch Isles,Cinderwatch Spire,21-30,Liga Saltgrave,5,,,
+Desa Shepherd's Rest,Desa,Greymoor Downs,Shepherd's Rest,1-10,Penjaga Barrow,8,,,
+Desa Cairnfield,Desa,Greymoor Downs,Cairnfield,11-20,Penjaga Barrow,8,,,
+Pos Wailing,Desa,Greymoor Downs,Wailing Heights,21-30,Penjaga Barrow,5,,,
+Desa Reedshallows,Desa,Blackmere Fens,Reedshallows,1-10,Hierarki Iblis,8,,,
+Desa Gloomwater,Desa,Blackmere Fens,Gloomwater Maze,11-20,Hierarki Iblis,8,,,
+Pos Drownedheart,Desa,Blackmere Fens,Drownedheart Bog,21-30,Hierarki Iblis,5,,,
+Desa Mossroot,Desa,Elderwake Grove,Mossroot Verge,1-10,Dewan Elderwake,8,,,
+Desa Whisperbark,Desa,Elderwake Grove,Whisperbark Hollow,11-20,Dewan Elderwake,8,,,
+Pos Crownroot,Desa,Elderwake Grove,The Elderwake Crown,21-30,Dewan Elderwake,5,,,
+Desa Fallowleaf,Desa,Rustleaf Weald,Fallowleaf Trail,1-10,Dewan Elderwake,8,,,
+Desa Amberdeep,Desa,Rustleaf Weald,Amberdeep Wood,11-20,Dewan Elderwake,8,,,
+Pos Witchlight,Desa,Rustleaf Weald,Witchlight Thicket,21-30,Dewan Elderwake,5,,,
+Desa Stillwater,Desa,Hollowbarrow Highlands,Stillwater Shore,1-10,Penjaga Barrow,8,,,
+Desa Barrowdown,Desa,Hollowbarrow Highlands,Barrowdowns,11-20,Penjaga Barrow,8,,,
+Pos Kinglesscrag,Desa,Hollowbarrow Highlands,Kingless Crags,21-30,Penjaga Barrow,5,,,
+Desa Tidewrack,Desa,Saltgrave Coast,Tidewrack Beach,1-10,Liga Saltgrave,8,,,
+Desa Quayside,Desa,Saltgrave Coast,Rotdock Quarter,11-20,Liga Saltgrave,8,,,
+Pos Lanternreef,Desa,Saltgrave Coast,Sunken Lighthouse Reef,21-30,Liga Saltgrave,5,,,
+Desa Briar Meadow,Desa,Briarfall Marches,Briar Meadow,1-10,Kerajaan Briarfall,8,,,
+Desa Hollowroad,Desa,Briarfall Marches,Hollowroad Forest,11-20,Kerajaan Briarfall,8,,,
+Pos Thornfall,Desa,Briarfall Marches,Thornfall Redoubt,21-30,Kerajaan Briarfall,5,,,
+Desa Greenmaw,Desa,Bonethorn Peninsula,Greenmaw Edge,1-10,Suku Thornback,8,,,
+Desa Thornback,Desa,Bonethorn Peninsula,Thornback Jungle,11-20,Suku Thornback,8,,,
+Pos Marrowdeep,Desa,Bonethorn Peninsula,Marrow Deep,21-30,Suku Thornback,5,,,
+Desa Ironroot,Desa,Wyrmspine Mountains,Ironroot Foothills,1-10,Wyrmspine,8,,,
+Desa Snowline,Desa,Wyrmspine Mountains,Snowline Switchbacks,11-20,Wyrmspine,8,,,
+Pos Summitwatch,Desa,Wyrmspine Mountains,Wyrmspine Summit,21-30,Wyrmspine,5,,,
+Desa Dryreed,Desa,Ashwind Steppe,Dryreed Plains,1-10,Klan Ashwind,8,,,
+Desa Saltlake,Desa,Ashwind Steppe,Saltlake Shore,11-20,Klan Ashwind,8,,,
+Pos Dustwind,Desa,Ashwind Steppe,Dustwind Ruins,21-30,Klan Ashwind,5,,,
+Desa Pinewatch,Desa,Frostpine Taiga,Pinewatch Edge,1-10,Suku Frostpine,8,,,
+Desa Wolfmoon,Desa,Frostpine Taiga,Wolfmoon Glade,11-20,Suku Frostpine,8,,,
+Pos Deepfrost,Desa,Frostpine Taiga,Deepfrost Hollow,21-30,Suku Frostpine,5,,,
+Desa Cooledune,Desa,Emberwaste,Cooled Dunes,1-10,Ordo Emberwaste,8,,,
+Desa Glasssand,Desa,Emberwaste,Glasssand Basin,11-20,Ordo Emberwaste,8,,,
+Pos Cindermaw,Desa,Emberwaste,Cinder Maw Crater,21-30,Ordo Emberwaste,5,,,
+Desa Rimeshore,Desa,Crownfrost Isle,Rimeshore Landing,1-10,Sisa Mahkota Beku,8,,,
+Desa Barbican,Desa,Crownfrost Isle,Frozen Barbican,11-20,Sisa Mahkota Beku,8,,,
+Pos Crownfrost,Desa,Crownfrost Isle,Crownfrost Keep,21-30,Sisa Mahkota Beku,5,,,
+Desa Driftwood,Desa,Wraithtide Isles,Driftwood Cove,1-10,Hierarki Iblis,8,,,
+Desa Fogbound,Desa,Wraithtide Isles,Fogbound Reef,11-20,Hierarki Iblis,8,,,
+Pos Wraithspire,Desa,Wraithtide Isles,Wraith Spire,21-30,Hierarki Iblis,5,,,
+Pasar Hollowfrost,Kota kecil,Hollowfrost Range,-,,Sisa Mahkota Beku,,,,
+Bandar Gullquay,Kota kecil,Cinderwatch Isles,-,,Liga Saltgrave,,,,
+Kota Greymoor,Kota kecil,Greymoor Downs,-,,Penjaga Barrow,,,,
+Dermaga Reedmire,Kota kecil,Blackmere Fens,-,,Hierarki Iblis,,,,
+Pos Dagang Mossgate,Kota kecil,Elderwake Grove,-,,Dewan Elderwake,,,,
+Kota Fallowgate,Kota kecil,Rustleaf Weald,-,,Dewan Elderwake,,,,
+Kota Stillmere,Kota kecil,Hollowbarrow Highlands,-,,Penjaga Barrow,,,,
+Pelabuhan Rotdock,Kota kecil,Saltgrave Coast,-,,Liga Saltgrave,,,,
+Pasar Hollowroad,Kota kecil,Briarfall Marches,-,,Kerajaan Briarfall,,,,
+Perkampungan Greenmaw,Kota kecil,Bonethorn Peninsula,-,,Suku Thornback,,,,
+Gerbang Wyrmspine,Kota kecil,Wyrmspine Mountains,-,,Wyrmspine,,,,
+Perkemahan Besar Ashwind,Kota kecil,Ashwind Steppe,-,,Klan Ashwind,,,,
+Pasar Wolfmoon,Kota kecil,Frostpine Taiga,-,,Suku Frostpine,,,,
+Oasis Cooledune,Kota kecil,Emberwaste,-,,Ordo Emberwaste,,,,
+Dermaga Frostquay,Kota kecil,Crownfrost Isle,-,,Sisa Mahkota Beku,,,,
+Dermaga Mistquay,Kota kecil,Wraithtide Isles,-,,Hierarki Iblis,,,,
+Benteng Thornfall,Kota sedang,Briarfall Marches,-,,Kerajaan Briarfall,,,,
+Bandar Fogbell,Kota sedang,Cinderwatch Isles,-,,Liga Saltgrave,,,,
+Pasar Pinewatch,Kota sedang,Frostpine Taiga,-,,Suku Frostpine,,,,
+Pasar Karavan Saltlake,Kota sedang,Ashwind Steppe,-,,Klan Ashwind,,,,
+Kuil Glasssand,Kota sedang,Emberwaste,-,,Ordo Emberwaste,,,,
+Aula Elderwake,Kota sedang,Elderwake Grove,-,,Dewan Elderwake,,,,
+Benteng Barbican,Kota sedang,Crownfrost Isle,-,,Sisa Mahkota Beku,,,,
+Kota Makam Barrowdown,Kota sedang,Hollowbarrow Highlands,-,,Penjaga Barrow,,,,
+Kota Briarfall,Kota besar,Briarfall Marches,-,,Kerajaan Briarfall,,Kota benteng bertembok berlapis dengan barak di setiap sudut dan pajak yang menghidupi pasukan,Menguasai perbatasan dan menjamin pasokan senjata massal. Menginginkan standar senjata seragam dan curiga pada Fusi. Menjaga klaim mahkota dan menahan Ashwind,prajurit|juru tulis|penjaga|pandai besi
+Pelabuhan Agung Saltgrave,Kota besar,Saltgrave Coast,-,,Liga Saltgrave,,Kota dagang terbuka siang malam yang ramai orang asing dengan harga paling liar dan bayangan penyelundup,Menjaga jalur dagang bebas dan netral demi untung. Memperluas pasar ke semua faksi. Diam-diam menutupi urusan gelap dan menolak kerajaan menguasai pelabuhan,pedagang|pelaut|penyelundup|saudagar
+Kota Tempa Wyrmspine,Kota besar,Wyrmspine Mountains,-,,Wyrmspine,,Kota industri bertingkat di lereng gunung dengan bunyi palu tanpa henti dan akademi tempa,Memonopoli bijih dan resep. Menjaga standar mutu dan tradisi Terkunci. Mengendalikan harga logam dan menekan Elderwake soal tambang,pandai besi|penambang|saudagar
+Kota Kurultai,Kota besar,Ashwind Steppe,-,,Klan Ashwind,,Kota tenda raksasa yang berdiri penuh saat musim pertemuan klan dan hampir kosong sesudahnya tanpa tembok,Mengembalikan persatuan klan sesudah Khan Terakhir. Mencari sekutu senjata jauh. Menjaga rute karavan dan garam dan menolak aturan Briarfall di perbatasan,pemanah|pedagang karavan|penjejak|pemburu
+Kota Obsidian,Kota besar,Emberwaste,-,,Ordo Emberwaste,,Kota kuil dari kaca vulkanik hitam dengan ritual api di kawah air yang langka dan hidup mengikuti musim abu,Mengamankan pasokan air dan menjaga ritual api. Memonopoli bahan api dan obsidian. Mencari senjata elemen api untuk ritual dan menolak pengaruh elemen es,pendeta api|perajin kaca|penjaga|pedagang
+`;
+const hs=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7);
+const fk=n=>P.faksi.find(x=>x[0]===n)||P.faksi[0];
+const cap=l=>l.cap||TIPE[l.t]||8;
+const slotList=l=>{const r=rng(hs(l.n)),f=fk(l.f),ti=Math.max(0,Object.keys(TIPE).indexOf(l.t)),pool=EX.slice(0,ti+1).flat(),o=[];for(let i=0;i<cap(l);i++){const u=l.ug&&l.ug.length&&r()<.5;o.push(u?l.ug[Math.floor(r()*l.ug.length)]:(r()<.4?f[3][Math.floor(r()*f[3].length)]:pool[Math.floor(r()*pool.length)]).split(":")[0])}return o};
+const rem=l=>S.rem[l.n]||(S.rem[l.n]=slotList(l));
+const tick=n=>{if(n.d!==S.day){n.d=S.day;n.tk=0;n.gf=0}};
+const add=m=>{S.log.unshift("Hari "+S.day+": "+m);S.log.length=Math.min(S.log.length,8)};
+const kn=()=>S.npc.filter(n=>n.status==="Kunci").length,cl=()=>S.npc.filter(n=>n.status==="Calon").length;
+function gen(l){
+const R=rem(l);if(!R.length)return null;
+const seed=Math.floor(Math.random()*1e6),r=rng(seed),pick=a=>a[Math.floor(r()*a.length)];
+const f=r()<.7?fk(l.f):pick(P.faksi),g=P.gaya[f[1]],prof=R.splice(Math.floor(r()*R.length),1)[0],si=[];let k=0;
+while(si.length<3&&k++<60){const s=pick(P.sifat);if(!si.includes(s)&&!si.some(x=>P.lawan.some(p=>(p[0]===x&&p[1]===s)||(p[1]===x&&p[0]===s))))si.push(s)}
+const bakat={};P.skill.forEach(s=>bakat[s]=Math.floor(r()*4)+(s===PROF[prof]?5:0));
+const t=pick(P.tujuan);
+return{id:++S.n,seed,lok:l.n,nama:pick(g[0])+" "+pick(g[1]),faksi:f[0],profesi:prof,sifat:si,bakat,tujuan:t[0],permintaan:[t[1],t[2]],kuirk:pick(P.kuirk),status:"Warga",kedekatan:0,temu:1,misi:0,bk:0,arc:null,peran:null,ready:null,hold:false,hue:Math.floor(r()*360)};}
+function check(){
+S.npc.filter(n=>n.status==="Calon"&&!n.ready).forEach(n=>{const j=n.misi>=2?"Misi pribadi":n.kedekatan>=K.promo?"Kedekatan":n.bk>=2?"Bakat menonjol":null;if(j){n.ready=j;n.ord=++S.ord;add(n.nama+" siap dipromosikan lewat jalur "+j+".")}});
+if(!S.pend&&S.day-S.last>=10&&kn()<12){
+const c=S.npc.filter(n=>n.ready&&n.status==="Calon"&&!n.hold).sort((a,b)=>a.ord-b.ord)[0];
+if(c){S.pend=c.id;const r=rng(c.seed+7);let best=-1;for(const[a,l]of Object.entries(ARC)){const sc=c.sifat.filter(x=>l.includes(x)).length*2+r();if(sc>best){best=sc;c.arc=a}}}}}
+const bar=(l,v,m)=>`<div class="b"><span>${l} ${Math.min(v,m)}/${m}</span><i><u style="width:${Math.min(1,v/m)*100}%"></u></i></div>`;
+const btn=(a,i,t,c,d)=>`<button${c?' class="alt"':""}${d?" disabled":""} data-a="${a}" data-i="${i}">${t}</button>`;
+function card(n){
+tick(n);const j=n.status==="Calon"||n.status==="Kunci",wait=n.ready&&n.status==="Calon"&&S.pend!==n.id;
+const js=JSON.stringify({id:"npc_"+n.id,seed:n.seed,status:n.status.toLowerCase(),faksi:n.faksi,profesi:n.profesi,sifat:n.sifat,bakat:n.bakat,tujuan:n.tujuan,kuirk:n.kuirk,kedekatan:n.kedekatan,promosi:{misi:n.misi,kedekatan:n.kedekatan,bakat:n.bk,arc:n.arc,peran:n.peran}},null,1);
+return`<article class="n ${n.status}"><div class="h"><span class="av" style="background:hsl(${n.hue} 45% 36%)">${n.nama[0]}</span><div><b>${n.nama}</b><div class="m">${n.profesi} di ${n.lok}, ${n.faksi}</div></div><span class="st">${n.status}</span></div>
+<p class="m">Sifat: ${n.sifat.join(", ")}. Tujuan: ${n.tujuan}. Kebiasaan: ${n.kuirk}.</p>
+<p class="m">Kedekatan ${n.kedekatan}/99, ${n.temu} pertemuan${n.status==="Kunci"?". Arc "+n.arc+", peran "+n.peran:""}${wait?(n.hold?". Promosi ditunda.":". Siap promosi, menunggu jeda "+Math.max(0,10-(S.day-S.last))+" hari."):""}</p>
+${j?bar("Misi pribadi",n.misi,2)+bar("Kedekatan",n.kedekatan,K.promo)+bar("Bakat menonjol",n.bk,2):""}
+<div class="a">${btn("talk",n.id,"Ngobrol ("+n.tk+"/"+K.talk+")",0,n.tk>=K.talk)}${btn("gift",n.id,"Beri hadiah ("+n.gf+"/"+K.gift+")",0,n.gf>=K.gift)}${n.status==="Calon"&&n.misi<2?btn("req",n.id,"Kerjakan: "+n.permintaan[n.misi],1):""}${n.hold&&n.status==="Calon"?btn("rev",n.id,"Tinjau promosi",1):""}</div>
+<details><summary>Data JSON</summary><pre>${js}</pre></details></article>`;}
+function draw(){
+$("#hud").innerHTML=`<span>Hari <b>${S.day}</b></span><span>Warga <b>${S.npc.length}</b></span><span>Calon <b>${cl()}/5</b></span><span>NPC kunci <b>${kn()}/12</b></span><span>Nada: Ramah ${S.nada.Ramah}, Tegas ${S.nada.Tegas}, Jenaka ${S.nada.Jenaka}</span>`;
+const p=S.npc.find(x=>x.id===S.pend);
+$("#promo").innerHTML=p?`<div class="pc"><span class="av big" style="background:hsl(${p.hue} 45% 36%)">${p.nama[0]}</span><h2>Orang yang Kau Kenal</h2><p>${p.nama}, ${p.profesi} dari ${p.faksi}, siap dipromosikan lewat jalur <b>${p.ready}</b>. Arc yang cocok: <b>${p.arc}</b>.</p><div class="a"><button data-a="pr" data-t="Ramah">Ramah</button><button data-a="pr" data-t="Tegas">Tegas</button><button data-a="pr" data-t="Jenaka">Jenaka</button><button class="alt" data-a="hold">Tunda</button></div></div>`:"";
+const o={Kunci:0,Calon:1,Dikenal:2,Warga:3};
+$("#list").innerHTML=S.npc.length?S.npc.slice().sort((a,b)=>o[a.status]-o[b.status]).map(card).join(""):'<div class="pn"><p class="m">Belum ada yang kamu kenal. Tekan Temui warga baru.</p></div>';
+$("#log").innerHTML=S.log.map(l=>`<p>${l}</p>`).join("")||'<p class="m">Belum ada kabar.</p>';}
+const LINES=["menyapamu sambil %k.","bercerita soal keinginannya untuk %t.","mengomentari harga bahan hari ini.","menanyakan senjata terbarumu."];
+document.addEventListener("click",e=>{
+const b=e.target.closest("button");if(!b)return;
+const a=b.dataset.a,n=S.npc.find(x=>x.id===+b.dataset.i);
+if(a==="meet"){const x=gen(LOK[S.lok]);if(x){S.npc.push(x);add("Di "+x.lok+" kamu bertemu "+x.nama+", "+x.profesi+" dari "+x.faksi+".")}else add("Semua warga "+LOK[S.lok].n+" sudah kamu temui. Pindah ke lokasi lain.")}
+else if(a==="day"){S.day++;S.npc.filter(x=>x.status==="Dikenal"&&x.kedekatan>=K.calon).forEach(x=>{if(cl()<5){x.status="Calon";add(x.nama+" mulai dipantau sebagai Calon.")}});add("Hari berganti.")}
+else if(a==="ev"){const v=EV[Math.floor(Math.random()*EV.length)],h=S.npc.filter(x=>x.status==="Calon"&&x.bakat[v[1]]>=6);add("Event: "+v[0]+" (butuh bakat "+v[1]+").");h.forEach(x=>{x.bk++;add(x.nama+" menonjol di sini.")});if(!h.length)add("Tidak ada Calon yang cocok kali ini.")}
+else if(a==="talk"&&n){tick(n);if(n.tk>=K.talk)add(n.nama+" sudah cukup bicara hari ini.");else{n.tk++;n.temu++;n.kedekatan=Math.min(99,n.kedekatan+K.dT);add(n.nama+", yang "+n.sifat[0]+", "+LINES[Math.floor(Math.random()*4)].replace("%k",n.kuirk).replace("%t",n.tujuan));if(n.status==="Warga"&&n.temu>=3){n.status="Dikenal";add(n.nama+" kini kamu kenal.")}}}
+else if(a==="gift"&&n){tick(n);if(n.gf>=K.gift)add(n.nama+" sudah menerima hadiahmu hari ini.");else{n.gf++;n.kedekatan=Math.min(99,n.kedekatan+K.dG);add(n.nama+" senang menerima hadiahmu.")}}
+else if(a==="req"&&n){add("Permintaan selesai untuk "+n.nama+": "+n.permintaan[n.misi]+".");n.misi++}
+else if(a==="rev"&&n){n.hold=false;S.pend=n.id}
+else if(a==="hold"){const p=S.npc.find(x=>x.id===S.pend);p.hold=true;S.pend=null;add("Promosi "+p.nama+" ditunda, menunggu tanpa konsekuensi.")}
+else if(a==="pr"){const p=S.npc.find(x=>x.id===S.pend);p.status="Kunci";p.peran=PERAN[p.arc]||"rekan";S.last=S.day;S.pend=null;S.nada[b.dataset.t]++;add(p.nama+" menjadi NPC kunci ("+p.arc+", jalur "+p.ready+").")}
+check();draw();sensus();});
+function sensus(){
+const l=LOK[S.lok],all=slotList(l),met=S.npc.filter(n=>n.lok===l.n),c={},m={};
+all.forEach(p=>c[p]=(c[p]||0)+1);met.forEach(n=>m[n.profesi]=(m[n.profesi]||0)+1);
+$("#sensus").innerHTML=`<p class="m"><b>${l.n}</b>, ${l.t}${l.area?" di "+l.area:""}${l.w&&l.w!=="-"?", wilayah "+l.w+" (Lv"+l.lv+")":""}, faksi dominan ${l.f}. Warga ditemui ${met.length}/${cap(l)}.</p>${l.tr?`<p class="m"><b>Ciri kota:</b> ${l.tr}.</p><p class="m"><b>Kepentingan kerajaan:</b> ${l.kp}.</p>`:""}<p class="m">Profesi di sini (ditemui/jumlah): ${Object.entries(c).sort((a,b)=>b[1]-a[1]).map(e=>e[0]+" "+(m[e[0]]||0)+"/"+e[1]).join(", ")}.</p>`;
+const b=document.querySelector("[data-a=meet]"),full=met.length>=cap(l);b.disabled=full;b.textContent=full?"Semua warga sudah ditemui":"Temui warga baru";}
+function fillLok(){const g={};LOK.forEach((l,i)=>(g[l.area||"Lainnya"]=g[l.area||"Lainnya"]||[]).push([l,i]));
+$("#lok").innerHTML=Object.entries(g).map(([a,x])=>`<optgroup label="${a}">${x.map(([l,i])=>`<option value="${i}">${l.n} (${l.t})</option>`).join("")}</optgroup>`).join("");$("#lok").value=S.lok}
+function parseLok(t){
+const L=t.trim().split(/\r?\n/).map(x=>x.split(/[,;\t]/).map(s=>s.trim().replace(/^"|"$/g,"")));
+const h=L.shift().map(s=>s.toLowerCase()),ix=k=>h.findIndex(x=>x.startsWith(k)),a=ix("lokasi"),b=ix("tipe"),c=ix("area"),w=ix("wilayah"),v=ix("level"),d=ix("faksi"),e=ix("kapasitas"),tr=ix("trait"),kp=ix("kepentingan"),ug=ix("unggulan");
+if(a<0||b<0)return"CSV butuh kolom Lokasi dan Tipe.";
+return L.filter(r=>r[a]).map(r=>({n:r[a],t:Object.keys(TIPE).find(k=>k.toLowerCase()===(r[b]||"").toLowerCase())||"Desa",area:c>=0?r[c]:"",w:w>=0?r[w]:"",lv:v>=0?r[v]:"",f:d>=0&&r[d]?r[d]:"Liga Saltgrave",cap:e>=0&&+r[e]>0?+r[e]:0,tr:tr>=0?r[tr]:"",kp:kp>=0?r[kp]:"",ug:ug>=0&&r[ug]?r[ug].split("|"):[]}));}
+function impCsv(t){const o=parseLok(t);if(typeof o==="string")return o;if(!o.length)return"CSV kosong.";LOK.splice(0,LOK.length,...o);S.lok=0;S.rem={};return o.length+" lokasi dimuat dari CSV.";}
+$("#lok").onchange=e=>{S.lok=+e.target.value;draw();sensus()};
+$("#fc").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{add(impCsv(String(r.result)));fillLok();check();draw();sensus()};r.readAsText(f);e.target.value=""};
+LOK.push(...parseLok(CSV0));S.lok=LOK.findIndex(l=>l.n==="Desa Tidewrack");
+fillLok();draw();sensus();
+</script>
+</body>
+</html>

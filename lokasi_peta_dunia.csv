@@ -1,0 +1,78 @@
+Lokasi,Tipe,Area,Wilayah,Level,Faksi,Kapasitas,Trait,Jenis trait,Kepentingan,Unggulan
+Desa Whitepine,Desa,Hollowfrost Range,Whitepine Foothills,10-Jan,Sisa Mahkota Beku,8,Kebun rumah kaca hangat tumbuh subur di tengah salju,Bertentangan,,pelayan istana
+Desa Rimeclaw,Desa,Hollowfrost Range,Rimeclaw Pass,20-Nov,Sisa Mahkota Beku,8,Warga memuja panas dan menjaga tungku raksasa di tengah permukiman,Bertentangan,,pelayan istana
+Pos Glacierhold,Desa,Hollowfrost Range,Glacier Throne,21-30,Sisa Mahkota Beku,5,Warga memakai kulit tebal dan pandai mengawetkan makanan,Selaras,,pemburu
+Desa Gullrock,Desa,Cinderwatch Isles,Gullrock Shore,10-Jan,Liga Saltgrave,8,Penduduknya lebih suka berburu di darat daripada melaut,Bertentangan,,pedagang
+Desa Fogbell,Desa,Cinderwatch Isles,Fogbell Cliffs,20-Nov,Liga Saltgrave,8,Warga takut laut dan melarang anak-anak mendekati pantai,Bertentangan,,penyelundup
+Pos Cinderwatch,Desa,Cinderwatch Isles,Cinderwatch Spire,21-30,Liga Saltgrave,5,Kabut laut menelan lonceng peringatan tiap malam,Selaras,,nelayan
+Desa Shepherd's Rest,Desa,Greymoor Downs,Shepherd's Rest,10-Jan,Penjaga Barrow,8,Peternak dan penggembala mengiringi ribuan domba,Selaras,,tabib
+Desa Cairnfield,Desa,Greymoor Downs,Cairnfield,20-Nov,Penjaga Barrow,8,Peternak dan penggembala mengiringi ribuan domba,Selaras,,pembaca nisan
+Pos Wailing,Desa,Greymoor Downs,Wailing Heights,21-30,Penjaga Barrow,5,Penduduk pelaut yang tinggal jauh dari laut,Bertentangan,,pemburu
+Desa Reedshallows,Desa,Blackmere Fens,Reedshallows,10-Jan,Hierarki Iblis,8,Rumah panggung dan jalan papan di atas lumpur,Selaras,,nelayan
+Desa Gloomwater,Desa,Blackmere Fens,Gloomwater Maze,20-Nov,Hierarki Iblis,8,Rumah panggung dan jalan papan di atas lumpur,Selaras,,pandai besi
+Pos Drownedheart,Desa,Blackmere Fens,Drownedheart Bog,21-30,Hierarki Iblis,5,Cerita hantu dituturkan di setiap perapian,Selaras,,pembisik
+Desa Mossroot,Desa,Elderwake Grove,Mossroot Verge,10-Jan,Dewan Elderwake,8,Pengrajin kayu dan penjaga hutan sangat dihormati,Selaras,,tabib
+Desa Whisperbark,Desa,Elderwake Grove,Whisperbark Hollow,20-Nov,Dewan Elderwake,8,Warga menanam pohon baru tiap ada bayi lahir,Selaras,,pandai besi
+Pos Crownroot,Desa,Elderwake Grove,The Elderwake Crown,21-30,Dewan Elderwake,5,Rumah menyatu dengan pohon dan atapnya berlumut,Selaras,,pemburu
+Desa Fallowleaf,Desa,Rustleaf Weald,Fallowleaf Trail,10-Jan,Dewan Elderwake,8,Lubang tambang dan gudang logam berdiri di tepi hutan,Bertentangan,,pemburu
+Desa Amberdeep,Desa,Rustleaf Weald,Amberdeep Wood,20-Nov,Dewan Elderwake,8,Warganya menebang pohon besar tanpa peduli,Bertentangan,,tabib
+Pos Witchlight,Desa,Rustleaf Weald,Witchlight Thicket,21-30,Dewan Elderwake,5,Warganya menebang pohon besar tanpa peduli,Bertentangan,,pemburu
+Desa Stillwater,Desa,Hollowbarrow Highlands,Stillwater Shore,10-Jan,Penjaga Barrow,8,Pasar keliling datang tiap pekan,Selaras,,pemburu
+Desa Barrowdown,Desa,Hollowbarrow Highlands,Barrowdowns,20-Nov,Penjaga Barrow,8,Peternak dan penggembala mengiringi ribuan domba,Selaras,,pembaca nisan
+Pos Kinglesscrag,Desa,Hollowbarrow Highlands,Kingless Crags,21-30,Penjaga Barrow,5,Penduduk pelaut yang tinggal jauh dari laut,Bertentangan,,pemburu
+Desa Tidewrack,Desa,Saltgrave Coast,Tidewrack Beach,10-Jan,Liga Saltgrave,8,Penduduknya lebih suka berburu di darat daripada melaut,Bertentangan,,penyelundup
+Desa Quayside,Desa,Saltgrave Coast,Rotdock Quarter,20-Nov,Liga Saltgrave,8,Perahu dan jala menggantung di setiap rumah,Selaras,,kernet kapal
+Pos Lanternreef,Desa,Saltgrave Coast,Sunken Lighthouse Reef,21-30,Liga Saltgrave,5,Kabut laut menelan lonceng peringatan tiap malam,Selaras,,kernet kapal
+Desa Briar Meadow,Desa,Briarfall Marches,Briar Meadow,10-Jan,Kerajaan Briarfall,8,Warga tinggal di rumah rendah yang terbuka,Selaras,,prajurit
+Desa Hollowroad,Desa,Briarfall Marches,Hollowroad Forest,20-Nov,Kerajaan Briarfall,8,Warga tinggal di rumah rendah yang terbuka,Selaras,,prajurit
+Pos Thornfall,Desa,Briarfall Marches,Thornfall Redoubt,21-30,Kerajaan Briarfall,5,Warga hidup di bawah tanah dan jarang terlihat,Bertentangan,,pandai besi
+Desa Greenmaw,Desa,Bonethorn Peninsula,Greenmaw Edge,10-Jan,Suku Thornback,8,Bangunan batu dingin yang menolak tanaman,Bertentangan,,tabib
+Desa Thornback,Desa,Bonethorn Peninsula,Thornback Jungle,20-Nov,Suku Thornback,8,Pengrajin kayu dan penjaga hutan sangat dihormati,Selaras,,pegulat
+Pos Marrowdeep,Desa,Bonethorn Peninsula,Marrow Deep,21-30,Suku Thornback,5,Lubang tambang dan gudang logam berdiri di tepi hutan,Bertentangan,,pemburu
+Desa Ironroot,Desa,Wyrmspine Mountains,Ironroot Foothills,10-Jan,Wyrmspine,8,Gema palu dan lonceng tambang terdengar tiap jam,Selaras,,pandai besi
+Desa Snowline,Desa,Wyrmspine Mountains,Snowline Switchbacks,20-Nov,Wyrmspine,8,Rumah bertingkat di lereng dengan tangga batu panjang,Selaras,,pemburu
+Pos Summitwatch,Desa,Wyrmspine Mountains,Wyrmspine Summit,21-30,Wyrmspine,5,Rumah bertingkat di lereng dengan tangga batu panjang,Selaras,,pandai besi
+Desa Dryreed,Desa,Ashwind Steppe,Dryreed Plains,10-Jan,Klan Ashwind,8,Benteng kecil tertutup dengan gerbang selalu terkunci,Bertentangan,,pemanah
+Desa Saltlake,Desa,Ashwind Steppe,Saltlake Shore,20-Nov,Klan Ashwind,8,Peternak dan penggembala mengiringi ribuan domba,Selaras,,pedagang karavan
+Pos Dustwind,Desa,Ashwind Steppe,Dustwind Ruins,21-30,Klan Ashwind,5,Pasar keliling datang tiap pekan,Selaras,,pandai besi
+Desa Pinewatch,Desa,Frostpine Taiga,Pinewatch Edge,10-Jan,Suku Frostpine,8,Penduduknya periang dan gemar berpesta meski udara beku,Bertentangan,,penyamak kulit
+Desa Wolfmoon,Desa,Frostpine Taiga,Wolfmoon Glade,20-Nov,Suku Frostpine,8,Jalan sering tertutup salju dan warga terbiasa menimbun bahan,Selaras,,tabib
+Pos Deepfrost,Desa,Frostpine Taiga,Deepfrost Hollow,21-30,Suku Frostpine,5,Rumah beratap tebal dengan perapian menyala sepanjang tahun,Selaras,,pedagang
+Desa Cooledune,Desa,Emberwaste,Cooled Dunes,10-Jan,Ordo Emberwaste,8,Abu vulkanik turun tiap musim panas,Selaras,,pandai besi
+Desa Glasssand,Desa,Emberwaste,Glasssand Basin,20-Nov,Ordo Emberwaste,8,Atap kaca dan dinding batu hitam menahan panas,Selaras,,pendeta api
+Pos Cindermaw,Desa,Emberwaste,Cinder Maw Crater,21-30,Ordo Emberwaste,5,Air dijatah ketat dan dijaga bersama,Selaras,,tabib
+Desa Rimeshore,Desa,Crownfrost Isle,Rimeshore Landing,10-Jan,Sisa Mahkota Beku,8,Warga memuja panas dan menjaga tungku raksasa di tengah permukiman,Bertentangan,,pemburu
+Desa Barbican,Desa,Crownfrost Isle,Frozen Barbican,20-Nov,Sisa Mahkota Beku,8,Kebun rumah kaca hangat tumbuh subur di tengah salju,Bertentangan,,penyamak kulit
+Pos Crownfrost,Desa,Crownfrost Isle,Crownfrost Keep,21-30,Sisa Mahkota Beku,5,Warga memuja panas dan menjaga tungku raksasa di tengah permukiman,Bertentangan,,kesatria
+Desa Driftwood,Desa,Wraithtide Isles,Driftwood Cove,10-Jan,Hierarki Iblis,8,Perahu dan jala menggantung di setiap rumah,Selaras,,pelaut
+Desa Fogbound,Desa,Wraithtide Isles,Fogbound Reef,20-Nov,Hierarki Iblis,8,Warga pandai membaca arus dan cuaca,Selaras,,penyihir rawa
+Pos Wraithspire,Desa,Wraithtide Isles,Wraith Spire,21-30,Hierarki Iblis,5,Gudang garam dan ikan asin berjejer di dermaga,Selaras,,nelayan
+Pasar Hollowfrost,Kota kecil,Hollowfrost Range,-,,Sisa Mahkota Beku,20,Kebun rumah kaca hangat tumbuh subur di tengah salju,Bertentangan,,tabib|kesatria
+Bandar Gullquay,Kota kecil,Cinderwatch Isles,-,,Liga Saltgrave,20,Penduduknya lebih suka berburu di darat daripada melaut,Bertentangan,,kernet kapal|nelayan
+Kota Greymoor,Kota kecil,Greymoor Downs,-,,Penjaga Barrow,20,Penduduk pelaut yang tinggal jauh dari laut,Bertentangan,,pemburu|pembaca nisan
+Dermaga Reedmire,Kota kecil,Blackmere Fens,-,,Hierarki Iblis,20,Kabut tebal membuat orang asing sering tersesat,Selaras,,pandai besi|perajin kulit
+Pos Dagang Mossgate,Kota kecil,Elderwake Grove,-,,Dewan Elderwake,20,Warga menanam pohon baru tiap ada bayi lahir,Selaras,,pedagang|nelayan
+Kota Fallowgate,Kota kecil,Rustleaf Weald,-,,Dewan Elderwake,20,Musim gugur membuat jalan setapak penuh daun,Selaras,,pemburu|pandai besi
+Kota Stillmere,Kota kecil,Hollowbarrow Highlands,-,,Penjaga Barrow,20,Pasar keliling datang tiap pekan,Selaras,,tabib|pemilik kedai
+Pelabuhan Rotdock,Kota kecil,Saltgrave Coast,-,,Liga Saltgrave,20,Kabut laut menelan lonceng peringatan tiap malam,Selaras,,nelayan|pandai besi
+Pasar Hollowroad,Kota kecil,Briarfall Marches,-,,Kerajaan Briarfall,20,Benteng kecil tertutup dengan gerbang selalu terkunci,Bertentangan,,pemburu|prajurit
+Perkampungan Greenmaw,Kota kecil,Bonethorn Peninsula,-,,Suku Thornback,20,Pengrajin kayu dan penjaga hutan sangat dihormati,Selaras,,pemburu|pandai besi
+Gerbang Wyrmspine,Kota kecil,Wyrmspine Mountains,-,,Wyrmspine,20,Rumah bertingkat di lereng dengan tangga batu panjang,Selaras,,penjaga|penambang
+Perkemahan Besar Ashwind,Kota kecil,Ashwind Steppe,-,,Klan Ashwind,20,Warga hidup di bawah tanah dan jarang terlihat,Bertentangan,,pandai besi|pemanah
+Pasar Wolfmoon,Kota kecil,Frostpine Taiga,-,,Suku Frostpine,20,Penduduknya periang dan gemar berpesta meski udara beku,Bertentangan,,pemburu|penjaga
+Oasis Cooledune,Kota kecil,Emberwaste,-,,Ordo Emberwaste,20,Atap kaca dan dinding batu hitam menahan panas,Selaras,,pedagang|juru tulis
+Dermaga Frostquay,Kota kecil,Crownfrost Isle,-,,Sisa Mahkota Beku,20,Kebun rumah kaca hangat tumbuh subur di tengah salju,Bertentangan,,pemburu|kesatria
+Dermaga Mistquay,Kota kecil,Wraithtide Isles,-,,Hierarki Iblis,20,Kabut laut menelan lonceng peringatan tiap malam,Selaras,,pembisik|pandai besi
+Benteng Thornfall,Kota sedang,Briarfall Marches,-,,Kerajaan Briarfall,40,Pasar keliling datang tiap pekan,Selaras,,nelayan|prajurit|saudagar|perajin kulit
+Bandar Fogbell,Kota sedang,Cinderwatch Isles,-,,Liga Saltgrave,40,Warga pandai membaca arus dan cuaca,Selaras,,pedagang|nelayan|penjaga|pandai besi
+Pasar Pinewatch,Kota sedang,Frostpine Taiga,-,,Suku Frostpine,40,Rumah beratap tebal dengan perapian menyala sepanjang tahun,Selaras,,penyamak kulit|pedagang|tukang kayu|pemburu
+Pasar Karavan Saltlake,Kota sedang,Ashwind Steppe,-,,Klan Ashwind,40,Peternak dan penggembala mengiringi ribuan domba,Selaras,,pemanah|pedagang karavan|pedagang|pemilik kedai
+Kuil Glasssand,Kota sedang,Emberwaste,-,,Ordo Emberwaste,40,Warga memuja es dan menyimpan salju dari pegunungan,Bertentangan,,nelayan|saudagar|penambang|perajin kaca
+Aula Elderwake,Kota sedang,Elderwake Grove,-,,Dewan Elderwake,40,Warga menanam pohon baru tiap ada bayi lahir,Selaras,,pemilik kedai|pedagang|pemburu|saudagar
+Benteng Barbican,Kota sedang,Crownfrost Isle,-,,Sisa Mahkota Beku,40,Rumah beratap tebal dengan perapian menyala sepanjang tahun,Selaras,,kesatria|juru tulis|pandai besi|penyamak kulit
+Kota Makam Barrowdown,Kota sedang,Hollowbarrow Highlands,-,,Penjaga Barrow,40,Warga hidup di bawah tanah dan jarang terlihat,Bertentangan,,pandai besi|tabib|pemburu|penambang
+Kota Briarfall,Kota besar,Briarfall Marches,-,,Kerajaan Briarfall,80,Kota benteng bertembok berlapis dengan barak di setiap sudut dan pajak yang menghidupi pasukan,Khas,Menguasai perbatasan dan menjamin pasokan senjata massal. Menginginkan standar senjata seragam dan curiga pada Fusi. Menjaga klaim mahkota dan menahan Ashwind,prajurit|juru tulis|penjaga|pandai besi|pejabat|kurir|pemburu|saudagar
+Pelabuhan Agung Saltgrave,Kota besar,Saltgrave Coast,-,,Liga Saltgrave,80,Kota dagang terbuka siang malam yang ramai orang asing dengan harga paling liar dan bayangan penyelundup,Khas,Menjaga jalur dagang bebas dan netral demi untung. Memperluas pasar ke semua faksi. Diam-diam menutupi urusan gelap dan menolak kerajaan menguasai pelabuhan,pedagang|pelaut|penyelundup|saudagar|nelayan|kernet kapal|pemilik kedai|kurir
+Kota Tempa Wyrmspine,Kota besar,Wyrmspine Mountains,-,,Wyrmspine,80,Kota industri bertingkat di lereng gunung dengan bunyi palu tanpa henti dan akademi tempa,Khas,Memonopoli bijih dan resep. Menjaga standar mutu dan tradisi Terkunci. Mengendalikan harga logam dan menekan Elderwake soal tambang,pandai besi|penambang|saudagar|tukang kayu|penjaga|pejabat|perajin kulit|kurir
+Kota Kurultai,Kota besar,Ashwind Steppe,-,,Klan Ashwind,80,Kota tenda raksasa yang berdiri penuh saat musim pertemuan klan dan hampir kosong sesudahnya tanpa tembok,Khas,Mengembalikan persatuan klan sesudah Khan Terakhir. Mencari sekutu senjata jauh. Menjaga rute karavan dan garam dan menolak aturan Briarfall di perbatasan,pemanah|pedagang karavan|penjejak|pemburu|perajin kulit|penyamak kulit|pedagang|kurir
+Kota Obsidian,Kota besar,Emberwaste,-,,Ordo Emberwaste,80,Kota kuil dari kaca vulkanik hitam dengan ritual api di kawah air yang langka dan hidup mengikuti musim abu,Khas,Mengamankan pasokan air dan menjaga ritual api. Memonopoli bahan api dan obsidian. Mencari senjata elemen api untuk ritual dan menolak pengaruh elemen es,pendeta api|perajin kaca|penjaga|pedagang|penambang|tabib|pejabat|saudagar
