@@ -1,49 +1,49 @@
-region_id,area_id,area_name,region_name,faction_id,faction_name,zone_band,tier_full,demo_level_min,demo_level_max,full_level_min,full_level_max,zone_multiplier_demo
-whitepine_foothills,hollowfrost_range,Hollowfrost Range,Whitepine Foothills,frostcrown_remnant,Frostcrown Remnant,Rendah,3,1,10,61,70,1.0
-rimeclaw_pass,hollowfrost_range,Hollowfrost Range,Rimeclaw Pass,frostcrown_remnant,Frostcrown Remnant,Sedang,3,11,20,71,80,1.5
-glacier_throne,hollowfrost_range,Hollowfrost Range,Glacier Throne,frostcrown_remnant,Frostcrown Remnant,Tinggi,3,21,30,81,90,2.25
-gullrock_shore,cinderwatch_isles,Cinderwatch Isles,Gullrock Shore,saltgrave_league,Saltgrave League,Rendah,3,1,10,61,70,1.0
-fogbell_cliffs,cinderwatch_isles,Cinderwatch Isles,Fogbell Cliffs,saltgrave_league,Saltgrave League,Sedang,3,11,20,71,80,1.5
-cinderwatch_spire,cinderwatch_isles,Cinderwatch Isles,Cinderwatch Spire,saltgrave_league,Saltgrave League,Tinggi,3,21,30,81,90,2.25
-shepherd_s_rest,greymoor_downs,Greymoor Downs,Shepherd's Rest,barrow_wardens,Barrow Wardens,Rendah,1,1,10,1,10,1.0
-cairnfield,greymoor_downs,Greymoor Downs,Cairnfield,barrow_wardens,Barrow Wardens,Sedang,1,11,20,11,20,1.5
-wailing_heights,greymoor_downs,Greymoor Downs,Wailing Heights,barrow_wardens,Barrow Wardens,Tinggi,1,21,30,21,30,2.25
-reedshallows,blackmere_fens,Blackmere Fens,Reedshallows,infernal_hierarchy,Infernal Hierarchy,Rendah,2,1,10,31,40,1.0
-gloomwater_maze,blackmere_fens,Blackmere Fens,Gloomwater Maze,infernal_hierarchy,Infernal Hierarchy,Sedang,2,11,20,41,50,1.5
-drownedheart_bog,blackmere_fens,Blackmere Fens,Drownedheart Bog,infernal_hierarchy,Infernal Hierarchy,Tinggi,2,21,30,51,60,2.25
-mossroot_verge,elderwake_grove,Elderwake Grove,Mossroot Verge,elderwake_council,Elderwake Council,Rendah,2,1,10,31,40,1.0
-whisperbark_hollow,elderwake_grove,Elderwake Grove,Whisperbark Hollow,elderwake_council,Elderwake Council,Sedang,2,11,20,41,50,1.5
-the_elderwake_crown,elderwake_grove,Elderwake Grove,The Elderwake Crown,elderwake_council,Elderwake Council,Tinggi,2,21,30,51,60,2.25
-fallowleaf_trail,rustleaf_weald,Rustleaf Weald,Fallowleaf Trail,elderwake_council,Elderwake Council,Rendah,1,1,10,1,10,1.0
-amberdeep_wood,rustleaf_weald,Rustleaf Weald,Amberdeep Wood,elderwake_council,Elderwake Council,Sedang,1,11,20,11,20,1.5
-witchlight_thicket,rustleaf_weald,Rustleaf Weald,Witchlight Thicket,elderwake_council,Elderwake Council,Tinggi,1,21,30,21,30,2.25
-stillwater_shore,hollowbarrow_highlands,Hollowbarrow Highlands,Stillwater Shore,barrow_wardens,Barrow Wardens,Rendah,1,1,10,1,10,1.0
-barrowdowns,hollowbarrow_highlands,Hollowbarrow Highlands,Barrowdowns,barrow_wardens,Barrow Wardens,Sedang,1,11,20,11,20,1.5
-kingless_crags,hollowbarrow_highlands,Hollowbarrow Highlands,Kingless Crags,barrow_wardens,Barrow Wardens,Tinggi,1,21,30,21,30,2.25
-tidewrack_beach,saltgrave_coast,Saltgrave Coast,Tidewrack Beach,saltgrave_league,Saltgrave League,Rendah,1,1,10,1,10,1.0
-rotdock_quarter,saltgrave_coast,Saltgrave Coast,Rotdock Quarter,saltgrave_league,Saltgrave League,Sedang,1,11,20,11,20,1.5
-sunken_lighthouse_reef,saltgrave_coast,Saltgrave Coast,Sunken Lighthouse Reef,saltgrave_league,Saltgrave League,Tinggi,1,21,30,21,30,2.25
-briar_meadow,briarfall_marches,Briarfall Marches,Briar Meadow,briarfall_crown,Briarfall Crown,Rendah,1,1,10,1,10,1.0
-hollowroad_forest,briarfall_marches,Briarfall Marches,Hollowroad Forest,briarfall_crown,Briarfall Crown,Sedang,1,11,20,11,20,1.5
-thornfall_redoubt,briarfall_marches,Briarfall Marches,Thornfall Redoubt,briarfall_crown,Briarfall Crown,Tinggi,1,21,30,21,30,2.25
-greenmaw_edge,bonethorn_peninsula,Bonethorn Peninsula,Greenmaw Edge,thornback_tribe,Thornback Tribe,Rendah,1,1,10,1,10,1.0
-thornback_jungle,bonethorn_peninsula,Bonethorn Peninsula,Thornback Jungle,thornback_tribe,Thornback Tribe,Sedang,1,11,20,11,20,1.5
-marrow_deep,bonethorn_peninsula,Bonethorn Peninsula,Marrow Deep,thornback_tribe,Thornback Tribe,Tinggi,1,21,30,21,30,2.25
-ironroot_foothills,wyrmspine_mountains,Wyrmspine Mountains,Ironroot Foothills,wyrmspine_hold,Wyrmspine Hold,Rendah,3,1,10,61,70,1.0
-snowline_switchbacks,wyrmspine_mountains,Wyrmspine Mountains,Snowline Switchbacks,wyrmspine_hold,Wyrmspine Hold,Sedang,3,11,20,71,80,1.5
-wyrmspine_summit,wyrmspine_mountains,Wyrmspine Mountains,Wyrmspine Summit,wyrmspine_hold,Wyrmspine Hold,Tinggi,3,21,30,81,90,2.25
-dryreed_plains,ashwind_steppe,Ashwind Steppe,Dryreed Plains,ashwind_clans,Ashwind Clans,Rendah,2,1,10,31,40,1.0
-saltlake_shore,ashwind_steppe,Ashwind Steppe,Saltlake Shore,ashwind_clans,Ashwind Clans,Sedang,2,11,20,41,50,1.5
-dustwind_ruins,ashwind_steppe,Ashwind Steppe,Dustwind Ruins,ashwind_clans,Ashwind Clans,Tinggi,2,21,30,51,60,2.25
-pinewatch_edge,frostpine_taiga,Frostpine Taiga,Pinewatch Edge,frostpine_tribe,Frostpine Tribe,Rendah,2,1,10,31,40,1.0
-wolfmoon_glade,frostpine_taiga,Frostpine Taiga,Wolfmoon Glade,frostpine_tribe,Frostpine Tribe,Sedang,2,11,20,41,50,1.5
-deepfrost_hollow,frostpine_taiga,Frostpine Taiga,Deepfrost Hollow,frostpine_tribe,Frostpine Tribe,Tinggi,2,21,30,51,60,2.25
-cooled_dunes,emberwaste,Emberwaste,Cooled Dunes,emberwaste_order,Emberwaste Order,Rendah,4,1,10,91,100,1.0
-glasssand_basin,emberwaste,Emberwaste,Glasssand Basin,emberwaste_order,Emberwaste Order,Sedang,4,11,20,101,110,1.5
-cinder_maw_crater,emberwaste,Emberwaste,Cinder Maw Crater,emberwaste_order,Emberwaste Order,Tinggi,4,21,30,111,120,2.25
-rimeshore_landing,crownfrost_isle,Crownfrost Isle,Rimeshore Landing,frostcrown_remnant,Frostcrown Remnant,Rendah,5,1,10,121,130,1.0
-frozen_barbican,crownfrost_isle,Crownfrost Isle,Frozen Barbican,frostcrown_remnant,Frostcrown Remnant,Sedang,5,11,20,131,140,1.5
-crownfrost_keep,crownfrost_isle,Crownfrost Isle,Crownfrost Keep,frostcrown_remnant,Frostcrown Remnant,Tinggi,5,21,30,141,150,2.25
-driftwood_cove,wraithtide_isles,Wraithtide Isles,Driftwood Cove,infernal_hierarchy,Infernal Hierarchy,Rendah,4,1,10,91,100,1.0
-fogbound_reef,wraithtide_isles,Wraithtide Isles,Fogbound Reef,infernal_hierarchy,Infernal Hierarchy,Sedang,4,11,20,101,110,1.5
-wraith_spire,wraithtide_isles,Wraithtide Isles,Wraith Spire,infernal_hierarchy,Infernal Hierarchy,Tinggi,4,21,30,111,120,2.25
+region_id,area_id,area_name,region_name,faction_id,faction_name,zone_band,tier,level_min,level_max,zone_multiplier_base,tier_price_mult_demo
+whitepine_foothills,hollowfrost_range,Hollowfrost Range,Whitepine Foothills,frostcrown_remnant,Frostcrown Remnant,Rendah,3,61,70,1.0,6.0
+rimeclaw_pass,hollowfrost_range,Hollowfrost Range,Rimeclaw Pass,frostcrown_remnant,Frostcrown Remnant,Sedang,3,71,80,1.5,6.0
+glacier_throne,hollowfrost_range,Hollowfrost Range,Glacier Throne,frostcrown_remnant,Frostcrown Remnant,Tinggi,3,81,90,2.25,6.0
+gullrock_shore,cinderwatch_isles,Cinderwatch Isles,Gullrock Shore,saltgrave_league,Saltgrave League,Rendah,3,61,70,1.0,6.0
+fogbell_cliffs,cinderwatch_isles,Cinderwatch Isles,Fogbell Cliffs,saltgrave_league,Saltgrave League,Sedang,3,71,80,1.5,6.0
+cinderwatch_spire,cinderwatch_isles,Cinderwatch Isles,Cinderwatch Spire,saltgrave_league,Saltgrave League,Tinggi,3,81,90,2.25,6.0
+shepherd_s_rest,greymoor_downs,Greymoor Downs,Shepherd's Rest,barrow_wardens,Barrow Wardens,Rendah,1,1,10,1.0,1.0
+cairnfield,greymoor_downs,Greymoor Downs,Cairnfield,barrow_wardens,Barrow Wardens,Sedang,1,11,20,1.5,1.0
+wailing_heights,greymoor_downs,Greymoor Downs,Wailing Heights,barrow_wardens,Barrow Wardens,Tinggi,1,21,30,2.25,1.0
+reedshallows,blackmere_fens,Blackmere Fens,Reedshallows,infernal_hierarchy,Infernal Hierarchy,Rendah,2,31,40,1.0,2.5
+gloomwater_maze,blackmere_fens,Blackmere Fens,Gloomwater Maze,infernal_hierarchy,Infernal Hierarchy,Sedang,2,41,50,1.5,2.5
+drownedheart_bog,blackmere_fens,Blackmere Fens,Drownedheart Bog,infernal_hierarchy,Infernal Hierarchy,Tinggi,2,51,60,2.25,2.5
+mossroot_verge,elderwake_grove,Elderwake Grove,Mossroot Verge,elderwake_council,Elderwake Council,Rendah,2,31,40,1.0,2.5
+whisperbark_hollow,elderwake_grove,Elderwake Grove,Whisperbark Hollow,elderwake_council,Elderwake Council,Sedang,2,41,50,1.5,2.5
+the_elderwake_crown,elderwake_grove,Elderwake Grove,The Elderwake Crown,elderwake_council,Elderwake Council,Tinggi,2,51,60,2.25,2.5
+fallowleaf_trail,rustleaf_weald,Rustleaf Weald,Fallowleaf Trail,elderwake_council,Elderwake Council,Rendah,1,1,10,1.0,1.0
+amberdeep_wood,rustleaf_weald,Rustleaf Weald,Amberdeep Wood,elderwake_council,Elderwake Council,Sedang,1,11,20,1.5,1.0
+witchlight_thicket,rustleaf_weald,Rustleaf Weald,Witchlight Thicket,elderwake_council,Elderwake Council,Tinggi,1,21,30,2.25,1.0
+stillwater_shore,hollowbarrow_highlands,Hollowbarrow Highlands,Stillwater Shore,barrow_wardens,Barrow Wardens,Rendah,1,1,10,1.0,1.0
+barrowdowns,hollowbarrow_highlands,Hollowbarrow Highlands,Barrowdowns,barrow_wardens,Barrow Wardens,Sedang,1,11,20,1.5,1.0
+kingless_crags,hollowbarrow_highlands,Hollowbarrow Highlands,Kingless Crags,barrow_wardens,Barrow Wardens,Tinggi,1,21,30,2.25,1.0
+tidewrack_beach,saltgrave_coast,Saltgrave Coast,Tidewrack Beach,saltgrave_league,Saltgrave League,Rendah,1,1,10,1.0,1.0
+rotdock_quarter,saltgrave_coast,Saltgrave Coast,Rotdock Quarter,saltgrave_league,Saltgrave League,Sedang,1,11,20,1.5,1.0
+sunken_lighthouse_reef,saltgrave_coast,Saltgrave Coast,Sunken Lighthouse Reef,saltgrave_league,Saltgrave League,Tinggi,1,21,30,2.25,1.0
+briar_meadow,briarfall_marches,Briarfall Marches,Briar Meadow,briarfall_crown,Briarfall Crown,Rendah,1,1,10,1.0,1.0
+hollowroad_forest,briarfall_marches,Briarfall Marches,Hollowroad Forest,briarfall_crown,Briarfall Crown,Sedang,1,11,20,1.5,1.0
+thornfall_redoubt,briarfall_marches,Briarfall Marches,Thornfall Redoubt,briarfall_crown,Briarfall Crown,Tinggi,1,21,30,2.25,1.0
+greenmaw_edge,bonethorn_peninsula,Bonethorn Peninsula,Greenmaw Edge,thornback_tribe,Thornback Tribe,Rendah,1,1,10,1.0,1.0
+thornback_jungle,bonethorn_peninsula,Bonethorn Peninsula,Thornback Jungle,thornback_tribe,Thornback Tribe,Sedang,1,11,20,1.5,1.0
+marrow_deep,bonethorn_peninsula,Bonethorn Peninsula,Marrow Deep,thornback_tribe,Thornback Tribe,Tinggi,1,21,30,2.25,1.0
+ironroot_foothills,wyrmspine_mountains,Wyrmspine Mountains,Ironroot Foothills,wyrmspine_hold,Wyrmspine Hold,Rendah,3,61,70,1.0,6.0
+snowline_switchbacks,wyrmspine_mountains,Wyrmspine Mountains,Snowline Switchbacks,wyrmspine_hold,Wyrmspine Hold,Sedang,3,71,80,1.5,6.0
+wyrmspine_summit,wyrmspine_mountains,Wyrmspine Mountains,Wyrmspine Summit,wyrmspine_hold,Wyrmspine Hold,Tinggi,3,81,90,2.25,6.0
+dryreed_plains,ashwind_steppe,Ashwind Steppe,Dryreed Plains,ashwind_clans,Ashwind Clans,Rendah,2,31,40,1.0,2.5
+saltlake_shore,ashwind_steppe,Ashwind Steppe,Saltlake Shore,ashwind_clans,Ashwind Clans,Sedang,2,41,50,1.5,2.5
+dustwind_ruins,ashwind_steppe,Ashwind Steppe,Dustwind Ruins,ashwind_clans,Ashwind Clans,Tinggi,2,51,60,2.25,2.5
+pinewatch_edge,frostpine_taiga,Frostpine Taiga,Pinewatch Edge,frostpine_tribe,Frostpine Tribe,Rendah,2,31,40,1.0,2.5
+wolfmoon_glade,frostpine_taiga,Frostpine Taiga,Wolfmoon Glade,frostpine_tribe,Frostpine Tribe,Sedang,2,41,50,1.5,2.5
+deepfrost_hollow,frostpine_taiga,Frostpine Taiga,Deepfrost Hollow,frostpine_tribe,Frostpine Tribe,Tinggi,2,51,60,2.25,2.5
+cooled_dunes,emberwaste,Emberwaste,Cooled Dunes,emberwaste_order,Emberwaste Order,Rendah,4,91,100,1.0,14.0
+glasssand_basin,emberwaste,Emberwaste,Glasssand Basin,emberwaste_order,Emberwaste Order,Sedang,4,101,110,1.5,14.0
+cinder_maw_crater,emberwaste,Emberwaste,Cinder Maw Crater,emberwaste_order,Emberwaste Order,Tinggi,4,111,120,2.25,14.0
+rimeshore_landing,crownfrost_isle,Crownfrost Isle,Rimeshore Landing,frostcrown_remnant,Frostcrown Remnant,Rendah,5,121,130,1.0,30.0
+frozen_barbican,crownfrost_isle,Crownfrost Isle,Frozen Barbican,frostcrown_remnant,Frostcrown Remnant,Sedang,5,131,140,1.5,30.0
+crownfrost_keep,crownfrost_isle,Crownfrost Isle,Crownfrost Keep,frostcrown_remnant,Frostcrown Remnant,Tinggi,5,141,150,2.25,30.0
+driftwood_cove,wraithtide_isles,Wraithtide Isles,Driftwood Cove,infernal_hierarchy,Infernal Hierarchy,Rendah,4,91,100,1.0,14.0
+fogbound_reef,wraithtide_isles,Wraithtide Isles,Fogbound Reef,infernal_hierarchy,Infernal Hierarchy,Sedang,4,101,110,1.5,14.0
+wraith_spire,wraithtide_isles,Wraithtide Isles,Wraith Spire,infernal_hierarchy,Infernal Hierarchy,Tinggi,4,111,120,2.25,14.0
