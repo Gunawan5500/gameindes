@@ -1,0 +1,50 @@
+rule_group,rule_key,value_demo,status,unit_or_scope,description
+currency,bronze_per_silver,100,LOCKED,br,1 silver = 100 bronze
+currency,silver_per_gold,100,LOCKED,s,1 gold = 100 silver
+currency,bronze_per_gold,10000,LOCKED,br,1 gold = 10.000 bronze (angka gold di file lama dibaca br)
+snd_core,sensitivity_k,0.5,DEMO,exponent,Kepekaan kurva harga = acuan x (D / S)^k
+snd_core,multiplier_min,0.4,DEMO,multiplier,Batas bawah pengali pasar S&D
+snd_core,multiplier_max,2.5,DEMO,multiplier,Batas atas pengali pasar S&D
+snd_core,full_recovery_hours,12,LOCKED,real_hours,Pemulihan penuh S&D secara Lazy Math + auto-prune 0 byte
+snd_core,shop_buy_spread,0.55,DEMO,ratio,Toko membeli dari pemain di 55% harga pasar agar menempa lebih untung
+snd_core,cha_bonus_per_point,0.01,DEMO,ratio,Bonus harga jual +1% per poin CHA di atas 10
+snd_core,cha_bonus_cap,0.25,DEMO,ratio,Batas maksimal bonus CHA pada harga jual (+25%)
+snd_core,parent_ripple_weight,0.25,LOCKED,ratio,Efek riak 25% dari kota induk (parent_location_id) ke kota anak
+snd_core,forging_cost_damping,0.5,LOCKED,ratio,Anti-eksploitasi biaya bahan tempa = acuan + 50% deviasi pasar
+snd_core,origin_area_discount,0.8,DEMO,multiplier,Diskon -20% untuk bahan di area asalnya
+market_class,village_rarities,Common|Uncommon,LOCKED,48_locations,Kelas Village: modal 1500br depth x0.4
+market_class,town_rarities,Common|Uncommon|Rare,LOCKED,16_locations,Kelas Town: modal 8000br depth x0.8
+market_class,city_rarities,Common|Uncommon|Rare|Epic,LOCKED,8_locations,Kelas City: modal 35000br depth x1.4
+market_class,major_city_rarities,Common|Uncommon|Rare|Epic|Legendary,LOCKED,5_locations,Kelas Major City: modal 150000br depth x2.5
+tier_full_scale,tier_1_price_mult,1.0,DEMO,Lv1-30,Pengali harga acuan bahan Area Tier 1 (6 Area)
+tier_full_scale,tier_2_price_mult,2.5,DEMO,Lv31-60,Pengali harga acuan bahan Area Tier 2 (4 Area)
+tier_full_scale,tier_3_price_mult,6.0,DEMO,Lv61-90,Pengali harga acuan bahan Area Tier 3 (3 Area)
+tier_full_scale,tier_4_price_mult,14.0,DEMO,Lv91-120,Pengali harga acuan bahan Area Tier 4 (2 Area)
+tier_full_scale,tier_5_price_mult,30.0,DEMO,Lv121-150,Pengali harga acuan bahan Area Tier 5 (Crownfrost Isle)
+rarity_ratio,base_ratio_C_U_R_E_L,1:4:16:60:300,DEMO,ratio,Rasio harga acuan antar rarity Common hingga Legendary
+politics_world,open_war_weapon_mult,1.35,DEMO,multiplier,Lonjakan permintaan senjata (+35%) saat faksi dalam Open War
+politics_world,open_war_material_mult,1.2,DEMO,multiplier,Lonjakan permintaan material (+20%) saat faksi dalam Open War
+politics_world,embargo_enemy_supply_mult,0.55,DEMO,multiplier,Penyusutan pasokan bahan faksi lawan saat Embargo (+35% harga)
+politics_world,alliance_discount_mult,0.9,DEMO,multiplier,Diskon -10% bahan dari faksi Alliance
+politics_world,winter_fire_demand_mult,1.25,DEMO,multiplier,Lonjakan permintaan elemen Api (+25%) saat Musim Dingin
+politics_world,festival_luxury_mult,1.2,DEMO,multiplier,Lonjakan permintaan barang Rare-Legendary (+20%) saat Festival
+politics_world,shadow_buy_markup,1.45,DEMO,multiplier,Markup harga beli Shadow Syndicate (+45%) tembus boikot/kelas
+politics_world,shadow_sell_spread,0.45,DEMO,ratio,Harga beli Shadow Syndicate dari pemain (45% pasar)
+market_ledger,local_price_free,Y,LOCKED,boolean,Harga pasar lokasi tempat pemain berdiri selalu gratis & real-time
+market_ledger,remote_price_locked,Y,LOCKED,boolean,Harga kota lain tertutup (???) sampai beli Market Ledger di Guild
+market_ledger,ledger_duration_hours,12,DEMO,real_hours,Masa berlaku Market Ledger (1 hari game / 12 jam nyata)
+market_ledger,ledger_area_cost_br,50,DEMO,br,Biaya eceran Market Ledger per Area di Guild (skala naik per Tier)
+market_ledger,informant_official,free_or_discount,LOCKED,WD-3_link,NPC Kunci Informan resmi membuka info harga areanya gratis/diskon
+market_ledger,informant_shadow,boycott_and_intel,LOCKED,WD-3_link,NPC Informan Shadow Syndicate membocorkan wilayah boikot/embargo/perang
+gold_sink,sink_1_market_ledger,50-500,DEMO,br_per_area,Beli laporan harga pasar luar kota di Guild
+gold_sink,sink_2_caravan_fare,25-1500,DEMO,br_per_trip,Ongkos Karavan/Kapal (+50% s.d +100% saat melintasi Embargo/Open War)
+gold_sink,sink_3_portal_seal,500-15000,DEMO,br_per_tier,Portal Seal Dungeon Tier 1-5 (habis pakai penahan pecah portal)
+gold_sink,sink_4_workshop_branch,10000-250000,DEMO,br_one_time_and_rent,Sewa & ekspansi cabang bengkel/gudang di kota lain
+gold_sink,sink_5_faction_tax_permit,500-25000,DEMO,br_periodic,Pajak faksi & izin dagang/lelang kota besar
+gold_sink,sink_6_shadow_services,markup_45pct_plus,DEMO,dynamic,Jasa Shadow Syndicate (tembus boikot, selundupan, beli Trofi langka)
+trophy_rule,trophy_buy_source,hunt_or_shadow_only,LOCKED,480_trophies,480 Trofi Monster hanya dari berburu atau dibeli mahal & stok terbatas di Shadow Syndicate
+trophy_rule,trophy_raw_sellable,N,LOCKED,boolean,Trofi mentah tidak dijual bebas; harus ditempa dulu menjadi senjata signature
+trophy_rule,first_signature_weapon,gallery_trophy_locked,LOCKED,collector_rule,Senjata signature ke-1 dari tiap Trofi otomatis masuk Galeri Bengkel (tidak dijual)
+trophy_rule,second_plus_signature_weapon,sellable,LOCKED,collector_rule,Senjata signature ke-2 dan seterusnya dari Trofi tersebut boleh dijual di pasar/NPC/faksi
+offline_idle,pace_philosophy,high_velocity_high_sink,LOCKED,Full_Lv1-150,Pace cepat arus kas aktif; mode idle (cap 8j) jadi mesin penambang gold & bahan dasar
+offline_idle,max_detailed_days,7,DEMO,game_days,Simulasi latar detail maks 7 hari game saat offline, selebihnya agregat

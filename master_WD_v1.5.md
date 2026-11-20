@@ -1,4 +1,4 @@
-# BATTLE-SMITH RPG: MASTER WORLD DEVELOPMENT (WD) v1.4
+# BATTLE-SMITH RPG: MASTER WORLD DEVELOPMENT (WD) v1.5
 Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan sebelumnya. Baca seluruhnya sebelum bekerja.
 
 ## 0. Aturan kerja untuk AI pembaca
@@ -18,10 +18,10 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 ## 1. Pembagian chunk World Development
 - **WD-1 (SELESAI — LOCKED, Mode Full Lv1-150)**: Peta, Geografi, Wilayah, 77 Permukiman, dan 16 Dungeon (database: `data/areas_dungeons.csv`, `data/regions.csv`, `data/locations.csv`).
 - **WD-2 (SELESAI — LOCKED, Mode Full Lv1-150)**: Faksi, Ras, Politik, Diplomasi Dinamis, dan Siklus Antagonis Dinamis (database: `data/factions.csv`, `data/faction_relations.csv`).
-- **WD-3**: NPC, Generator, Promosi, dan Hubungan (mix-and-match, 3 jalur promosi, arc, nada bicara, kepribadian berkembang).
+- **WD-3**: NPC, Generator, Promosi, dan Hubungan (mix-and-match, 3 jalur promosi, arc termasuk Informan resmi & *Shadow Syndicate*, nada bicara, kepribadian berkembang).
 - **WD-4**: Narasi, Event Director, Krisis Besar, Kalender, dan Moral Dunia (kartu event, 5 fase krisis, musim/festival, Mulia/Kejam, seed).
-- **WD-5 (PROGRES — Poin 1-4 LOCKED, tinggal Poin 5 *Gold Sink* & Trofi + Ekspor)**: Ekonomi, Pasar (*Supply & Demand*), *Market Ledger*, Karavan, dan Pace Cepat Full Lv1-150.
-- **WD-6**: Ekosistem Dunia & Arsitektur Aset Data (populasi monster/material/trofi per area, pemecahan data & optimasi RAM Oppo A54).
+- **WD-5 (SELESAI — LOCKED, Mode Full Lv1-150)**: Ekonomi, Pasar (*Supply & Demand*), *Market Ledger*, 6 *Gold Sink*, Trofi Signature & Pace Cepat Full Lv1-150 (database: `data/economy_rules.csv`; prototipe engine: `engines/snd_prototype/`).
+- **WD-6**: Ekosistem Dunia & Arsitektur Aset Data (populasi monster/material/trofi per area, pemecahan data `v1.xlsx` & optimasi RAM Oppo A54).
 - **Parkir (di luar WD)**: Character Development & Battle (`CD-1` s.d `CD-7`) dikelola terpisah di `master_CD_v3.1.md`.
 
 ## 2. Kontrak lintas chunk (baca saja dari `master_CD_v3.1.md`)
@@ -79,38 +79,37 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-4.04**: Kalender lengkap dengan hari, bulan, musim, festival, dan hari besar (`Q20`).
 - **WD-4.05**: Moral naratif memakai dua stat terpisah: **Mulia** dan **Kejam**, imbalan semi abu-abu, tambahan pasti per pilihan (Sapaan, Dilema, Titik Balik), tag nilai berpasangan memicu reaksi NPC otomatis, konsekuensi fisik lewat Penyelarasan senjata.
 
-### WD-5 Ekonomi, Pasar, dan Harga *(Poin 1-4 LOCKED)*
+### WD-5 Ekonomi, Pasar, dan Harga *(SELESAI — Mode Full Lv1-150)*
 - **WD-5.01**: Ekonomi dinamis penuh memakai *supply and demand* (`Q18`): `Harga = harga_acuan x pengali_pasar`. Bahan tingkat lebih tinggi lebih mahal.
 - **WD-5.02**: Mata uang 3 tingkat: `1g = 100s = 10.000br` (`1s = 100br`). Angka "gold" di file lama dibaca sebagai `br`.
 - **WD-5.03**: Material Common & Uncommon memakai **Grade I / II / III**.
-- **WD-5.04**: Harga senjata tempaan dipengaruhi biaya bahan (harga pasar teredam), nilai kerajinan (Mastery Tempa), mutu (dadu mengecil), nilai seni, dan bonus CHA. Mahakarya butuh bahan langka. Senjata unik bisa dijual, disimpan di galeri, dipakai, atau diberikan ke NPC.
+- **WD-5.04**: Harga senjata tempaan dipengaruhi biaya bahan (harga pasar teredam), nilai kerajinan (Mastery Tempa), mutu (dadu mengecil), nilai seni, dan bonus CHA. Mahakarya butuh bahan langka. Senjata unik bisa dijual, disimpan di galeri, dipakai, atau diberikan ke NPC *(dengan aturan khusus Trofi Signature di `WD-5.10`)*.
 - **WD-5.05**: Elemen terpisah dari bahan (Inti Elemen) dan memengaruhi pasar/musim/faksi. Mode elemen senjata: **Terkunci**, **Fleksibel**, **Fusi**.
-- **WD-5.06**: **Pasar 77 Lokasi Berjenjang (4 Kelas Pasar)**: Semua 77 permukiman punya pasar S&D sendiri (*sparse save state*, 0 byte untuk barang diam), tetapi dibatasi kelas lokasi:
-  - **Village (48)**: Material dasar/lokal (*Common-Uncommon*) & barang dasar; modal kecil.
-  - **Town (16)**: Material area (*Common-Rare*) & senjata lokal/menengah.
-  - **City (8)**: Material *Common-Epic* (termasuk tetangga), senjata lanjut & pesanan faksi.
-  - **Major City (5)**: Katalog penuh lintas benua (*Common-Legendary* terbatas), modal terbesar & pesanan besar faksi.
-- **WD-5.07**: **Arsitektur *Basic S&D Engine*** (aturan LOCKED, angka DEMO): 3 Lapis *Lazy Math* (pulih penuh **12 jam nyata** + *auto-prune* 0 byte), `k = 0,5`, batas pengali `x0,4` s.d `x2,5`, *spread* beli-jual toko `55%` (+ bonus `CHA` `+1%`/poin di atas 10, cap `+25%`), **efek riak 25% kota induk (`parent_location_id`)**, Event Karavan harian (maks 7 hari detail saat offline, sisanya agregat), serta anti-eksploitasi biaya bahan tempa = **Harga Pasar Teredam (`acuan + 50% deviasi pasar`)**.
+- **WD-5.06**: **Pasar 77 Lokasi Berjenjang (4 Kelas Pasar)**: Semua 77 permukiman punya pasar S&D sendiri (*sparse save state*, 0 byte untuk barang diam), dibatasi kelas lokasi: **Village (48)** = *Common-Uncommon* | **Town (16)** = *Common-Rare* | **City (8)** = *Common-Epic* | **Major City (5)** = *Common-Legendary* terbatas & pesanan besar faksi.
+- **WD-5.07**: **Arsitektur *Basic S&D Engine*** (aturan LOCKED, angka DEMO di `data/economy_rules.csv`): 3 Lapis *Lazy Math* (pulih penuh **12 jam nyata** + *auto-prune* 0 byte), `k = 0,5`, batas `x0,4` s.d `x2,5`, *spread* beli-jual `55%` (+ bonus `CHA` `+1%`/poin di atas 10, cap `+25%`), **efek riak 25% kota induk (`parent_location_id`)**, Event Karavan harian (maks 7 hari detail saat offline, sisanya agregat), serta anti-eksploitasi biaya bahan tempa = **Harga Pasar Teredam (`acuan + 50% deviasi pasar`)**.
 - **WD-5.08**: ***Market Ledger* (Info Harga Luar Kota) & Paket Efek Politik/Karavan**:
-  - Harga lokasi tempat pemain berdiri = gratis & *real-time*; harga luar kota = tertutup (`???`).
+  - Harga lokasi pemain berdiri = gratis & *real-time*; luar kota = tertutup (`???`).
   - Buka info luar kota lewat beli **Market Ledger** eceran di Guild (*Adventurers' / Forgemasters' Guild*, berlaku 1 hari game / 12 jam nyata — *gold sink*).
   - **Jalur NPC Informan (`WD-3`)**: Informan resmi mengabari harga area gratis/diskon; **Informan *Shadow Syndicate*** juga membocorkan harga di wilayah boikot, rute selundupan *Embargo*, dan bocoran lonjakan perang.
   - Paket efek (`DEMO`): *Open War* (senjata `+35%`, bahan `+20%`), *Embargo* (bahan lawan `+35%`), *Winter* (Api `+25%`), *Shadow Syndicate* (beli `+45%`, jual `45%`), ongkos Karavan naik `+50%-100%` melintasi zona *Embargo/Open War*.
 - **WD-5.09**: **Pace Ekonomi Cepat Full Lv1-150 (*High Velocity, High Sink*)**:
-  - Arus kas harian & tempa berputar **cepat** (renyah di sesi aktif 10-20 menit), diimbangi pengeluaran operasional aktif (*Market Ledger*, ongkos Karavan, *Portal Seal*, pajak faksi, sewa/cabang bengkel, bahan Tier 2-5).
-  - **Peran Mode Idle**: Mode idle (offline cap 8 jam) menjadi mesin utama "menambang" gold & bahan dasar untuk membiayai eksperimen tempa, dagang S&D, dan *gold sink* aktif (tetap patuh batas idle tanpa mengambil keputusan cerita).
-  - Pengali harga acuan bahan per Tier (`DEMO` anti-inflasi Lv1-150): Tier 1 (`Lv1-30`) `x1` | Tier 2 (`Lv31-60`) `x2,5` | Tier 3 (`Lv61-90`) `x6` | Tier 4 (`Lv91-120`) `x14` | Tier 5 (`Lv121-150`) `x30`.
+  - Arus kas harian & tempa berputar cepat (renyah di sesi 10-20 menit), diimbangi 6 *gold sink* aktif (`WD-5.10`).
+  - **Peran Mode Idle**: Mode idle (offline cap 8 jam) menjadi mesin "menambang" gold & bahan dasar untuk membiayai eksperimen tempa, dagang S&D, dan *gold sink* aktif.
+  - Pengali harga acuan bahan per Tier (`DEMO` anti-inflasi Lv1-150): Tier 1 `x1` | Tier 2 `x2,5` | Tier 3 `x6` | Tier 4 `x14` | Tier 5 `x30`.
+- **WD-5.10**: **6 *Gold Sink* Aktif & Aturan 480 Trofi Signature**:
+  - **6 *Gold Sink* utama**: (1) *Market Ledger*, (2) Ongkos Karavan/Kapal, (3) *Portal Seal* Dungeon Tier 1-5, (4) Sewa & ekspansi cabang bengkel/gudang, (5) Pajak faksi & izin dagang/lelang, (6) Jasa **Shadow Syndicate**.
+  - **Sumber bahan langka / 480 Trofi Monster**: Tidak dijual di toko resmi — hanya didapat dari **berburu** atau dibeli mahal (stok sangat terbatas) lewat **Shadow Syndicate**.
+  - **Aturan Jual Karya Signature (Kolektor-Smith)**: Trofi mentah tidak dijual bebas; nilai jualnya baru terbuka setelah **ditempa menjadi senjata signature**. **Senjata ke-1** yang ditempa dari tiap Trofi otomatis **terkunci sebagai Trofi pajangan Galeri Bengkel**; baru **senjata ke-2 dan seterusnya** yang boleh dijual ke pasar/NPC/faksi!
 
 ### WD-6 Platform dan Skala Aset Data
 - **WD-6.01**: Jalan lancar di laptop dan HP Oppo A54 (RAM < 150 MB, `Q29`). Konten dimuat bertahap per Area/Tier (*lazy loading*).
-- **WD-6.02**: **Mode Full (Lv1-150) Langsung Aktif**: World Development tidak lagi memakai pembatasan Demo Lv30; seluruh 16 Area (Tier 1-5), 48 Wilayah Lv1-150, 77 Lokasi, 16 Dungeon, 11 Faksi, dan kurva ekonomi dirancang langsung untuk skala penuh Lv1-150.
+- **WD-6.02**: **Mode Full (Lv1-150) Langsung Aktif**: Seluruh 16 Area (Tier 1-5), 48 Wilayah Lv1-150, 77 Lokasi, 16 Dungeon, 11 Faksi, dan kurva ekonomi dirancang langsung untuk skala penuh Lv1-150.
 
 ## 4. USULAN (belum dikonfirmasi)
 - **WD-1**: Draf ras minoritas 5 Kota Besar (`minority_races_usulan` di `data/locations.csv`).
 - **WD-3 NPC & Event Director**:
   - Jenjang prototipe Tidewrack: Warga -> Dikenal (3 pertemuan) -> Calon (maks 5) -> Kunci (maks 12); 8 arc (termasuk **Informan** resmi & *Shadow Syndicate*); 20 sifat berpasangan; kedekatan 0-99; 30% NPC faksi acak; tambahan kelas sosial (elit/warga/terpinggir) & posisi konflik (loyalis/ragu/penengah).
   - Antrean Event Director 3-5 kartu (festival -> misi/krisis -> kejutan kecil; maks 1 kejutan besar/sesi); krisis 5 fase; skala waktu 1 hari game = 30 menit nyata; simulasi offline detail maks 7 hari game lalu agregat.
-- **WD-5**: Daftar detail nominal *Gold Sink* (sewa/cabang bengkel, *Portal Seal* Tier 1-5, ongkos Karavan, pajak) dan aturan perdagangan 480 Trofi Monster (Poin 5).
 - **WD-6 Ekosistem & Platform**:
   - `v1.xlsx`: 4.864 musuh, 208 material, 480 trofi, 19.952 baris drop. Platform web app/PWA dengan save JSON + ekspor/impor; pecah data per area (16 file + efek bersama), muat per tier level.
 
@@ -122,7 +121,8 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 | `data/locations.csv` | **Database bersih `WD-1` (Full Lv1-150)**: 77 Permukiman Inggris, bug tanggal & typo Quay fixed, hierarki `parent_location_id`, 27 kantong sengketa | **AKTIF / BERSIH** |
 | `data/factions.csv` | **Database bersih `WD-2`**: 11 faksi wilayah + 3 organisasi, kubu Pro/Kontra, kebutuhan senjata | **AKTIF / BERSIH** |
 | `data/faction_relations.csv` | **Database bersih `WD-2`**: 55 pasangan relasi awal, label Rival Sejarah, poros konflik | **AKTIF / BERSIH** (Hari-0: 4 Embargo, 0 Open War) |
-| `engines/snd_prototype/` | **Prototipe *Basic S&D Engine* (v0.2 DEMO)**: `snd_engine.js`, `economy_config.json`, `dummy_items.csv`, `test_simulation.js`, `snd_simulator.html` (100% offline 77 lokasi + 2 grafik live, 56 KB) | **AKTIF / TERUJI** (~10 MB RAM, 3,1 KB save state) |
+| `data/economy_rules.csv` | **Database bersih `WD-5` (Full Lv1-150)**: Seluruh parameter S&D, 4 kelas pasar, Tier 1-5, *Market Ledger*, 6 *Gold Sink*, aturan Trofi Signature | **AKTIF / BERSIH** |
+| `engines/snd_prototype/` | **Prototipe *Basic S&D Engine* (v0.2 DEMO)**: `snd_engine.js`, `economy_config.json`, `dummy_items.csv`, `test_simulation.js`, `snd_simulator.html` (offline 77 lokasi + 2 grafik live) | **AKTIF / TERUJI** (~10 MB RAM, 3,1 KB save state) |
 | `Battle-Smith_RPG_Peta_Dunia_Musuh_v1.xlsx` | Database mentah musuh, drop, material, trofi (19 sheet) | 5,3 MB (64 MB *uncompressed*), dipecah di `WD-6` |
 | `lokasi_peta_dunia.csv` | Sumber lama 77 permukiman | **TERGANTIKAN** oleh `data/locations.csv` |
 | `Spesifikasi Narasi...docx`, `Naratif-Moral...docx`, `Laporan Sesi Desain...docx` | Sumber arsip desain awal | Dikonsolidasikan bertahap ke `master_WD` |
@@ -138,6 +138,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - Tafsiran larangan masuk dungeon `> 30 x tier` digantikan oleh **`WD-1.04` (batas monster maks L100, pemain bebas masuk)**.
 - Acak kepemilikan 48 desa saat *new save* digantikan oleh **`WD-1.07` (awal tetap + 27 kantong sengketa dinamis)**.
 - "Harga jual terakhir mentah 1 transaksi" digantikan oleh **Harga Pasar Teredam (`WD-5.07`)**.
+- Gagasan jual bebas senjata signature pertama digantikan oleh **`WD-5.10` (karya ke-1 = Trofi Galeri Bengkel; karya ke-2 dst = boleh dijual)**.
 
 ### 6b. KONFLIK & Kosakata yang masih perlu disatukan
 1. **KONFLIK LINTAS CHUNK — Mode Full Lv1-150 (WD) vs Demo Lv30 (`master_CD_v3.1.md`)**: `WD` kini aktif penuh Lv1-150 (Tier 1-5); chunk `CD` perlu diberitahu saat sesi berikutnya untuk menyelaraskan cap stat, poin/level, kelipatan zona, dan tier senjata di atas Lv30.
@@ -152,13 +153,13 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-2**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-3**: Kedalaman romansa ringan; rekrut NPC jadi pegawai bengkel vs murid (`CD-6.01`)/sekutu/pelanggan; potret NPC vs ikon/warna; matriks sifat ke tag nilai moral; detail akses NPC Informan *Shadow Syndicate*.
 - **WD-4**: Keputusan final *endless* vs ending opsional + tujuan jangka panjang Lv150; konfirmasi skala waktu (1 hari = 30 menit); nama dunia & kota awal; 30-45 templat isu berjenjang; pilihan bahasa teks (ID saja vs dwibahasa); penamaan ulang 3 arti "Resonansi".
-- **WD-5 (tersisa Poin 5-6)**: Daftar *Gold Sink* aktif Full Lv1-150 (*Portal Seal* Tier 1-5, ongkos Karavan, sewa/cabang bengkel, pajak faksi, *Market Ledger*); apakah 480 Trofi Monster boleh diperdagangkan; ekspor `data/economy_rules.csv` & update tombol *Market Ledger* di simulator.
-- **WD-6**: Keputusan 100 musuh unik/wilayah vs template biome untuk Oppo A54 (< 150 MB); penyatuan 6 vs 13 elemen di data material/musuh; pemecahan sisa `v1.xlsx` ke `data/` CSV/JSON; pembersihan file duplikat/DEMO lama di repo; konfirmasi jalur PWA.
+- **WD-5**: **SELESAI (Mode Full Lv1-150)** (seluruh angka DEMO siap dituning saat simulasi).
+- **WD-6**: Keputusan 100 musuh unik/wilayah vs template biome untuk Oppo A54 (< 150 MB); penyatuan 6 vs 13 elemen di data material/musuh; pemecahan sisa `v1.xlsx` (208 Material, 480 Trofi, Musuh) ke `data/` CSV/JSON; pembersihan file duplikat/DEMO lama di repo; konfirmasi jalur PWA.
 
 ## 8. Format Laporan Perubahan (isi tiap akhir sesi)
 ```text
 LAPORAN PERUBAHAN
-Versi master yang dipakai: WD v1.4
+Versi master yang dipakai: WD v1.5
 Chunk: WD-?
 Tanggal sesi: ...
 1. Keputusan baru (ID, isi, status LOCKED/USULAN)
@@ -174,4 +175,5 @@ Tanggal sesi: ...
 - **v1.1 (19 November 2026)**: Fondasi politik `WD-2` (`WD-2.05` s.d `WD-2.14` LOCKED).
 - **v1.2 (19 November 2026)**: Penuntasan `WD-2` 100% (`WD-2.15` s.d `WD-2.17` LOCKED) + ekspor `data/factions.csv` & `data/faction_relations.csv`.
 - **v1.3 (19 November 2026)**: Penuntasan `WD-1` 100% (`WD-1.04` s.d `WD-1.07` LOCKED) + ekspor `data/areas_dungeons.csv`, `data/regions.csv`, `data/locations.csv`.
-- **v1.4 (19 November 2026)**: **Sinkronisasi penuh ke Mode Full (Lv1-150)** (`WD-6.02` LOCKED, seluruh 16 Area & 16 Dungeon Tier 1-5 aktif di `data/`), plus **Poin 1-4 `WD-5` LOCKED** (`WD-5.06` Pasar 77 lokasi 4 kelas, `WD-5.07` Arsitektur *Basic S&D Engine* + prototipe JS/HTML grafik live teruji < 10 MB RAM, `WD-5.08` *Market Ledger* Guild + NPC Informan resmi & *Shadow Syndicate*, `WD-5.09` Pace cepat *High Velocity, High Sink* dengan idle sebagai penambang gold).
+- **v1.4 (19 November 2026)**: Sinkronisasi penuh ke Mode Full (Lv1-150) (`WD-6.02` LOCKED) + Poin 1-4 `WD-5` LOCKED (`WD-5.06` s.d `WD-5.09`).
+- **v1.5 (20 November 2026)**: **Penuntasan `WD-5` 100%** (`WD-5.10` LOCKED: 6 *Gold Sink* aktif, 480 Trofi Monster hanya dari berburu atau *Shadow Syndicate*, karya signature ke-1 otomatis jadi Trofi Galeri Bengkel & karya ke-2 dst boleh dijual) + ekspor `data/economy_rules.csv` + tambah *Market Ledger* & Informan Shadow ke simulator grafik.
