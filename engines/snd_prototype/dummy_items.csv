@@ -1,0 +1,12 @@
+item_id,item_name,category,rarity,base_price_br,origin_area_id,element_tag,min_market_class
+mat_iron_ore,Raw Iron Ore (Grade I),material,Common,20,wyrmspine_mountains,Tanah,Village
+mat_pine_resin,Frostpine Resin (Grade I),material,Common,25,frostpine_taiga,Es,Village
+mat_marsh_hide,Blackmere Hide (Grade II),material,Uncommon,80,blackmere_fens,Gelap,Village
+mat_ember_shard,Ember Obsidian Shard,material,Rare,320,emberwaste,Api,Town
+mat_barrow_silver,Barrow Sanctified Silver,material,Epic,1200,hollowbarrow_highlands,Cahaya,City
+mat_frostcrown_core,Heart of Frostcrown,material,Legendary,24000,crownfrost_isle,Es,Major City
+wpn_iron_axe,Kapak Perang (Tier 1),weapon,Common,180,,Netral,Village
+wpn_ashwind_bow,Busur Pendek (Tier 2),weapon,Uncommon,650,ashwind_steppe,Petir,Town
+wpn_ember_blade,Pedang Rune Api (Tier 3),weapon,Rare,2400,emberwaste,Api,City
+wpn_unique_replica,Skema Warblade (Epic),weapon,Epic,7200,,Gelap,City
+util_portal_seal,Portal Seal (Tier 1),utility,Rare,500,,Netral,Town

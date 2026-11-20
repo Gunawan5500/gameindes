@@ -1,0 +1,69 @@
+{
+  "version": "0.1-demo",
+  "note": "Semua angka bersifat DEMO untuk uji coba Basic S&D Engine (WD-5.07)",
+  "currency": {
+    "bronze_per_silver": 100,
+    "silver_per_gold": 100,
+    "bronze_per_gold": 10000
+  },
+  "snd": {
+    "sensitivity_k": 0.5,
+    "multiplier_min": 0.4,
+    "multiplier_max": 2.5,
+    "full_recovery_hours": 12,
+    "shop_buy_from_player_spread": 0.55,
+    "parent_ripple_weight": 0.25,
+    "forging_cost_damping": 0.5,
+    "origin_area_discount": 0.8
+  },
+  "cha_bonus": {
+    "threshold": 10,
+    "per_point": 0.01,
+    "max_bonus": 0.25
+  },
+  "market_class_rank": {
+    "Village": 1,
+    "Town": 2,
+    "City": 3,
+    "Major City": 4
+  },
+  "market_class_depth_mult": {
+    "Village": 0.4,
+    "Town": 0.8,
+    "City": 1.4,
+    "Major City": 2.5
+  },
+  "market_class_allowed_rarities": {
+    "Village": ["Common", "Uncommon"],
+    "Town": ["Common", "Uncommon", "Rare"],
+    "City": ["Common", "Uncommon", "Rare", "Epic"],
+    "Major City": ["Common", "Uncommon", "Rare", "Epic", "Legendary"]
+  },
+  "market_class_cash_cap_br": {
+    "Village": 1500,
+    "Town": 8000,
+    "City": 35000,
+    "Major City": 150000
+  },
+  "rarity_base_depth": {
+    "Common": 40,
+    "Uncommon": 25,
+    "Rare": 12,
+    "Epic": 5,
+    "Legendary": 2
+  },
+  "world_modifiers": {
+    "open_war_weapon_demand_mult": 1.35,
+    "open_war_material_demand_mult": 1.2,
+    "embargo_enemy_origin_supply_mult": 0.55,
+    "alliance_origin_discount_mult": 0.9,
+    "winter_fire_demand_mult": 1.25,
+    "festival_luxury_demand_mult": 1.2,
+    "shadow_syndicate_buy_markup": 1.45,
+    "shadow_syndicate_sell_spread": 0.45
+  },
+  "offline_simulation": {
+    "max_detailed_days": 7,
+    "caravan_events_per_day": 3
+  }
+}
