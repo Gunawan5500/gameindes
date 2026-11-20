@@ -1,0 +1,12 @@
+rule_id,category,rule,status
+WD-3.01,generator,Prosedural mix-and-match tanpa AI; jumlah NPC bertambah bertahap,LOCKED
+WD-3.06,identity,"Tag NPC: ras (5), asal_area (16), kelas_sosial (Elit/Warga/Terpinggir), posisi_konflik (Pro/Ragu/Kontra)",LOCKED
+WD-3.06,race_bonus,+1 bakat ras: Human menawar; Dwarf menempa; Elf berburu/meramu; Orc berkelahi; Tiefling meramu/menawar,LOCKED
+WD-3.06,migrant,NPC asal_area != lokasi: bisa bawa order/bahan dari asal; condong Terpinggir; enclave sengketa 50-60% asing,LOCKED
+WD-3.07,tiers,Warga > Dikenal (3 pertemuan) > Calon (maks 5) > Kunci; 8 arc,LOCKED
+WD-3.08,murid,Dikenal/Calon dengan menempa tinggi boleh jadi murid (5 slot CD-6.01) / jaga cabang bengkel,LOCKED
+WD-3.09,placement,"16 Core Key NPC (~1/Area, arc dalam) + Local Contacts/Informan di 77 permukiman (template ringan)",LOCKED
+WD-3.10,recruit,"Murid: jalur Event + jalur Guild (acak) + terarah via arc Mentor/Ikatan Guru; Crew Skill, approval=loyalitas, mini-arc 3-4 beat; companion tempur = Parkir CD",LOCKED
+WD-3.11,arc,"Romansa dihapus; diganti arc Ikatan Guru (guru-murid, khusus murid)",LOCKED
+WD-3.12,informant,Akses dasar (Market Ledger + harga ???) lewat langganan Guild/Syndicate; akses penuh (bahan langka+trofi) hanya lewat arc Informan Syndicate,LOCKED
+WD-3.13,moral_matrix,"20 sifat -> 3 kelompok (Mulia 6 / Kejam 6 / Netral 8); pilihan sefaham +1 loyalitas, berlawanan -1, Netral 0",LOCKED

@@ -18,7 +18,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 ## 1. Pembagian chunk World Development
 - **WD-1 (SELESAI — LOCKED, Mode Full Lv1-150)**: Peta, Geografi, Wilayah, 77 Permukiman, dan 16 Dungeon (`data/areas_dungeons.csv`, `data/regions.csv`, `data/locations.csv`).
 - **WD-2 (SELESAI — LOCKED, Mode Full Lv1-150)**: Faksi, Ras, Politik, Diplomasi Dinamis, dan Siklus Antagonis Dinamis (`data/factions.csv`, `data/faction_relations.csv`).
-- **WD-3**: NPC, Generator, Promosi, dan Hubungan (mix-and-match, 3 jalur promosi, arc termasuk Informan resmi & *Shadow Syndicate*, nada bicara, kepribadian berkembang).
+- **WD-3 (SELESAI — LOCKED)**: NPC, Generator, Promosi, dan Hubungan (`data/npc_rules.csv`, `data/npc_pools.json`) (mix-and-match, 3 jalur promosi, arc termasuk Informan resmi & *Shadow Syndicate*, nada bicara, kepribadian berkembang).
 - **WD-4**: Narasi, Event Director, Krisis Besar, Kalender, dan Moral Dunia (kartu event, 5 fase krisis, musim/festival, Mulia/Kejam, seed).
 - **WD-5 (SELESAI — LOCKED, Mode Full Lv1-150)**: Ekonomi, Pasar (*Supply & Demand*), *Market Ledger*, 6 *Gold Sink*, Trofi Signature & Pace Cepat Full Lv1-150 (`data/economy_rules.csv`, `engines/snd_prototype/`).
 - **WD-6 (SELESAI — LOCKED, Mode Full Lv1-150)**: Ekosistem Dunia & Arsitektur Aset Data (`data/materials.csv`, `data/trophies.csv`, 16 file `data/areas/*.json` — 26,8x lebih ringan dari Excel 64 MB!).
@@ -56,6 +56,14 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-3.03**: Persahabatan, rivalitas, romansa ringan/soft (`Q5`); NPC bisa aktif/sibuk/pindah, **tidak bisa mati** (`Q6`).
 - **WD-3.04**: Peran ganda pelanggan, pemasok & mentor (`Q16`); bereaksi pada senjata tempaan (`Q17`).
 - **WD-3.05**: Menu topik tap (`Q14`), kepribadian NPC berkembang (`Q15`), 3 nada Smith: **Ramah, Tegas, Jenaka** (`Q24`).
+- **WD-3.06**: Tag identitas NPC: `ras` (5 ras), `asal_area` (16), `kelas_sosial` (Elit/Warga/Terpinggir), `posisi_konflik` (Pro/Ragu/Kontra). Migran/faksi musuh condong Terpinggir & memicu konflik sosial; 27 enclave sengketa ~50–60% NPC asing. Bonus ringan +1 bakat ras (Human menawar, Dwarf menempa, Elf berburu/meramu, Orc berkelahi, Tiefling meramu/menawar); migran bisa membawa order/bahan dari asal.
+- **WD-3.07**: 4 jenjang (Warga → Dikenal → Calon maks 5 → Kunci) & 8 arc dari prototipe Tidewrack.
+- **WD-3.08**: NPC Dikenal/Calon ber-`menempa` tinggi bisa jadi murid (5 slot `CD-6.01`) atau penjaga cabang bengkel (`WD-5.10`); lainnya jadi jaringan dunia termasuk Informan.
+- **WD-3.09**: Penempatan 2 lapis: **16 Core Key NPC** (~1/Area, arc dalam) + **Local Contacts/Informan** di 77 permukiman (templat prosedural ringan).
+- **WD-3.10**: Rekrut murid hibrida: acak lewat **Event Director** + acak lewat **Adventurers' Guild**, atau terarah lewat arc. Gaya companion ringan: Crew Skill (kumpul bahan/jaga cabang/bawa order), *approval* = `loyalitas` (`CD-6.01`) bereaksi pada Mulia/Kejam, mini-arc 3–4 beat. Companion tempur = **Parkir CD**.
+- **WD-3.11**: Arc Romansa **dihapus**; diganti **Ikatan Guru** (hubungan guru-murid, khusus murid, tanpa percintaan). Tetap 8 arc.
+- **WD-3.12**: Informan hibrida: akses dasar (Market Ledger + harga `???`) lewat langganan Guild/Syndicate (gold sink); akses penuh (bahan langka & trofi, `WD-5.08`) hanya lewat arc Informan Syndicate (risiko moral/faksi).
+- **WD-3.13**: Matriks sifat 3 kelompok (Mulia 6: ramah, dermawan, setia, berani, sabar, teliti | Kejam 6: pelit, licin, pemarah, curiga, ambisius, bangga | Netral 8). Pilihan sefaham +1 loyalitas, berlawanan −1, Netral 0. Daftar kelompok = nilai awal, bisa disetel saat uji.
 
 ### WD-4 Narasi, Event Director, Kalender, dan Moral Dunia
 - **WD-4.01–WD-4.02**: 100% offline tanpa AI/API, data kartu (`Q21`), seed per save (jejak lewat log Kabar), nada campuran (epik/santai/gelap, `Q1`), kejutan kecil sering/besar jarang (`Q9`), cabang tidak bergantung hidup-mati (`Q3`).
@@ -94,6 +102,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 | `data/locations.csv` | `WD-1` Full Lv1-150: 77 Permukiman Inggris, bug fixed, 27 sengketa | **AKTIF / BERSIH** |
 | `data/factions.csv` | `WD-2`: 11 faksi wilayah + 3 organisasi, kubu Pro/Kontra | **AKTIF / BERSIH** |
 | `data/faction_relations.csv` | `WD-2`: 55 pasangan relasi awal | **AKTIF / BERSIH** |
+| `data/npc_rules.csv`, `data/npc_pools.json` | `WD-3`: aturan NPC + pool sifat/arc/ras/matriks moral | **AKTIF / BERSIH** |
 | `data/economy_rules.csv` | `WD-5` Full Lv1-150: 46 parameter S&D, *Market Ledger*, 6 *Gold Sink*, Trofi | **AKTIF / BERSIH** |
 | `data/materials.csv` | `WD-6` Full Lv1-150: **208 Material** (6 Elemen + `sub_damage_tag`, harga Tier 1-5) | **AKTIF / BERSIH** |
 | `data/trophies.csv` | `WD-6` Full Lv1-150: **480 Trofi Monster** (level Full Lv1-150, aturan `WD-5.10`) | **AKTIF / BERSIH** |
@@ -122,7 +131,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 ## 7. OPEN (Daftar Keputusan Terbuka WD)
 - **WD-1**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-2**: **SELESAI (Mode Full Lv1-150)**.
-- **WD-3**: Kedalaman romansa ringan; rekrut NPC jadi pegawai bengkel vs murid (`CD-6.01`)/sekutu/pelanggan; potret NPC vs ikon/warna; matriks sifat ke tag nilai moral; detail akses NPC Informan *Shadow Syndicate*.
+- **WD-3**: **SELESAI**. Sisa kecil: potret NPC vs ikon/warna (UI, ditunda); skala `loyalitas` final milik CD.
 - **WD-4**: Keputusan final *endless* vs ending opsional + tujuan jangka panjang Lv150; konfirmasi skala waktu (1 hari = 30 menit); nama dunia & kota awal; 30-45 templat isu berjenjang; pilihan bahasa teks (ID saja vs dwibahasa); penamaan ulang 3 arti "Resonansi"; keselarasan event moral di antrean Event Director.
 - **WD-5**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-6**: **SELESAI (Mode Full Lv1-150)** *(tinggal izin opsional pembersihan file arsip/duplikat lama & konfirmasi jalur PWA)*.
@@ -130,7 +139,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 ## 8. Format Laporan Perubahan (isi tiap akhir sesi)
 ```text
 LAPORAN PERUBAHAN
-Versi master yang dipakai: WD v1.6
+Versi master yang dipakai: WD v1.7
 Chunk: WD-?
 Tanggal sesi: ...
 1. Keputusan baru (ID, isi, status LOCKED/USULAN)
@@ -144,3 +153,4 @@ Tanggal sesi: ...
 ## 9. Log versi
 - **v1.0–v1.5 (19–20 November 2026)**: Konsolidasi WD, penuntasan `WD-1`, `WD-2`, `WD-5`, dan sinkronisasi penuh ke Mode Full Lv1-150.
 - **v1.6 (20 November 2026)**: **Penuntasan `WD-6` 100%** (`WD-6.03` pecah 16 file Area JSON, `WD-6.04` 4.864 musuh mengisi penuh Lv1-150 tanpa lubang + varian *Apex* runtime, `WD-6.05` 6 Elemen Utama + `sub_damage_tag` asli) + ekspor bersih `data/materials.csv` (208), `data/trophies.csv` (480), dan 16 file `data/areas/*.json` (**2,39 MB total vs 64 MB Excel = 26,8x lebih ringan**).
+- **v1.7 (20 November 2026)**: **Penuntasan `WD-3`** (`WD-3.06`–`3.13`): tag ras/asal/kelas/konflik, penempatan 2 lapis, rekrut murid hibrida, arc Ikatan Guru menggantikan Romansa, akses Informan hibrida, matriks sifat 3 kelompok; ekspor `data/npc_rules.csv` & `data/npc_pools.json`.
