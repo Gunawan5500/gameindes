@@ -1,0 +1,10 @@
+rule_id,category,rule,status
+WD-4.06,terms,Resonance(CD upgrade Unique); Attunement(elemen-bahan); Conscience(bar moral),LOCKED
+WD-4.07,world,world_name=Emberhold; start_location=loc_22_tidewrack_village,LOCKED
+WD-4.08,ending,"none_endless; milestones: Lv150, 480 Trophy gallery, branches, apprentices",LOCKED
+WD-4.09,calendar,idle_only; 1_day=30min_idle; 30_days_per_season; 4_seasons; 120_days_per_year; idle_cap_8h=16_days; detail_max_7_days,LOCKED
+WD-4.10,event_director,queue_max=5; decide_per_session=1-3; expired=Netral; big_surprise_max=1; idle=grinding_only,LOCKED
+WD-4.11,branch_idle,apprentice branch yields gold+base mats at idle with skill-scaled cap,LOCKED
+WD-4.12,issue_templates,"36 total = 9 x (Major City,City,Town,Village); slot-filled; cascade via parent_location_id",LOCKED
+WD-4.13,branch_cap,"cap=min(pct(skill)*idle_income*cap_hours, ratio(skill)*rent); pct 0.15-0.60; ratio 0.03-0.08",LOCKED_structure/USULAN_values
+WD-4.14,language,dialog/narration/UI=Indonesian; 1-word English terms kept English; proper nouns English,LOCKED

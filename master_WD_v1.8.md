@@ -19,7 +19,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-1 (SELESAI — LOCKED, Mode Full Lv1-150)**: Peta, Geografi, Wilayah, 77 Permukiman, dan 16 Dungeon (`data/areas_dungeons.csv`, `data/regions.csv`, `data/locations.csv`).
 - **WD-2 (SELESAI — LOCKED, Mode Full Lv1-150)**: Faksi, Ras, Politik, Diplomasi Dinamis, dan Siklus Antagonis Dinamis (`data/factions.csv`, `data/faction_relations.csv`).
 - **WD-3 (SELESAI — LOCKED)**: NPC, Generator, Promosi, dan Hubungan (`data/npc_rules.csv`, `data/npc_pools.json`) (mix-and-match, 3 jalur promosi, arc termasuk Informan resmi & *Shadow Syndicate*, nada bicara, kepribadian berkembang).
-- **WD-4**: Narasi, Event Director, Krisis Besar, Kalender, dan Moral Dunia (kartu event, 5 fase krisis, musim/festival, Mulia/Kejam, seed).
+- **WD-4 (SELESAI — LOCKED)**: Narasi, Event Director, Krisis Besar, Kalender, dan Moral Dunia (kartu event, 5 fase krisis, musim/festival, Mulia/Kejam, seed).
 - **WD-5 (SELESAI — LOCKED, Mode Full Lv1-150)**: Ekonomi, Pasar (*Supply & Demand*), *Market Ledger*, 6 *Gold Sink*, Trofi Signature & Pace Cepat Full Lv1-150 (`data/economy_rules.csv`, `engines/snd_prototype/`).
 - **WD-6 (SELESAI — LOCKED, Mode Full Lv1-150)**: Ekosistem Dunia & Arsitektur Aset Data (`data/materials.csv`, `data/trophies.csv`, 16 file `data/areas/*.json` — 26,8x lebih ringan dari Excel 64 MB!).
 - **Parkir (di luar WD)**: Character Development & Battle (`CD-1` s.d `CD-7`) dikelola terpisah di `master_CD_v3.1.md`.
@@ -69,6 +69,15 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-4.01–WD-4.02**: 100% offline tanpa AI/API, data kartu (`Q21`), seed per save (jejak lewat log Kabar), nada campuran (epik/santai/gelap, `Q1`), kejutan kecil sering/besar jarang (`Q9`), cabang tidak bergantung hidup-mati (`Q3`).
 - **WD-4.03–WD-4.04**: Tanpa tekanan waktu (`Q10–Q13`), misi/event & krisis menunggu saat idle, hanya simulasi latar berjalan lalu dirangkum (`Q19`, sesi 10-20 menit); kalender lengkap hari/bulan/musim/festival (`Q20`).
 - **WD-4.05**: Moral **Mulia** & **Kejam** terpisah, imbalan semi abu-abu, tambahan pasti per pilihan, tag nilai antonim memicu reaksi NPC, wujud fisik lewat Penyelarasan senjata.
+- **WD-4.06**: Istilah (Inggris): **Resonance** = tahap upgrade senjata Unique (milik CD, hanya ejaan UI); **Attunement** = keselarasan elemen-bahan; **Conscience** = bar moral Mulia/Kejam pada item. Menggantikan 3 arti "Resonansi" (KONFLIK #2 selesai). "Penyelarasan senjata" pada WD-4.05 = **Attunement**/**Conscience** sesuai konteks.
+- **WD-4.07**: Nama dunia **Emberhold**; titik mulai **Tidewrack Village** (Saltgrave Coast, Tier 1, Lv1-30), dipilih AI atas delegasi user; mudah diganti.
+- **WD-4.08**: **Tanpa ending** (*endless*); Siklus Antagonis jadi mesin cerita; tonggak tanpa akhir (Lv150, Galeri Bengkel 480 Trofi, jumlah cabang & murid).
+- **WD-4.09**: Jam dunia **hanya maju saat idle**: 1 hari = 30 menit idle; 1 musim = 30 hari = 15 jam; 1 tahun = 120 hari ≈ 60 jam idle. Mode aktif tidak memajukan kalender. Cap idle 8 jam = 16 hari game (detail maks 7 hari, sisanya agregat). Respons UI cepat, progres kalender lambat; pace gold `WD-5.09` tidak berubah.
+- **WD-4.10**: Event Director: antrean maks 5 kartu; saat idle event hanya masuk antrean; pemain memutuskan 1-3 kartu per sesi aktif; kartu lama kedaluwarsa jadi hasil Netral; maks 1 kejutan besar per sesi. **Idle = grinding saja** (berburu/tambang gold & bahan dasar); tanpa keputusan moral/dialog/arc/tempa signature. KONFLIK #3 selesai. Menggantikan sebagian WD-4.03–4.04.
+- **WD-4.11**: Murid penjaga cabang tetap menghasilkan gold & bahan dasar saat idle dengan **cap**; cap naik seiring skill/bakat murid (dibaca dari `CD-6.01`).
+- **WD-4.12**: **36 templat isu**, 9 per jenjang (Major City/City/Town/Village), berslot (kota, bahan, faksi, ras, NPC) diisi otomatis; isu menurun via `parent_location_id`.
+- **WD-4.13**: Rumus cap cabang: `cap = min(A, C)`; A = `persen(skill) x idle_income_pemain(Tier) x jam_cap`; C = `rasio(skill) x sewa_cabang_per_periode`. Angka persen 15-60% & rasio 3-8% = USULAN, disetel di simulator S&D.
+- **WD-4.14**: Bahasa campuran: dialog, narasi, UI = Bahasa Indonesia; istilah yang bila di-Indonesia-kan jadi >= 2 kata sedangkan Inggris 1 kata (mis. *Resonance*, *Attunement*, *Conscience*) memakai Inggris. Nama diri tetap Inggris (`WD-2.13`).
 
 ### WD-5 Ekonomi, Pasar, dan Harga *(SELESAI — Mode Full Lv1-150)*
 - **WD-5.01–WD-5.05**: Ekonomi S&D (`Q18`), mata uang `1g = 100s = 10.000br`, Grade I/II/III untuk Common/Uncommon, harga tempa memperhitungkan biaya bahan teredam/Mastery/mutu/seni/CHA, elemen terpisah (mode Terkunci/Fleksibel/Fusi).
@@ -103,6 +112,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 | `data/factions.csv` | `WD-2`: 11 faksi wilayah + 3 organisasi, kubu Pro/Kontra | **AKTIF / BERSIH** |
 | `data/faction_relations.csv` | `WD-2`: 55 pasangan relasi awal | **AKTIF / BERSIH** |
 | `data/npc_rules.csv`, `data/npc_pools.json` | `WD-3`: aturan NPC + pool sifat/arc/ras/matriks moral | **AKTIF / BERSIH** |
+| `data/narrative_calendar_rules.csv` | `WD-4`: kalender, Event Director, bahasa, cap cabang | **AKTIF / BERSIH** |
 | `data/economy_rules.csv` | `WD-5` Full Lv1-150: 46 parameter S&D, *Market Ledger*, 6 *Gold Sink*, Trofi | **AKTIF / BERSIH** |
 | `data/materials.csv` | `WD-6` Full Lv1-150: **208 Material** (6 Elemen + `sub_damage_tag`, harga Tier 1-5) | **AKTIF / BERSIH** |
 | `data/trophies.csv` | `WD-6` Full Lv1-150: **480 Trofi Monster** (level Full Lv1-150, aturan `WD-5.10`) | **AKTIF / BERSIH** |
@@ -124,22 +134,22 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 
 ### 6b. KONFLIK & Kosakata yang masih perlu disatukan
 1. **KONFLIK LINTAS CHUNK — Mode Full Lv1-150 (WD) vs Demo Lv30 (`master_CD_v3.1.md`)**: `WD` sudah penuh Lv1-150; chunk `CD` perlu diselaraskan di sesi `CD` (cap stat, poin/level, kelipatan zona, stat monster > Lv30).
-2. **Istilah "Resonansi" (3 arti)**: tahap upgrade senjata Unique vs keselarasan elemen-bahan vs pengisian bar item moral Mulia/Kejam (akan diselesaikan di `WD-4`).
-3. **Event Moral "Aktif Saja" vs Sesi Pendek**: perlu diselaraskan lewat antrean Event Director (`WD-4`).
+2. ~~Istilah "Resonansi"~~ **SELESAI** (`WD-4.06`).
+3. ~~Event Moral "Aktif Saja"~~ **SELESAI** (`WD-4.10`).
 4. **Lintas Chunk (Parkir ke CD)**: 5 vs 6 tingkat kualitas; 36 senjata vs 10 jenis senjata Unique di `v1.xlsx`.
 
 ## 7. OPEN (Daftar Keputusan Terbuka WD)
 - **WD-1**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-2**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-3**: **SELESAI**. Sisa kecil: potret NPC vs ikon/warna (UI, ditunda); skala `loyalitas` final milik CD.
-- **WD-4**: Keputusan final *endless* vs ending opsional + tujuan jangka panjang Lv150; konfirmasi skala waktu (1 hari = 30 menit); nama dunia & kota awal; 30-45 templat isu berjenjang; pilihan bahasa teks (ID saja vs dwibahasa); penamaan ulang 3 arti "Resonansi"; keselarasan event moral di antrean Event Director.
+- **WD-4**: **SELESAI**. Sisa: tulis 36 templat isu (konten), setel angka cap cabang di simulator, murid/skala `CD` sinkron Lv150.
 - **WD-5**: **SELESAI (Mode Full Lv1-150)**.
 - **WD-6**: **SELESAI (Mode Full Lv1-150)** *(tinggal izin opsional pembersihan file arsip/duplikat lama & konfirmasi jalur PWA)*.
 
 ## 8. Format Laporan Perubahan (isi tiap akhir sesi)
 ```text
 LAPORAN PERUBAHAN
-Versi master yang dipakai: WD v1.7
+Versi master yang dipakai: WD v1.8
 Chunk: WD-?
 Tanggal sesi: ...
 1. Keputusan baru (ID, isi, status LOCKED/USULAN)
@@ -154,3 +164,4 @@ Tanggal sesi: ...
 - **v1.0–v1.5 (19–20 November 2026)**: Konsolidasi WD, penuntasan `WD-1`, `WD-2`, `WD-5`, dan sinkronisasi penuh ke Mode Full Lv1-150.
 - **v1.6 (20 November 2026)**: **Penuntasan `WD-6` 100%** (`WD-6.03` pecah 16 file Area JSON, `WD-6.04` 4.864 musuh mengisi penuh Lv1-150 tanpa lubang + varian *Apex* runtime, `WD-6.05` 6 Elemen Utama + `sub_damage_tag` asli) + ekspor bersih `data/materials.csv` (208), `data/trophies.csv` (480), dan 16 file `data/areas/*.json` (**2,39 MB total vs 64 MB Excel = 26,8x lebih ringan**).
 - **v1.7 (20 November 2026)**: **Penuntasan `WD-3`** (`WD-3.06`–`3.13`): tag ras/asal/kelas/konflik, penempatan 2 lapis, rekrut murid hibrida, arc Ikatan Guru menggantikan Romansa, akses Informan hibrida, matriks sifat 3 kelompok; ekspor `data/npc_rules.csv` & `data/npc_pools.json`.
+- **v1.8 (20 November 2026)**: **Penuntasan `WD-4`** (`WD-4.06`–`4.14`): istilah Resonance/Attunement/Conscience, dunia Emberhold & start Tidewrack, tanpa ending, jam dunia idle-only, antrean Event Director, 36 templat isu, cap cabang `min(A,C)`, bahasa campuran; ekspor `data/narrative_calendar_rules.csv`. **WD-1..WD-6 semua SELESAI.**
