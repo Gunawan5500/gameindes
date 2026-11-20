@@ -78,6 +78,8 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 - **WD-4.12**: **36 templat isu**, 9 per jenjang (Major City/City/Town/Village), berslot (kota, bahan, faksi, ras, NPC) diisi otomatis; isu menurun via `parent_location_id`.
 - **WD-4.13**: Rumus cap cabang: `cap = min(A, C)`; A = `persen(skill) x idle_income_pemain(Tier) x jam_cap`; C = `rasio(skill) x sewa_cabang_per_periode`. Angka persen 15-60% & rasio 3-8% = USULAN, disetel di simulator S&D.
 - **WD-4.14**: Bahasa campuran: dialog, narasi, UI = Bahasa Indonesia; istilah yang bila di-Indonesia-kan jadi >= 2 kata sedangkan Inggris 1 kata (mis. *Resonance*, *Attunement*, *Conscience*) memakai Inggris. Nama diri tetap Inggris (`WD-2.13`).
+- **WD-4.15**: **Issue Engine** (`engines/issue_engine/`, `data/issue_templates.json`): 36 templat berslot (`{kota},{faksiA},{faksiB},{bahan},{ras},{asal},{npc}`) + 4 *twist* tersembunyi (plain 60 / false_lead 15 / double_edge 15 / escalate 10). Tidak mudah ditebak: deterministik per seed rahasia, bobot dari permusuhan faksi nyata & enclave sengketa, anti-ulang riwayat (8 kartu), kaskade 40% dari isu induk. Teruji: 36/36 templat terpakai, 755/1000 teks unik, 1000 kartu 22,7 ms, ~11,5 MB heap.
+- **WD-6.06**: Arsip lama (`lokasi_peta_dunia.csv`, 2 `...DEMO.xlsx`, `Laporan Sesi...(1).docx`) dipindah ke `backup/arsip_lama_2026-11-20.zip` (terverifikasi) lalu dibersihkan dari root.
 
 ### WD-5 Ekonomi, Pasar, dan Harga *(SELESAI — Mode Full Lv1-150)*
 - **WD-5.01–WD-5.05**: Ekonomi S&D (`Q18`), mata uang `1g = 100s = 10.000br`, Grade I/II/III untuk Common/Uncommon, harga tempa memperhitungkan biaya bahan teredam/Mastery/mutu/seni/CHA, elemen terpisah (mode Terkunci/Fleksibel/Fusi).
@@ -113,13 +115,14 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 | `data/faction_relations.csv` | `WD-2`: 55 pasangan relasi awal | **AKTIF / BERSIH** |
 | `data/npc_rules.csv`, `data/npc_pools.json` | `WD-3`: aturan NPC + pool sifat/arc/ras/matriks moral | **AKTIF / BERSIH** |
 | `data/narrative_calendar_rules.csv` | `WD-4`: kalender, Event Director, bahasa, cap cabang | **AKTIF / BERSIH** |
+| `data/issue_templates.json`, `engines/issue_engine/` | `WD-4.15`: 36 templat isu + mesin anti-tebak | **AKTIF / TERUJI** |
+| `backup/arsip_lama_2026-11-20.zip` | Arsip file lama (4 file) | **BACKUP** |
 | `data/economy_rules.csv` | `WD-5` Full Lv1-150: 46 parameter S&D, *Market Ledger*, 6 *Gold Sink*, Trofi | **AKTIF / BERSIH** |
 | `data/materials.csv` | `WD-6` Full Lv1-150: **208 Material** (6 Elemen + `sub_damage_tag`, harga Tier 1-5) | **AKTIF / BERSIH** |
 | `data/trophies.csv` | `WD-6` Full Lv1-150: **480 Trofi Monster** (level Full Lv1-150, aturan `WD-5.10`) | **AKTIF / BERSIH** |
 | `data/areas/*.json` (16 file) | `WD-6` Full Lv1-150: **4.864 Musuh + 19.952 Drop + 4.864 Unique + 64 Boss Skill** | **AKTIF / BERSIH** (**2,39 MB total**, ~153 KB/file!) |
 | `engines/snd_prototype/` | Prototipe *Basic S&D Engine* + Simulator Grafik Live offline | **AKTIF / TERUJI** (~10 MB RAM, 3,1 KB save) |
 | `Battle-Smith_RPG_Peta_Dunia_Musuh_v1.xlsx` | Sumber arsip Excel mentah (64 MB uncompressed) | **TERGANTIKAN di runtime** oleh `data/` |
-| `lokasi_peta_dunia.csv`, `...DEMO.xlsx`, `...(1).docx` | Arsip lama / duplikat | Menunggu izin pembersihan user |
 
 ## 6. KONFLIK & Aturan Lama yang Tergantikan
 ### 6a. Aturan lama yang tergantikan (jangan dipakai)
@@ -149,7 +152,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 ## 8. Format Laporan Perubahan (isi tiap akhir sesi)
 ```text
 LAPORAN PERUBAHAN
-Versi master yang dipakai: WD v1.8
+Versi master yang dipakai: WD v1.9
 Chunk: WD-?
 Tanggal sesi: ...
 1. Keputusan baru (ID, isi, status LOCKED/USULAN)
@@ -165,3 +168,4 @@ Tanggal sesi: ...
 - **v1.6 (20 November 2026)**: **Penuntasan `WD-6` 100%** (`WD-6.03` pecah 16 file Area JSON, `WD-6.04` 4.864 musuh mengisi penuh Lv1-150 tanpa lubang + varian *Apex* runtime, `WD-6.05` 6 Elemen Utama + `sub_damage_tag` asli) + ekspor bersih `data/materials.csv` (208), `data/trophies.csv` (480), dan 16 file `data/areas/*.json` (**2,39 MB total vs 64 MB Excel = 26,8x lebih ringan**).
 - **v1.7 (20 November 2026)**: **Penuntasan `WD-3`** (`WD-3.06`–`3.13`): tag ras/asal/kelas/konflik, penempatan 2 lapis, rekrut murid hibrida, arc Ikatan Guru menggantikan Romansa, akses Informan hibrida, matriks sifat 3 kelompok; ekspor `data/npc_rules.csv` & `data/npc_pools.json`.
 - **v1.8 (20 November 2026)**: **Penuntasan `WD-4`** (`WD-4.06`–`4.14`): istilah Resonance/Attunement/Conscience, dunia Emberhold & start Tidewrack, tanpa ending, jam dunia idle-only, antrean Event Director, 36 templat isu, cap cabang `min(A,C)`, bahasa campuran; ekspor `data/narrative_calendar_rules.csv`. **WD-1..WD-6 semua SELESAI.**
+- **v1.9 (20 November 2026)**: Arsip lama dibackup lalu dibersihkan; `WD-4.15` Issue Engine 36 templat (`data/issue_templates.json`, `engines/issue_engine/`) teruji.
