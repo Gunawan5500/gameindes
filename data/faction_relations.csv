@@ -1,0 +1,56 @@
+pair_id,faction_a_id,faction_b_id,faction_a,faction_b,base_score_demo,initial_status,historical_rival,primary_axis,dynamic_note
+REL-01,briarfall_crown,saltgrave_league,Briarfall Crown,Saltgrave League,-40,Cold War,Y,Pelabuhan & Pajak,Briarfall ingin memajaki pelabuhan bebas Saltgrave
+REL-02,briarfall_crown,wyrmspine_hold,Briarfall Crown,Wyrmspine Hold,35,Friendly,N,Standar Senjata,Sekutu awal pemasok senjata massal; rawan retak bila harga bijih/Threat naik
+REL-03,briarfall_crown,ashwind_clans,Briarfall Crown,Ashwind Clans,-65,Embargo,Y,Mahkota & Perbatasan,Rival sejarah perbatasan dan otonomi klan
+REL-04,briarfall_crown,emberwaste_order,Briarfall Crown,Emberwaste Order,-25,Cold War,N,Standar vs Fusi,Briarfall curiga pada senjata Fusi Emberwaste
+REL-05,briarfall_crown,infernal_hierarchy,Briarfall Crown,Infernal Hierarchy,-54,Cold War,Y,Ancaman Babak 1,Perbatasan dan klaim ketertiban vs Infernal
+REL-06,briarfall_crown,frostcrown_remnant,Briarfall Crown,Frostcrown Remnant,-60,Embargo,Y,Klaim Mahkota,Sengketa legitimasi mahkota lama vs baru
+REL-07,briarfall_crown,barrow_wardens,Briarfall Crown,Barrow Wardens,-20,Neutral,N,Relik Kuno,Gesekan kecil soal izin ekspedisi relik
+REL-08,briarfall_crown,elderwake_council,Briarfall Crown,Elderwake Council,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-09,briarfall_crown,frostpine_tribe,Briarfall Crown,Frostpine Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-10,briarfall_crown,thornback_tribe,Briarfall Crown,Thornback Tribe,-45,Cold War,Y,Pajak Semenanjung,Thornback menolak upeti dan aturan kerajaan
+REL-11,saltgrave_league,wyrmspine_hold,Saltgrave League,Wyrmspine Hold,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-12,saltgrave_league,ashwind_clans,Saltgrave League,Ashwind Clans,15,Neutral,N,Jalur Karavan,Mitra dagang pelabuhan dan stepa
+REL-13,saltgrave_league,emberwaste_order,Saltgrave League,Emberwaste Order,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-14,saltgrave_league,infernal_hierarchy,Saltgrave League,Infernal Hierarchy,-20,Neutral,N,Jalur Kabut,Hubungan dingin tapi ada dagang gelap pelabuhan
+REL-15,saltgrave_league,frostcrown_remnant,Saltgrave League,Frostcrown Remnant,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-16,saltgrave_league,barrow_wardens,Saltgrave League,Barrow Wardens,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-17,saltgrave_league,elderwake_council,Saltgrave League,Elderwake Council,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-18,saltgrave_league,frostpine_tribe,Saltgrave League,Frostpine Tribe,25,Friendly,N,Jalur Dagang,Mitra dagang bahan dingin utara-selatan
+REL-19,saltgrave_league,thornback_tribe,Saltgrave League,Thornback Tribe,-35,Cold War,Y,Jalur Laut,Gesekan perompakan dan penjarahan kapal
+REL-20,wyrmspine_hold,ashwind_clans,Wyrmspine Hold,Ashwind Clans,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-21,wyrmspine_hold,emberwaste_order,Wyrmspine Hold,Emberwaste Order,-30,Cold War,Y,Standar vs Fusi,Tradisi Terkunci Wyrmspine vs Fusi api Emberwaste
+REL-22,wyrmspine_hold,infernal_hierarchy,Wyrmspine Hold,Infernal Hierarchy,-50,Cold War,Y,Standar vs Gelap,Menolak pengaruh gelap dan Fusi liar
+REL-23,wyrmspine_hold,frostcrown_remnant,Wyrmspine Hold,Frostcrown Remnant,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-24,wyrmspine_hold,barrow_wardens,Wyrmspine Hold,Barrow Wardens,-40,Cold War,Y,Tambang & Makam,Sengketa galian tambang dekat makam leluhur
+REL-25,wyrmspine_hold,elderwake_council,Wyrmspine Hold,Elderwake Council,-65,Embargo,Y,Logam & Hutan,Ekspansi tambang vs kelestarian hutan
+REL-26,wyrmspine_hold,frostpine_tribe,Wyrmspine Hold,Frostpine Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-27,wyrmspine_hold,thornback_tribe,Wyrmspine Hold,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-28,ashwind_clans,emberwaste_order,Ashwind Clans,Emberwaste Order,30,Friendly,N,Fusi & Karavan,Sekutu awal dagang garam/api & Fusi; rawan retak soal dominasi
+REL-29,ashwind_clans,infernal_hierarchy,Ashwind Clans,Infernal Hierarchy,-45,Cold War,N,Ancaman Babak 1,Curiga pada ekspansi rawa
+REL-30,ashwind_clans,frostcrown_remnant,Ashwind Clans,Frostcrown Remnant,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-31,ashwind_clans,barrow_wardens,Ashwind Clans,Barrow Wardens,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-32,ashwind_clans,elderwake_council,Ashwind Clans,Elderwake Council,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-33,ashwind_clans,frostpine_tribe,Ashwind Clans,Frostpine Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-34,ashwind_clans,thornback_tribe,Ashwind Clans,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-35,emberwaste_order,infernal_hierarchy,Emberwaste Order,Infernal Hierarchy,-50,Cold War,Y,Sesama Tiefling,Sengketa doktrin api murni vs rawa gelap
+REL-36,emberwaste_order,frostcrown_remnant,Emberwaste Order,Frostcrown Remnant,-70,Embargo,Y,Api vs Es,Monopoli api/panas vs kebutuhan bertahan di salju
+REL-37,emberwaste_order,barrow_wardens,Emberwaste Order,Barrow Wardens,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-38,emberwaste_order,elderwake_council,Emberwaste Order,Elderwake Council,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-39,emberwaste_order,frostpine_tribe,Emberwaste Order,Frostpine Tribe,-35,Cold War,Y,Api vs Es,Tekanan aliansi utara melawan monopoli api
+REL-40,emberwaste_order,thornback_tribe,Emberwaste Order,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-41,infernal_hierarchy,frostcrown_remnant,Infernal Hierarchy,Frostcrown Remnant,-45,Cold War,N,Ancaman Babak 1,Berjauhan tapi saling waspada
+REL-42,infernal_hierarchy,barrow_wardens,Infernal Hierarchy,Barrow Wardens,-54,Cold War,Y,Makam & Kutukan,Penjaga makam membenci sihir kutukan rawa
+REL-43,infernal_hierarchy,elderwake_council,Infernal Hierarchy,Elderwake Council,-52,Cold War,Y,Hutan vs Rawa,Khawatir korupsi rawa merambat ke hutan
+REL-44,infernal_hierarchy,frostpine_tribe,Infernal Hierarchy,Frostpine Tribe,-45,Cold War,N,Ancaman Babak 1,Waspada ancaman luar
+REL-45,infernal_hierarchy,thornback_tribe,Infernal Hierarchy,Thornback Tribe,-45,Cold War,N,Ancaman Babak 1,Tidak percaya pihak luar
+REL-46,frostcrown_remnant,barrow_wardens,Frostcrown Remnant,Barrow Wardens,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-47,frostcrown_remnant,elderwake_council,Frostcrown Remnant,Elderwake Council,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-48,frostcrown_remnant,frostpine_tribe,Frostcrown Remnant,Frostpine Tribe,-20,Neutral,N,Aliansi Rapuh Utara,Frostcrown menekan Frostpine ikut blokade selatan
+REL-49,frostcrown_remnant,thornback_tribe,Frostcrown Remnant,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-50,barrow_wardens,elderwake_council,Barrow Wardens,Elderwake Council,15,Neutral,N,Penjaga Tradisi,Sama-sama menahan ekspansi tambang Wyrmspine
+REL-51,barrow_wardens,frostpine_tribe,Barrow Wardens,Frostpine Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-52,barrow_wardens,thornback_tribe,Barrow Wardens,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-53,elderwake_council,frostpine_tribe,Elderwake Council,Frostpine Tribe,30,Friendly,N,Sesama Elf,Kedekatan budaya penjaga hutan dan taiga
+REL-54,elderwake_council,thornback_tribe,Elderwake Council,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis
+REL-55,frostpine_tribe,thornback_tribe,Frostpine Tribe,Thornback Tribe,0,Neutral,N,Netral Awal,Belum ada konflik langsung; bebas bergeser dinamis

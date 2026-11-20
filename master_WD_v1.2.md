@@ -1,4 +1,4 @@
-# BATTLE-SMITH RPG: MASTER WORLD DEVELOPMENT (WD) v1.1
+# BATTLE-SMITH RPG: MASTER WORLD DEVELOPMENT (WD) v1.2
 Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan sebelumnya. Baca seluruhnya sebelum bekerja.
 
 ## 0. Aturan kerja untuk AI pembaca
@@ -16,7 +16,7 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 
 ## 1. Pembagian chunk World Development
 - **WD-1**: Peta, Geografi, Wilayah, Permukiman, dan Dungeon (16 Area, 48 Wilayah, 77 Lokasi, 16 Dungeon).
-- **WD-2**: Faksi, Ras, Politik, Konflik, dan Siklus Antagonis Dinamis (11 faksi wilayah + 3 organisasi lintas-wilayah).
+- **WD-2 (SELESAI — LOCKED)**: Faksi, Ras, Politik, Diplomasi Dinamis, dan Siklus Antagonis Dinamis (database: `data/factions.csv`, `data/faction_relations.csv`).
 - **WD-3**: NPC, Generator, Promosi, dan Hubungan (mix-and-match, 3 jalur promosi, arc, nada bicara, kepribadian berkembang).
 - **WD-4**: Narasi, Event Director, Krisis Besar, Kalender, dan Moral Dunia (kartu event, 5 fase krisis, musim/festival, Mulia/Kejam, seed).
 - **WD-5**: Ekonomi, Pasar (*Supply & Demand*), Toko, Guild, dan Harga Acuan (rumus S&D, mata uang, harga bahan & senjata tempa, Grade).
@@ -35,10 +35,10 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 
 ### WD-1 Peta, Wilayah, Permukiman, dan Dungeon
 - **WD-1.01**: Struktur dunia terdiri dari 16 Area, 48 Wilayah (3 per area: Rendah Lv1-10, Sedang Lv11-20, Tinggi Lv21-30), 77 permukiman (48 desa, 16 kota kecil, 8 kota sedang, 5 kota besar; kapasitas total 1.376 NPC), dan 16 Dungeon (masing-masing 100 lantai). Di demo hanya dungeon Tier 1 (6 dungeon, Lv1-30) yang aktif; Tier 2-5 (Lv31-150) ditunda ke versi penuh. *(Nama spesifik area/wilayah/dungeon masih USULAN).*
-- **WD-1.02**: 5 Kota Besar bersifat multi-ras (ras dominan + minoritas dengan status sosial) dan punya tema sosial tetap: **Briarfall** (distopia), **Saltgrave** (utopia palsu), **Wyrmspine** (diskriminasi berbasis aturan/kepentingan), **Kurultai** (utopia rapuh), **Obsidian** (ketimpangan sosial). Diskriminasi lahir dari aturan & kepentingan dunia, bukan ras baik/jahat.
+- **WD-1.02**: 5 Kota Besar bersifat multi-ras (ras dominan + minoritas dengan status sosial) dan punya tema sosial tetap: **Briarfall City** (distopia), **Port Saltgrave** (utopia palsu), **Wyrmspine Forgecity** (diskriminasi berbasis aturan/kepentingan), **Kurultai Camp** (utopia rapuh), **Obsidian City** (ketimpangan sosial). Diskriminasi lahir dari aturan & kepentingan dunia, bukan ras baik/jahat.
 - **WD-1.03**: Isu kota besar menurun berjenjang ke bawah: Kota Besar (struktur/politik) -> Kota Sedang (penegakan) -> Kota Kecil (dampak pasar) -> Desa (harga manusiawi). Pemain menemui gejala di desa dulu, sebabnya di kota belakangan.
 
-### WD-2 Faksi, Ras, Politik, dan Siklus Antagonis Dinamis
+### WD-2 Faksi, Ras, Politik, dan Siklus Antagonis Dinamis *(SELESAI)*
 - **WD-2.01**: Terdapat 7+ faksi berjenjang (Mayor, Menengah, Minor), masing-masing memiliki dinamika sendiri (`Q23`).
 - **WD-2.02**: 5 ras ala D&D dipetakan dari 11 faksi wilayah: **Human** (*Briarfall Crown, Saltgrave League, Ashwind Clans*), **Dwarf** (*Wyrmspine Hold, Barrow Wardens*), **Elf** (*Elderwake Council, Frostpine Tribe*), **Orc/Savage Tribes** (*Thornback Tribe, Frostcrown Remnant*), **Tiefling/Flame-blooded** (*Infernal Hierarchy, Emberwaste Order*). Satu ras boleh memiliki faksi yang saling berkonflik.
 - **WD-2.03**: Hubungan antar-faksi berubah sendiri seiring waktu (`Q26`). Reputasi pemain dihitung terpisah per faksi (`Q27`).
@@ -60,15 +60,17 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
   - **Menengah (3)**: *Frostcrown Remnant, Barrow Wardens, Elderwake Council*.
   - **Minor (2)**: *Frostpine Tribe, Thornback Tribe*.
   - Jenjang efektif bersifat dinamis: faksi Menengah/Minor dapat melonjak sementara menjadi Antagonis Aktif bila dikuatkan konflik/suplai, dan faksi Mayor yang baru tumbang melemah sementara.
-- **WD-2.12**: **Kepentingan & Kubu Pro/Kontra 6 Faksi Non-Kota-Besar**:
-  1. **Infernal Hierarchy** (Tiefling; *Blackmere Fens, Wraithtide Isles*): Menuntut pengakuan & kendali jalur kabut atas pengasingan sejarah; butuh senjata Gelap/Fusi. *Pro*: teror/kutukan/ekspansi (Antagonis Babak 1). *Kontra*: pelaut/nelayan & pembisik yang ingin dagang bebas.
-  2. **Frostcrown Remnant** (Orc; *Hollowfrost Range, Crownfrost Isle*): Klaim mahkota lama (lawan Briarfall) & pasokan panas/tungku demi bertahan di salju (lawan Emberwaste); butuh senjata berat & Api/Es. *Pro*: kesatria ekspansif yang menekan selatan & Frostpine. *Kontra*: pengelola tungku/rumah kaca yang ingin dagang damai.
-  3. **Frostpine Tribe** (Elf; *Frostpine Taiga*): Otonomi taiga & stok musim dingin; terjepit antara Frostcrown & Emberwaste; butuh senjata pemburu/ringan & Es. *Pro*: penjaga keras yang ingin embargo bahan dingin ke selatan. *Kontra*: pedagang terbuka sebagai jembatan utara-selatan.
-  4. **Barrow Wardens** (Dwarf; *Greymoor Downs, Hollowbarrow Highlands*): Melindungi makam leluhur/relik dari penjarah & tambang agresif Wyrmspine/Briarfall; butuh senjata Cahaya/pelindung. *Pro*: fanatik makam yang menyegel wilayah. *Kontra*: penggembala/penambang yang mau buka pasar keliling bersyarat adat.
-  5. **Elderwake Council** (Elf; *Elderwake Grove, Rustleaf Weald*): Menjaga kelestarian hutan dari tambang Wyrmspine (tampak pada desa tepi hutan *Rustleaf Weald*); butuh senjata alam/presisi. *Pro*: penjaga radikal yang menyabotase tambang & penebang. *Kontra*: saudagar/perajin yang mau kompromi tebang-tanam.
-  6. **Thornback Tribe** (Orc; *Bonethorn Peninsula*): Menolak pajak Briarfall & penjarahan laut Saltgrave; butuh senjata jarak dekat tangguh. *Pro*: petarung/penjarah karavan & kapal asing. *Kontra*: tabib/perajin yang ingin barter aman & pengakuan wilayah.
+- **WD-2.12**: **Kepentingan & Kubu Pro/Kontra 6 Faksi Non-Kota-Besar**: Terkunci (detail lengkap tersimpan di `data/factions.csv`).
 - **WD-2.13**: **Konvensi Penamaan Inggris**: Seluruh *proper noun* dunia (11 faksi, 3 organisasi, area, wilayah, dungeon, dan awalan 77 permukiman CSV) memakai Bahasa Inggris ringkas (gaya 2 kata). Narasi, dialog & UI tetap Bahasa Indonesia.
-- **WD-2.14**: **Reputasi & Boikot per Era**: Reputasi pemain per faksi memakai skala `-100` s.d `+100` (*Hostile / Neutral / Allied*). Bila jatuh di bawah ambang ekstrem (DEMO `< -80`), faksi menjadi **Hostile Terkunci per Era** (boikot toko resmi; akses bahan wilayah hanya lewat **Shadow Syndicate**). Boikot terbuka kembali saat kubu faksi berganti atau babak krisis selesai (aman untuk game *endless*).
+- **WD-2.14**: **Reputasi & Boikot per Era**: Reputasi pemain per faksi memakai skala `-100` s.d `+100` (*Hostile / Neutral / Allied*). Bila jatuh di bawah ambang ekstrem (DEMO `< -80`), faksi menjadi **Hostile Terkunci per Era** (boikot toko resmi; akses bahan wilayah hanya lewat **Shadow Syndicate**). Boikot terbuka kembali saat kubu faksi berganti atau babak krisis selesai.
+- **WD-2.15**: **Kubu 5 Kota Besar & Matriks Awal**: Kubu Pro/Kontra 5 Kota Besar serta Matriks Relasi 11×11 (55 pasangan di `data/faction_relations.csv`) dikunci sebagai **titik start & label Rival Sejarah** (bebas bergeser `-100` s.d `+100` seiring permainan).
+- **WD-2.16**: **Mesin Diplomasi Dinamis (Gabungan Simulasi + Kartu Insiden)**:
+  - Di balik layar, 55 pasangan relasi digerakkan oleh **Efek Ancaman (*Threat*)** (faksi/sekutu yang terlalu kuat dicurigai termasuk oleh temannya sendiri -> *teman bisa jadi musuh*), **Kelelahan Perang (*War Exhaustion*)** (perang berkepanjangan mendorong gencatan senjata -> *musuh bisa berdamai*), **Pergeseran Kubu Pro/Kontra**, serta **Aksi Pemain / Shadow Syndicate**.
+  - Setiap kali skor menembus ambang batas status, mesin menerbitkan **Kartu Insiden** dengan alasan cerita di log Kabar.
+- **WD-2.17**: **Parameter Ritme Seimbang & Rumus Tekanan Dunia (aturan LOCKED, angka DEMO)**:
+  - **Ambang Relasi 55 Pasangan**: `>= +60` **Alliance** | `+25..+59` **Friendly** | `-24..+24` **Neutral** | `-25..-54` **Cold War** | `-55..-74` **Embargo** | `<= -75` **Open War**.
+  - **Rem Keseimbangan Dunia**: Maksimal **3 Open War** & **4 Embargo** bersamaan di peta. *Threat* aktif saat `Kekuatan faksi >= 75` (menggerus relasi termasuk sekutu). Perang berlangsung rata-rata 15-30 hari game sebelum *War Exhaustion* mendorong damai.
+  - **Rumus Kandidat Antagonis Babak 2+**: `Skor = 0,35 x Kekuatan + 0,30 x Kubu_Keras + 0,20 x Ketegangan_Rata2 + 0,15 x Aksi_Pemain_Shadow + Acak_Seed(0..15)`. Antagonis yang baru tumbang mendapat jeda *cooldown* **1 babak**.
 
 ### WD-3 NPC, Generator, Promosi, dan Hubungan
 - **WD-3.01**: Jumlah NPC bertambah bertahap (`Q4`). NPC dibangkitkan secara prosedural (*mix and match* tanpa AI) lalu dapat dipromosikan menjadi NPC kunci gaya *Watch Dogs: Legion* (`Q25`).
@@ -100,16 +102,6 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
   - Rumus level lantai dungeon: `30 x (tier - 1) + ROUNDUP(0,3 x lantai)`.
   - Sebaran faksi desa/pos semi-random (~70% faksi dominan area, seed per save); 27 lokasi bertrait *Bertentangan* menjadi kantong faksi/ras asing.
   - Tambahan kolom CSV `Induk` dan `Isu lokal`; 30-45 templat isu berjenjang.
-- **WD-2 Kubu Pro/Kontra 5 Kota Besar & Draf Matriks Relasi Awal**:
-  - *Briarfall Crown* (Kepentingan CSV: senjata massal seragam, curiga Fusi, jaga klaim mahkota vs Ashwind): *Pro* = militeristik/pajak keras; *Kontra* = reformis perbatasan.
-  - *Saltgrave League* (Kepentingan CSV: dagang bebas, diam-diam urusan gelap, tolak pajak kerajaan): *Pro* = oligarki penyelundup; *Kontra* = serikat pelaut/pedagang jujur.
-  - *Wyrmspine Hold* (Kepentingan CSV: monopoli bijih/resep, tradisi Terkunci, tekan Elderwake): *Pro* = tradisionalis diskriminatif; *Kontra* = pandai besi muda terbuka pada inovasi.
-  - *Ashwind Clans* (Kepentingan CSV: satukan klan, cari senjata jauh, tolak aturan Briarfall): *Pro* = panglima perang ekspansif; *Kontra* = tetua karavan & dagang garam.
-  - *Emberwaste Order* (Kepentingan CSV: pasokan air, monopoli api/obsidian, tolak es): *Pro* = pendeta api fanatik; *Kontra* = penjaga sumur & pengrajin pragmatis.
-  - **Draf Pasangan Ketegangan Awal Matriks (`-100` s.d `+100`, lainnya default `0`/Netral)**:
-    - *Musuh/Tegang berat (`-60` s.d `-80`)*: `Infernal Hierarchy` vs mayoritas faksi (`-50` s.d `-70`, kecuali *Saltgrave League* `-20` karena dagang gelap); `Briarfall Crown` vs `Ashwind Clans` (`-65`); `Briarfall Crown` vs `Frostcrown Remnant` (`-60`); `Wyrmspine Hold` vs `Elderwake Council` (`-65`); `Emberwaste Order` vs `Frostcrown Remnant` (`-70`).
-    - *Gesekan (`-25` s.d `-45`)*: `Briarfall Crown` vs `Saltgrave League` (`-40`, pajak pelabuhan); `Briarfall Crown` vs `Thornback Tribe` (`-45`); `Saltgrave League` vs `Thornback Tribe` (`-35`); `Wyrmspine Hold` vs `Barrow Wardens` (`-40`, tambang makam); `Wyrmspine Hold` vs `Emberwaste Order` (`-30`, Terkunci vs Fusi); `Emberwaste Order` vs `Frostpine Tribe` (`-35`); `Frostcrown Remnant` vs `Frostpine Tribe` (`-20`, aliansi rapuh).
-    - *Sekutu/Dekat (`+25` s.d `+45`)*: `Briarfall Crown` + `Wyrmspine Hold` (`+35`, standar senjata); `Ashwind Clans` + `Emberwaste Order` (`+30`, Fusi & karavan); `Elderwake Council` + `Frostpine Tribe` (`+30`, sesama Elf penjaga hutan); `Saltgrave League` + `Frostpine Tribe` (`+25`, dagang).
 - **WD-3 NPC & Event Director**:
   - Jenjang prototipe Tidewrack: Warga -> Dikenal (3 pertemuan) -> Calon (maks 5) -> Kunci (maks 12); 8 arc; 20 sifat berpasangan; kedekatan 0-99; 30% NPC faksi acak; tambahan kelas sosial (elit/warga/terpinggir) & posisi konflik (loyalis/ragu/penengah).
   - Antrean Event Director 3-5 kartu (festival -> misi/krisis -> kejutan kecil; maks 1 kejutan besar/sesi); krisis 5 fase; skala waktu 1 hari game = 30 menit nyata; simulasi offline detail maks 7 hari game lalu agregat.
@@ -119,20 +111,23 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
   - `v1.xlsx`: 4.864 musuh, 208 material, 480 trofi, 19.952 baris drop. Platform web app/PWA dengan save JSON + ekspor/impor; pecah data per area (16 file + efek bersama), muat per tier level.
 
 ## 5. Inventaris Aset Data Dunia di Repositori
-| File di Repo | Peran dalam WD | Catatan / Masalah Saat Ini |
+| File di Repo | Peran dalam WD | Status / Catatan |
 | :--- | :--- | :--- |
-| `Battle-Smith_RPG_Peta_Dunia_Musuh_v1.xlsx` | Database mentah geografi, dungeon, musuh, drop, material, trofi (19 sheet) | 5,3 MB (64 MB *uncompressed*), perlu dipecah ke `data/` JSON/CSV ringan |
-| `lokasi_peta_dunia.csv` | 77 permukiman, 11 faksi, kapasitas, trait, kepentingan 5 kota besar | **BUG**: kolom `Level` rusak (`10-Jan`, `20-Nov`); nama faksi & lokasi masih bahasa Indonesia (perlu update ke `WD-2.13`) |
-| `Spesifikasi Narasi dan NPC Battle-Smith RPG.docx` | Sumber utama Q1-Q29 | Daftar 9 faksi lama sudah digantikan `WD-2.05` & `WD-2.13` |
-| `Battle-Smith RPG RPG Naratif-Moral Berbasis Faksi...docx` | Sumber utama 5 ras, tema 5 kota besar, isu berjenjang, Mulia/Kejam | Berisi 6 keluarga senjata (parkir ke CD) |
-| `Laporan Sesi Desain Battle-Smith.docx` | Sumber utama ekonomi S&D, harga bahan & tempaan, Grade I-III | Ada file duplikat identik `(1).docx` |
-| `Balai Kenalan Tidewrack_ Prototipe Generator NPC.html` | Prototipe generator NPC & log Kabar | Masih memuat Google Fonts eksternal (perlu font lokal agar 100% offline) |
+| `data/factions.csv` | **Database bersih `WD-2`**: 11 faksi wilayah + 3 organisasi, kubu Pro/Kontra, kebutuhan senjata | **AKTIF / BERSIH** (selaras `WD-2.05` s.d `WD-2.17`) |
+| `data/faction_relations.csv` | **Database bersih `WD-2`**: 55 pasangan relasi awal 11 faksi, label Rival Sejarah, poros konflik | **AKTIF / BERSIH** (Hari-0 patuh rem keseimbangan: 4 Embargo, 0 Open War) |
+| `Battle-Smith_RPG_Peta_Dunia_Musuh_v1.xlsx` | Database mentah geografi, dungeon, musuh, drop, material, trofi (19 sheet) | 5,3 MB (64 MB *uncompressed*), perlu dipecah ke `data/` ringan (`WD-1` & `WD-6`) |
+| `lokasi_peta_dunia.csv` | 77 permukiman mentah | **BUG**: kolom `Level` rusak (`10-Jan`, `20-Nov`); nama faksi/lokasi masih Indonesia (target rapikan di `WD-1`) |
+| `Spesifikasi Narasi dan NPC Battle-Smith RPG.docx` | Sumber Q1-Q29 | Daftar 9 faksi lama sudah tergantikan |
+| `Battle-Smith RPG RPG Naratif-Moral Berbasis Faksi...docx` | Sumber 5 ras, tema kota besar, isu berjenjang, Mulia/Kejam | 6 keluarga senjata = parkir ke CD |
+| `Laporan Sesi Desain Battle-Smith.docx` | Sumber ekonomi S&D, harga bahan & tempaan, Grade I-III | Ada file duplikat identik `(1).docx` |
+| `Balai Kenalan Tidewrack_ Prototipe Generator NPC.html` | Prototipe generator NPC & log Kabar | Masih memuat Google Fonts eksternal |
 
 ## 6. KONFLIK & Aturan Lama yang Tergantikan
 ### 6a. Aturan lama yang tergantikan (jangan dipakai)
-- Daftar lama **9 faksi organisasi** (`Spesifikasi Narasi` Bagian 8) digantikan oleh **Struktur 2 Lapisan (`WD-2.05`)**: 11 Faksi Wilayah + 2 Organisasi Netral + 1 *Shadow Syndicate* aktif.
-- Penamaan faksi/organisasi/lokasi berbahasa Indonesia (*Kerajaan Briarfall, Hierarki Iblis, Desa Whitepine*) digantikan oleh **Konvensi Penamaan Inggris (`WD-2.13`)**.
-- Gagasan *Hierarki Iblis* sebagai faksi antagonis permanen hitam-putih digantikan oleh **11 Faksi Abu-Abu + Siklus Antagonis Dinamis (`WD-2.06`, `WD-2.09`)**.
+- Daftar lama **9 faksi organisasi** (`Spesifikasi Narasi` Bagian 8) digantikan oleh **Struktur 2 Lapisan (`WD-2.05`)**.
+- Penamaan faksi/organisasi/lokasi berbahasa Indonesia digantikan oleh **Konvensi Penamaan Inggris (`WD-2.13`)**.
+- Gagasan *Hierarki Iblis* sebagai antagonis permanen hitam-putih digantikan oleh **11 Faksi Abu-Abu + Siklus Antagonis Dinamis (`WD-2.06`, `WD-2.09`)**.
+- Matriks relasi statis digantikan oleh **Mesin Diplomasi Dinamis (`WD-2.16`, `WD-2.17`)**.
 
 ### 6b. KONFLIK & Kosakata yang masih perlu disatukan
 1. **Istilah "Resonansi" (3 arti)**: tahap upgrade senjata Unique vs keselarasan elemen-bahan vs pengisian bar item moral Mulia/Kejam.
@@ -143,17 +138,17 @@ Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan s
 6. **Lintas Chunk (Parkir ke CD)**: 5 vs 6 tingkat kualitas; 36 senjata vs 10 jenis senjata Unique di `v1.xlsx`.
 
 ## 7. OPEN (Daftar Keputusan Terbuka WD)
-- **WD-1**: Konfirmasi nama 16 Area/48 Wilayah/16 Dungeon; kepastian arti batas level dungeon; sistem tier antar-area di Lv150; perbaikan bug tanggal `lokasi_peta_dunia.csv` + pembaruan nama Inggris (`WD-2.13`) + penambahan kolom `Induk`, `Isu lokal`, dan `Kepentingan` 6 faksi (`WD-2.12`).
-- **WD-2 (tersisa minor)**: Konfirmasi draf kubu Pro/Kontra 5 Kota Besar & draf Matriks Hubungan Awal 11×11 (Bagian 4); komposisi ras minoritas tiap kota besar; rumus angka pasti mesin Tekanan Dunia (`WD-2.09`) & ambang boikot `-80` (`WD-2.14`).
+- **WD-1**: Konfirmasi nama 16 Area/48 Wilayah/16 Dungeon; kepastian arti batas level dungeon; sistem tier antar-area di Lv150; komposisi ras minoritas 5 kota besar; perbaikan bug tanggal `lokasi_peta_dunia.csv` + pembaruan nama Inggris (`WD-2.13`) + penambahan kolom `Induk` dan `Isu lokal` ke `data/locations.csv`.
+- **WD-2**: **SELESAI** (seluruh angka DEMO siap dituning saat simulasi).
 - **WD-3**: Kedalaman romansa ringan; rekrut NPC jadi pegawai bengkel vs murid (`CD-6.01`)/sekutu/pelanggan; potret NPC vs ikon/warna; matriks sifat ke tag nilai moral.
-- **WD-4**: Keputusan final *endless* vs ending opsional + tujuan jangka panjang; konfirmasi skala waktu (1 hari = 30 menit); nama dunia & kota awal; 30-45 templat isu berjenjang; pilihan bahasa teks (ID saja vs dwibahasa).
+- **WD-4**: Keputusan final *endless* vs ending opsional + tujuan jangka panjang; konfirmasi skala waktu (1 hari = 30 menit); nama dunia & kota awal; 30-45 templat isu berjenjang; pilihan bahasa teks (ID saja vs dwibahasa); penamaan ulang 3 arti "Resonansi".
 - **WD-5**: Kalibrasi nominal bronze/silver/gold berbasis waktu menabung (Lv10/20/30) + daftar *gold sink*; parameter final S&D (`k`, batas harga, kedalaman pasar, pemulihan 12 jam); definisi "harga jual terakhir" tahan eksploitasi; mekanisme harga per kota/embargo/perang; apakah Trofi Monster boleh diperdagangkan.
 - **WD-6**: Keputusan 100 musuh unik/wilayah vs template biome untuk Oppo A54 (< 150 MB); pemecahan `v1.xlsx` ke `data/` CSV/JSON; pembersihan file duplikat/DEMO lama di repo; konfirmasi jalur PWA.
 
 ## 8. Format Laporan Perubahan (isi tiap akhir sesi)
 ```text
 LAPORAN PERUBAHAN
-Versi master yang dipakai: WD v1.1
+Versi master yang dipakai: WD v1.2
 Chunk: WD-?
 Tanggal sesi: ...
 1. Keputusan baru (ID, isi, status LOCKED/USULAN)
@@ -166,4 +161,5 @@ Tanggal sesi: ...
 
 ## 9. Log versi
 - **v1.0 (19 November 2026)**: Konsolidasi perdana World Development dari seluruh aset dunia di repo, diselaraskan dengan kontrak baca-saja `master_CD_v3.1.md`.
-- **v1.1 (19 November 2026)**: Penyelesaian fondasi politik `WD-2` (`WD-2.05` s.d `WD-2.14` LOCKED): struktur 2 lapisan (11 faksi + 2 guild netral + *Shadow Syndicate* aktif), konflik abu-abu & kubu Pro/Kontra, poros Api vs Es, Siklus Antagonis Dinamis (Babak 1 *Infernal Hierarchy* -> Babak 2+ Tekanan Dunia), penyelesaian quest bebas moral, jenjang dinamis, kepentingan 6 faksi, konvensi penamaan Inggris, boikot per era, serta draf awal Matriks Relasi 11×11 (USULAN).
+- **v1.1 (19 November 2026)**: Fondasi politik `WD-2` (`WD-2.05` s.d `WD-2.14` LOCKED).
+- **v1.2 (19 November 2026)**: **Penuntasan `WD-2` 100%** (`WD-2.15` s.d `WD-2.17` LOCKED: kubu 5 kota besar, mesin diplomasi dinamis *Threat + War Exhaustion + Kartu Insiden*, ritme seimbang maks 3 Open War & 4 Embargo, rumus Tekanan Dunia) + ekspor database bersih `data/factions.csv` (14 entitas) dan `data/faction_relations.csv` (55 pasangan).
