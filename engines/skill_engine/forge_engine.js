@@ -690,9 +690,15 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
       loadout,
       smithConfig,
       weapon: {
+        id: forgedWeapon.baseWeaponId,
+        name: forgedWeapon.name,
         stat: forgedWeapon.stat,
         tier: forgedWeapon.tier,
         tag: forgedWeapon.tag,
+        trigger: forgedWeapon.triggerName,
+        enhancePlus: forgedWeapon.enhancePlus || 0,
+        fused: !!forgedWeapon.fused,
+        hybridFusion: forgedWeapon.hybridFusion || null,
         element: effectiveWeaponElement,
         budget: forgedWeapon.budget
       },
