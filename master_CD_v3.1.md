@@ -1,4 +1,4 @@
-BATTLE-SMITH RPG: MASTER CHARACTER DEVELOPMENT (CD) v3.2
+BATTLE-SMITH RPG: MASTER CHARACTER DEVELOPMENT (CD) v3.3
 Dokumen ini berdiri sendiri. AI yang membacanya tidak punya riwayat percakapan sebelumnya. Baca seluruhnya sebelum bekerja.
 0. Aturan kerja untuk AI pembaca
 Proyek: Battle-Smith RPG, game idle/RPG blacksmith + petualangan. Bahasa Indonesia, ringkas, nyaman dibaca di HP.
@@ -42,40 +42,54 @@ CD-1.06: idle hanya satu mode (Battle atau Smith). Waktu minimum: Lv10 = 11 jam,
 CD-1.07: Mode Full Lv1-150 aktif (5 Tier, tiap Tier 30 level: Lv1-30, 31-60, 61-90, 91-120, 121-150). Cap stat per tier: 30 / 60 / 90 / 120 / 150 (+30 tiap tier). Poin stat per level tetap +2 sampai Lv150.
 CD-1.08: Anti-Farm XP & Drop menurut selisih level (delta = level_monster - level_pemain, skala Lv1-150, LOCKED): delta >= +5 mendapat XP x1,25 dan Drop x1,15; rentang ideal -5 <= delta <= +4 mendapat XP 100% dan Drop 100%; rentang -6 >= delta >= -15 turun linear -8% XP dan -5% Drop per level di bawah -5 (pada delta = -15: XP 20%, Drop 50%); delta < -15 memberi XP 0% (anti-farm XP di zona level rendah) tetapi Drop Bahan tetap minimal 25% (+ bonus sub-stat WIS Rare Drop Hunting agar crafter tetap bisa mengumpulkan bahan Tier bawah).
 
-CD-2 Skill (SWTOR Discipline + Loadout), title, un-fuse
+CD-2 Skill (5 Pohon Tipe Smith: SWTOR × RF Classic GM × Amalur Destiny), title, un-fuse
 
-CD-2.01: Sistem Skill MMORPG/SWTOR Discipline & Cross-Stat Macro Loadout (150 Node Total = 25 Node per Stat Utama sepanjang Stat 1-150, terimplementasi di engines/skill_engine/).
-- Struktur 5 Tier per Stat (tiap Tier = 30 poin stat):
-  1. Breakpoint +10 (Stat 10, 40, 70, 100, 130) -> 5 Core Passive (otomatis aktif, memperkuat Sub-Stat & mekanik dasar).
-  2. Breakpoint +20 (Stat 20, 50, 80, 110, 140) -> 5 Tier Utility / Morph Choice (pemain memilih 1 dari 3 varian per Tier: Offense, Defense, atau Tactical/Forge = 15 Utility node per stat).
-  3. Breakpoint +30 (Stat 30, 60, 90, 120, 150) -> 5 Rotational Active Skills (Stat 30 Builder/Opener pemicu Proc; Stat 60 Defensive/Interrupt; Stat 90 Core Combo pengonsumsi Proc; Stat 120 High-Impact/Execute; Stat 150 Apex Capstone Ultimate).
-- Active Macro Bar & Cross-Stat Modding:
-  - Kapasitas slot skill aktif di Macro Bar ditentukan oleh Sub-Stat INT #6 (Macro Capacity): skor 1-29 = 3 slot, 30-74 = 4 slot, 75-119 = 5 slot, 120+ = 6 slot.
-  - Setiap Skill Aktif yang dipasang di Macro Bar memiliki 2 Slot Modifikasi yang dapat diisi oleh Utility/Morph (+20) yang sudah dibuka pemain, termasuk lintas stat (Cross-Stat Modding).
-- Enam Disiplin Stat: STR (Juggernaut Forgebreaker), DEX (Phantom Bladeweaver), CON (Immortal Bastion), INT (Arcane Runelord), WIS (Seeker Inquisitor), CHA (Sovereign Marshal).
+CD-2.01: Sistem Skill Hibrida 5 Pohon Tipe Smith — SWTOR Ability Tree × RF Online Classic Mastery (Lv.1-7/GM) × Kingdoms of Amalur Destiny Cards (125 Node Class Total = 5 Smith Class x 5 Tier x [1 Active/Buff + 1 Core Passive + 3 Morph Choice], spesifikasi lengkap di docs/BLUEPRINT_SKILL_TREE_DESTINY_v3.3.md; migrasi kode engines/skill_engine/ menunggu tahap coding).
+- 5 Pohon Skill Tipe Smith & Mekanik Unik (Resource):
+  1. Weaponsmith (Forge Heat 0-5)
+  2. Armorer (Bastion Guard 0-5)
+  3. Rangesmith (Hunter's Mark 0-5)
+  4. Runesmith (Elemental Charge 0-3 + 6 Reaksi Fusi Hibrida)
+  5. Reforger (Overclock 0-5 + Sinergi +N & Companion)
+- Struktur 5 Baris Tier per Smith Class (terbuka sesuai alokasi 5 Poin Tier CD-3.01) & Anti-Spam Cooldown:
+  - Tier 1 (Basic): Opener / Builder (CD ~4-5d).
+  - Tier 2 (Expert): Class Buff ala RF Classic (CD ~26-30d, durasi ~16-18d).
+  - Tier 3 (Elite): Defensive / Interrupt pembatal Cast Bar ala SWTOR (CD ~12-14d).
+  - Tier 4 (Master): Core Combo / Execute pengonsumsi Resource (CD ~9-10d).
+  - Tier 5 (Apex — eksklusif 5 poin murni 1 class): Signature Ultimate (CD ~28-34d).
+  - Seluruh skill memakai Cooldown individual + Global Cooldown (GCD ~1,2-1,5d) agar tidak bisa spam 1 tombol; jeda diisi Auto-Attack & rotasi tombol lain.
+- Sistem Latihan "Use-to-Level" ala RF Online Classic (Lv.1 -> Lv.7 / GM):
+  - Setiap Active Skill, Class Buff, dan Weapon Skill naik level otomatis saat dipakai (manual maupun lewat Mode Idle Battle 8 jam): Lv.1 s.d. Lv.7 (GM: +40% efektivitas, -10% CD, bonus puncak Morph).
+  - Pembukaan di dalam Tier: Active/Buff langsung terbuka saat menanam Poin Tier -> mencapai Skill Lv.3 membuka Core Passive -> mencapai Skill Lv.5 membuka Pilihan Morph 1-dari-3 SWTOR (1. Offense, 2. Defense/Companion, 3. Forge Synergy).
+- Active Macro Bar + 1 Tombol Khusus Weapon Skill (48 Trigger):
+  - Kapasitas slot skill Class di Macro Bar tetap ditentukan Sub-Stat INT #6 (Macro Capacity): skor 1-29 = 3 slot, 30-74 = 4 slot, 75-119 = 5 slot, 120+ = 6 slot.
+  - Ditambah 1 Tombol Khusus "Weapon Skill" (CD ~6-8d) yang berubah otomatis sesuai 48 Senjata terpasang (48 Weapon Trigger menjadi skill aktif, terbuka bila punya min. Tier 1 Smith Class cocok sesuai CD-3.02).
+  - 6 Stat Utama (STR..CHA) tetap menggerakkan 60 Sub-Stat (CD-1.02b), syarat senjata, stat tempur, dan kapasitas Macro Bar.
 CD-2.02: title dihitung saat naik level. Spesialis bila stat terbesar unggul minimal 2 poin: +5% damage dan akurasi senjata sejenis, -5% senjata jenis lain. Bila tidak: Seimbang, tanpa penalti jenis senjata, plus muatan buff silang +10% lebih efisien. Corrupted tidak mengubah title.
-CD-2.03: un-fuse. 1 respec gratis per tier S, selebihnya 100br x level x poin x (1 + 0,25 x title unik), batas x4. Ganti perk, ganti pilihan Utility/Morph (+20), dan ganti 2 Sub-Stat Fokus memakai jatah yang sama.
+CD-2.03: un-fuse. 1 respec gratis per tier S, selebihnya 100br x level x poin x (1 + 0,25 x title unik), batas x4. Ganti perk, ganti distribusi 5 Poin Tier Smith, ganti pilihan Morph 1-dari-3, dan ganti 2 Sub-Stat Fokus memakai jatah yang sama. (Ganti Kartu Destiny aktif yang syarat poinnya sudah terpenuhi mengikuti aturan terpisah di CD-3.02b.)
 
-CD-3 Smith type, anggaran 5 tier, nama 1-kata, dan mazhab barang (LOCKED)
+CD-3 Smith type, anggaran 5 tier, 29 Kartu Destiny 1-kata, dan mazhab barang (LOCKED)
 
 CD-3.01: 5 Smith Class (Weaponsmith, Armorer, Rangesmith, Runesmith, Reforger) dengan Total Anggaran 5 Poin Tingkat (5 Tier). Pemain mendapat 1 poin tingkat tiap Tier dunia (total 5 poin di Lv150) yang bebas dialokasikan ke 5 Smith Class (contoh: 5 murni di 1 class; 4+1; 3+2; 3+1+1; 2+2+1; atau 1+1+1+1+1 mengambil semua 5 class di Tier 1).
 CD-3.02: Mazhab Pembuatan Barang & Kecocokan Pakai (Gabungan Opsi A + C). Semua pemain tetap bisa menempa seluruh 48 Senjata dan 15 Armor di Bengkel Tempa (untuk pesanan NPC, dijual di toko, atau trofi Galeri). Namun:
 - 5 Komponen Barang (Opsi C): Setiap barang punya 5 aspek yang kekuatannya mengikuti poin Tier (0-5) pemain pada class terkait: (1) Weaponsmith = Bilah/Kepala Senjata Dekat & Battle-Harness Armor agresif; (2) Armorer = Pelat/Perisai, Armor Trigger, & Senjata Pertahanan CON/Berat; (3) Rangesmith = Mekanik/Busur Senjata Jauh & Ranger Gear tinggi Dodge; (4) Runesmith = Inti Elemen, Mode Fusi (6 Elemen Hibrida, butuh minimal Runesmith Tier 1 untuk Fusi mandiri), & Slot Rune; (5) Reforger = Struktur Enhance +N, Transfer +N, & Pemurnian Kualitas.
-- Kecocokan Pemakaian Tempur (Equip & Trigger Mastery, Opsi A): Pemain hanya mengaktifkan 100% Weapon/Armor Trigger dan bonus Mastery (+6% per poin tier pada class tersebut) jika memiliki minimal Tier 1 pada Smith Class yang menaungi barang tersebut (Weaponsmith = Senjata Dekat STR/DEX/WIS/CHA; Armorer = Senjata CON & Armor Berat/Perisai; Rangesmith = Senjata Jauh; Runesmith = Senjata INT/Rune & Senjata Hasil Fusi Hibrida; Reforger = Senjata/Armor ber-+N & Taktis). Bila poin class terkait = 0, barang tetap bisa di-equip darurat tetapi terkena penalti ketidakcocokan (-25% efektivitas & Trigger terkunci).
-CD-3.02b: Sistem Nama Kelas 1 Kata Unik (Single-Word Class Name, LOCKED):
-- Murni 1 Class (Tier 1 -> 2 -> 3 -> 4 -> 5):
-  - Weaponsmith: Bladesmith -> Edgewright -> Warmonger -> Vanquisher -> Archblade
-  - Armorer: Platesmith -> Shieldwright -> Bulwark -> Juggernaut -> Aegisborn
-  - Rangesmith: Bowyer -> Fletcher -> Deadeye -> Ballistary -> Horizoner
-  - Runesmith: Runescribe -> Glyphwright -> Spellforger -> Arcanist -> Runelord
-  - Reforger: Tinkerer -> Temperer -> Transmuter -> Alchemizer -> Sovereign
-- Gabungan 2 Class (20 Nama 1-Kata Berarah menurut Class Utama yang Tier-nya lebih tinggi; bila seri 2+2 mengacu class yang diambil lebih dulu):
-  - Utama Weaponsmith: +Armorer = Vanguard | +Rangesmith = Skirmisher | +Runesmith = Spellblade | +Reforger = Hellforger
-  - Utama Armorer: +Weaponsmith = Wardensmith | +Rangesmith = Sentinel | +Runesmith = Runeguard | +Reforger = Ironclad
-  - Utama Rangesmith: +Weaponsmith = Outrider | +Armorer = Bastionbow | +Runesmith = Arcarcher | +Reforger = Artificer
-  - Utama Runesmith: +Weaponsmith = Hexblade | +Armorer = Aegisrune | +Rangesmith = Starfletcher | +Reforger = Thaumaturge
-  - Utama Reforger: +Weaponsmith = Reaver | +Armorer = Colossus | +Rangesmith = Machinist | +Runesmith = Chronosmith
-- Multi-Class (3-5 Class): 3 Class = Polymath (dominan INT/Reforge) atau Arsenist (dominan Weapon/Armor/Range); 4 Class = Synthesist; Semua 5 Class Tier 1 (1+1+1+1+1) = Omnismith.
+- Kecocokan Pemakaian Tempur (Equip & Trigger Mastery, Opsi A): Pemain hanya mengaktifkan 100% Weapon/Armor Trigger (termasuk Tombol Khusus Weapon Skill) dan bonus Mastery (+6% per poin tier pada class tersebut) jika memiliki minimal Tier 1 pada Smith Class yang menaungi barang tersebut (Weaponsmith = Senjata Dekat STR/DEX/WIS/CHA; Armorer = Senjata CON & Armor Berat/Perisai; Rangesmith = Senjata Jauh; Runesmith = Senjata INT/Rune & Senjata Hasil Fusi Hibrida; Reforger = Senjata/Armor ber-+N & Taktis). Bila poin class terkait = 0, barang tetap bisa di-equip darurat tetapi terkena penalti ketidakcocokan (-25% efektivitas & Trigger terkunci).
+CD-3.02b: Sistem 29 Kartu Destiny & Nama Kelas 1-Kata Unik ala Kingdoms of Amalur (LOCKED):
+- Setiap dari 29 Nama Kelas 1-Kata merupakan Kartu Destiny dengan Bonus Pasif Skala Tier + 1 Efek Signature Unik Berarah (detail lengkap di docs/BLUEPRINT_SKILL_TREE_DESTINY_v3.3.md):
+  - 5 Murni 1 Class (Tier 1 -> 2 -> 3 -> 4 -> 5):
+    - Weaponsmith: Bladesmith -> Edgewright -> Warmonger -> Vanquisher -> Archblade
+    - Armorer: Platesmith -> Shieldwright -> Bulwark -> Juggernaut -> Aegisborn
+    - Rangesmith: Bowyer -> Fletcher -> Deadeye -> Ballistary -> Horizoner
+    - Runesmith: Runescribe -> Glyphwright -> Spellforger -> Arcanist -> Runelord
+    - Reforger: Tinkerer -> Temperer -> Transmuter -> Alchemizer -> Sovereign
+  - 20 Gabungan 2 Class Berarah (menurut Class Utama yang Tier-nya lebih tinggi; bila seri 2+2 mengacu class yang diambil lebih dulu):
+    - Utama Weaponsmith: +Armorer = Vanguard | +Rangesmith = Skirmisher | +Runesmith = Spellblade | +Reforger = Hellforger
+    - Utama Armorer: +Weaponsmith = Wardensmith | +Rangesmith = Sentinel | +Runesmith = Runeguard | +Reforger = Ironclad
+    - Utama Rangesmith: +Weaponsmith = Outrider | +Armorer = Bastionbow | +Runesmith = Arcarcher | +Reforger = Artificer
+    - Utama Runesmith: +Weaponsmith = Hexblade | +Armorer = Aegisrune | +Rangesmith = Starfletcher | +Reforger = Thaumaturge
+    - Utama Reforger: +Weaponsmith = Reaver | +Armorer = Colossus | +Rangesmith = Machinist | +Runesmith = Chronosmith
+  - 4 Multi-Class (3-5 Class): 3 Class = Polymath (dominan Runesmith/Reforger) atau Arsenist (dominan Weapon/Armor/Range); 4 Class = Synthesist; Semua 5 Class Tier 1 (1+1+1+1+1) = Omnismith.
+- Aturan Koleksi & Ganti Kartu Destiny (LOCKED — Jalur Ganda): Seluruh Kartu Destiny yang syarat sebaran poin Smith-nya telah terpenuhi masuk ke koleksi pemain. Mengganti Kartu Destiny aktif di luar pertarungan tidak gratis — wajib memilih salah satu: (1) Jalur Misi (Destiny Trial di Forgemasters' Guild: tempa 1 senjata mutu Istimewa+ sesuai mazhab tujuan atau kalahkan 1 Reguler Khusus/Mini Boss di Area aktif), ATAU (2) Jalur Bayar Mahal Instan (Gold Sink: 500br x Level x Tier di Forgemasters' Guild; +50% lewat Shadow Syndicate bila faksi lokal Hostile; angka DEMO).
 CD-3.03: 21 Perk Smith (LOCKED: nama Inggris, efek ganda Tempa + Tempur, syarat Cap Stat 150, plus Bonus Afinitas +25% bila stat perk selaras dengan Smith Class utama pemain: Weaponsmith=STR/DEX, Armorer=CON/STR, Rangesmith=DEX/WIS, Runesmith=INT/WIS, Reforger=CHA/CON). Pilih 1 per tingkat; ganti perk & distribusi 5 poin Smith Class = un-fuse.
 - Tingkat 3 = 6 Perk Stat Tunggal (terbuka jika ada Smith Class mencapai Tier >= 3 dan stat terkait >= 45):
   1. STR — Titan's Anvil: (Tempa) +10 Skor Kualitas senjata dekat/berat & +1 Enhance (+N) gratis saat Mahakarya; (Tempur) +15% Armor Crush & +10% Raw Might.
@@ -229,45 +243,36 @@ Nama trigger INT "Resonance Hammer" diganti menjadi "Runic Shockwave".
 Syarat stat Perk Smith Tingkat 3 (stat 10) dan Tingkat 5 (stat 15) di skala demo diganti stat 45 (Tingkat 3) dan stat 75 pada kedua stat (Tingkat 5) di skala penuh 150.
 Sistem nama Smith Class multi-kata (awalan Raw..Paragon + akar pasangan) diganti Sistem Anggaran 5 Poin Tier & Nama Kelas 1-Kata Unik (CD-3.01 & CD-3.02b).
 Jumlah senjata 36 (hanya 4 senjata Jauh) diperluas menjadi 48 senjata (32 Dekat + 16 Jauh = +2 senjata Jauh baru per stat) agar Rangesmith seimbang di semua stat.
+Sistem Skill SWTOR Discipline 150 Node berbasis 6 Stat Utama (STR..CHA) & 48 Weapon Trigger murni pasif diganti Sistem Hibrida 5 Pohon Skill Tipe Smith (SWTOR Ability Tree + Cooldown/GCD Anti-Spam + RF Classic Lv.1-GM + 29 Kartu Destiny Kingdoms of Amalur + 1 Tombol Khusus Weapon Skill).
 7. OPEN
-Seluruh poin desain mekanik CD-1 s.d. CD-7 telah LOCKED di v3.2. Catatan administratif lintas sesi: pembagian peran AI (usulan Claude CD / Gemini WD) dan penyempurnaan visual/animasi tiap trigger saat masuk tahap Frontend/UI (setelah PRJ-01 backend selesai).
+Seluruh poin desain mekanik CD-1 s.d. CD-7 telah LOCKED di v3.2 & diperbarui desain skill/Destiny-nya di v3.3. Sisa teknis: migrasi kode engines/skill_engine/ (skill_data.json, skill_engine.js) & prototipe Three.js ke spesifikasi CD v3.3, tuning biaya bayar instan ganti Kartu Destiny (500br x Level x Tier DEMO) di simulator S&D WD, serta catatan administratif pembagian peran AI (usulan Claude CD / Gemini WD).
 8. Format Laporan Perubahan (isi tiap akhir sesi)
 LAPORAN PERUBAHAN
-Versi master yang dipakai: v3.1 -> v3.2 (Final Locked)
-Chunk: CD-1, CD-2, CD-3, CD-4, CD-5, CD-6, CD-7, Bagian 2, 4, 5, & 5b (Penyelesaian 100% BRIEF WD -> CD v1 + Seluruh OPEN CD-1 s.d. CD-7)
-Tanggal sesi: 20-21 November 2026
+Versi master yang dipakai: v3.2 (Final Locked) -> v3.3
+Chunk: CD-2, CD-3, CD-4 (Desain 5 Pohon Skill Tipe Smith + 29 Kartu Destiny + Latihan RF Classic GM + Standar Folder Aset)
+Tanggal sesi: 21 November 2026
 1. Keputusan baru (ID, isi, status LOCKED/USULAN):
-- CD-1.01 & CD-1.07 (LOCKED): Mode Full Lv1-150 aktif (5 Tier x 30 level). Poin stat per level tetap +2 sampai Lv150 (total 311 poin). Cap stat tiap tier naik +30: 30 / 60 / 90 / 120 / 150 (kapasitas total 900).
-- CD-1.02b (LOCKED): 60 Sub-Stat (10 per Stat Utama: 6 Tempur + 4 Profesi/Smith) + 2 Sub-Stat Fokus per Stat (+25% efisiensi).
-- CD-1.04, CD-1.06, & CD-1.08 (LOCKED): Target idle Lv150 ~720 jam; Cap XP/jam setelah Lv30 = 1.200 + 60 x (L - 30); Anti-Farm XP & Drop skala Lv150 menurut selisih level delta (+5 ke atas XP x1,25/Drop x1,15; -5..+4 100%; -6..-15 turun linear; < -15 XP 0% tapi Drop bahan minimal 25%).
-- CD-2.01 (LOCKED): Sistem Skill SWTOR Discipline & Cross-Stat Macro Loadout 150 Node (3-6 slot Macro Bar + 2 Cross-Stat Utility Mod per skill aktif).
-- CD-3.01, CD-3.02, CD-3.02b, & CD-3.03 (LOCKED): Anggaran 5 Poin Tier Smith Class, Nama Kelas 1-Kata Unik, Mazhab Barang A+C, dan 21 Perk Smith lengkap dengan Bonus Afinitas +25%.
-- CD-4.01, CD-4.02, CD-4.03, CD-4.04, & Bagian 5 (LOCKED): 48 Senjata (32 Dekat + 16 Jauh). Total Anggaran = 100 + 20 x (Tier - 1) + Bonus Rarity (0..+75). Rumus Enhance +N Tanpa Batas Seimbang (Gabungan A+C: +1..+5 +4%/lvl, +6..+10 +7%/lvl, +11..+15 +12%/lvl = +115%, dan +16 ke atas kurva logaritmik tanpa batas & tanpa senjata hancur; Unique memakai Resonance I..V + Transcendent). Penyetelan bobot stat (STR damage budget 35%, Defense 1,25 poin/1%, Trigger scale 1,5%/stat, CON +15% Guard Damage, CHA Trigger /5 dan /3).
-- CD-5.02b (LOCKED): 15 Jenis Armor (5 Slot x 3 Kelas) dengan 15 Base Armor Trigger + 5 Secondary Armor Trigger dari Tier Armorer (1-5) + 1 Ultimate Armor Trigger khusus Armorer Murni (5+0 / Aegisborn).
-- CD-6.01 & CD-6.02 (LOCKED): Batas 5 murid, skala 0-100. Sistem Seed Murid (Apprentice Seed) dengan AI Autonomous Style (stat, Smith Class 1-kata, & skill otomatis dari seed), Companion Tempur Assist Strike tiap 3 dtk, Ujian Murid di Skill 50 & 80 (+15 cap Bakat & +10 Loyalitas), serta syarat Penjaga Cabang Toko (Skill >= 60, Loyalitas >= 70, lulus Ujian 50).
-- CD-7.01, CD-7.02, & CD-7.03 (LOCKED): Skala Kutukan Gate Lv1-150 (-4 x Tier_Gate per stat, ambang lumpuh 13 x Tier_Gate), Penalti Mati Reguler (stamina 0, -25% muatan buff silang, XP aman, tanpa kutukan), dan Biaya Long Rest (Gratis di bengkel/cabang sendiri, 20 br x Level x Tier di penginapan luar, 30 br x Level x Tier_Gate per kutukan yang dibersihkan).
-- Kontrak Bagian 2 & Bagian 5b (LOCKED): Kelipatan zona 5 Tier linear (x1,0 s.d. x2,0), tabel pemetaan 5 Role & 4 Tipe monster WD, adopsi 6 Elemen + Neutral, dan standarisasi istilah Resonance, Attunement, Conscience.
+- CD-2.01 (LOCKED): Pindah ke 5 Pohon Skill Tipe Smith (Weaponsmith, Armorer, Rangesmith, Runesmith, Reforger) bergaya SWTOR Ability Tree (5 Tier = T1 Opener, T2 Class Buff RF, T3 Defensive/Interrupt, T4 Core Combo/Execute, T5 Apex Ultimate; 125 Node Class total). Semua skill memakai Cooldown individual + GCD anti-spam. 6 Stat Utama tetap menggerakkan 60 Sub-Stat dan kapasitas Macro Bar (3-6 slot dari INT).
+- CD-2.01 & CD-4 (LOCKED): 48 Weapon Trigger ditingkatkan menjadi 1 Tombol Khusus "Weapon Skill" (CD ~6-8d) di samping Macro Bar yang berubah otomatis sesuai senjata terpasang (butuh min. Tier 1 Smith Class cocok sesuai CD-3.02).
+- CD-2.01 (LOCKED): Sistem latihan skill "Use-to-Level" ala RF Online Classic (Lv.1 -> Lv.7 / GM) berlaku untuk Active Skill, Class Buff, dan Weapon Skill (berjalan saat manual maupun Mode Idle Battle). Mencapai Skill Lv.3 membuka Core Passive; mencapai Skill Lv.5 membuka Pilihan Morph 1-dari-3 (Offense / Defense-Companion / Forge Synergy); GM (+40% efek, -10% CD, bonus puncak Morph).
+- CD-3.02b (LOCKED): 29 Nama Kelas 1-Kata menjadi koleksi 29 Kartu Destiny ala Kingdoms of Amalur dengan Bonus Pasif Skala Tier + 1 Efek Signature Unik Berarah (spesifikasi di docs/BLUEPRINT_SKILL_TREE_DESTINY_v3.3.md). Mengganti Kartu Destiny aktif di luar battle memakai Jalur Ganda: Misi Pengukuhan (Destiny Trial di Forgemasters' Guild) ATAU Bayar Mahal Instan (500br x Level x Tier; +50% lewat Shadow Syndicate saat Hostile; angka DEMO).
+- Standar Aset (LOCKED): Struktur folder standar assets/ (monsters, materials, trophies, sprites, weapons, armors, vfx, env, ui, audio) + panduan format .webp/.ogg ramah Oppo A54 dibuat di assets/README.md.
 2. Aturan lama yang tergantikan:
-- Label skala demo Lv30 -> Mode Full Lv1-150.
-- Cap XP/jam setelah Lv30 (1.200 + 25/level) -> 1.200 + 60 x (L - 30).
-- Kelipatan zona 3 tingkat (x1 / x1,5 / x2,25) -> 5 Tier linear (x1,0 / x1,25 / x1,5 / x1,75 / x2,0).
-- Tabel peran/afinitas monster CSV lama & placeholder punya_kelemahan (Y/N) -> Tabel 5 Role & 4 Tipe WD + kolom el/weak 6 Elemen WD.
-- Nama trigger INT "Resonance Hammer" -> "Runic Shockwave".
-- 36 skill breakpoint statis (5..30) & syarat perk 10/15 -> 150 Node SWTOR Discipline + Cross-Stat Macro Loadout & 21 Perk Smith lengkap (syarat 45/75).
-- Nama Smith Class multi-kata -> Nama Kelas 1-Kata Unik dengan anggaran 5 Poin Tier.
-- Batas 36 senjata (4 Jauh) -> 48 senjata (32 Dekat + 16 Jauh).
-- Anggaran senjata lama 100 + 15 x (Tier - 1) tanpa bonus rarity & bobot defense 2 poin/1% -> 100 + 20 x (Tier - 1) + Bonus Rarity (0..75), bobot defense 1,25 poin/1%, dan Enhance +N Tanpa Batas Seimbang (kurva bertingkat + logaritmik di atas +15).
-- Kutukan Gate datar (-4 / 13) -> berskala Tier Gate (-4 x Tier_Gate / 13 x Tier_Gate).
+- 6 Pohon Disiplin berbasis 6 Stat Utama (150 Node) -> 5 Pohon Skill Tipe Smith (125 Node Class) + 29 Kartu Destiny.
+- Pembukaan node berbasis breakpoint stat (+10/+20/+30) -> Pembukaan berbasis Poin Tier Smith + latihan skill RF Classic (Lv.1->GM: Lv.3 Core Passive, Lv.5 Morph 1-dari-3).
+- 48 Weapon Trigger murni pasif -> 1 Tombol Khusus "Weapon Skill" aktif ber-cooldown.
 3. Nilai kontrak lintas chunk yang disentuh:
-- Skala level (Lv1-150, 5 Tier), cap stat (30/60/90/120/150), kelipatan zona (x1,0 s.d. x2,0), pemetaan role/tipe monster WD, 6 elemen + Neutral, skala murid 0-100 (maks 5 murid + syarat cabang WD-3.10), dan istilah Resonance/Attunement/Conscience.
+- Tidak mengubah nilai LOCKED WD maupun keputusan CD-1.08, CD-3.03 (21 Perk), CD-4.02/4.03 (+N/Rarity), CD-5.02b (15 Armor), CD-6.02 (Seed Murid), dan CD-7.01-7.03 dari v3.2; memanfaatkan langsung Forgemasters' Guild (WD-2.05), Shadow Syndicate (WD-2.14), Gold Sink (WD-5.10), 6 Elemen + Neutral (WD-6.05), dan Mode Idle 8 jam (CD-7.01).
 4. KONFLIK dengan chunk lain (jika ada):
-- Tidak ada konflik; seluruh kontrak WD dan CD telah sinkron 100%.
+- Tidak ada konflik; seluruh kontrak WD dan CD sinkron 100%.
 5. OPEN baru:
-- Tidak ada (seluruh OPEN mekanik CD-1 s.d. CD-7 telah diselesaikan dan LOCKED).
+- Migrasi kode engines/skill_engine/ (skill_data.json, skill_engine.js) & prototipe Three.js ke spesifikasi CD v3.3 (menunggu persetujuan pengguna untuk mulai tahap coding).
+- Tuning angka biaya bayar instan ganti Kartu Destiny (500br x Level x Tier DEMO) di simulator S&D WD.
 6. Parkir (topik milik chunk lain):
 - Tidak ada.
 9. Log versi
 v3.0: basis GDD v2 dan perubahan sampai pembahasan Smith type ke-5 dan pembeda jarak DEX.
 v3.1: tambah PRJ-01 (fokus backend), bagian 5b (model simulasi dan spesifikasi CSV monster), status LOCKED rumus damage monster, OPEN diperbarui. Saran pembagian AI tercatat sebagai USULAN.
 v3.2: penyelesaian penuh 100% BRIEF WD -> CD v1 (B1-B7) dan seluruh OPEN CD-1 s.d. CD-7 + pembangunan engines/skill_engine/ & forge_engine.js + bengkel-tempa-v3.html: Mode Full Lv1-150, cap stat 30/60/90/120/150, 60 sub-stat, Anti-Farm XP/Drop Lv150 (CD-1.08), sistem skill SWTOR Discipline & Cross-Stat Macro Loadout (150 node), anggaran 5 Tier Smith Class dengan nama 1-kata unik, aturan Mazhab Barang A+C, 21 Perk Smith lengkap (CD-3.03), 48 senjata (32 Dekat + 16 Jauh), Rumus Enhance +N Tanpa Batas Seimbang & Anggaran Rarity + Penyetelan Stat (CD-4.02 & CD-4.03), 15 Armor + Secondary & Ultimate Armor Trigger Armorer (CD-5.02b), Sistem Seed Murid AI Style + Companion Tempur + Ujian 50/80 + Syarat Cabang (CD-6.02), serta Skala Kutukan Gate, Penalti Mati, & Biaya Long Rest (CD-7.01-7.03).
+v3.3: revisi sistem skill & kelas (desain blueprint tanpa ubah kode dulu): migrasi dari 6 pohon stat ke 5 Pohon Skill Tipe Smith (SWTOR Ability Tree + Cooldown/GCD anti-spam + 1 Tombol Khusus Weapon Skill 48 Trigger), sistem latihan RF Classic Use-to-Level (Lv.1-GM: Lv.3 Core Passive, Lv.5 Morph 1-dari-3), 29 Kartu Destiny ala Kingdoms of Amalur dengan Jalur Ganda ganti kartu (Misi Forgemasters' Guild atau Bayar Mahal 500br x Lv x Tier), pembuatan docs/BLUEPRINT_SKILL_TREE_DESTINY_v3.3.md, serta pembuatan struktur folder standar assets/ & assets/README.md.
 

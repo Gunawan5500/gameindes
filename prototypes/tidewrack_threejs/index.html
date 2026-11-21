@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Battle-Smith RPG — Tidewrack Village (Lv.1) Three.js HD-2D Node Prototype</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="viewport-wrap">
+    <canvas id="three-canvas"></canvas>
+  </div>
+
+  <!-- Projected 3D Labels & Floating Combat Numbers -->
+  <div id="world-overlay"></div>
+
+  <!-- Main HUD -->
+  <div id="hud">
+    <!-- TOP ROW -->
+    <div class="hud-top">
+      <!-- Player Status Card -->
+      <div class="panel player-card hud-interactive">
+        <div class="player-head">
+          <span class="player-title">Pandai Besi Tidewrack</span>
+          <span class="lvl-chip" id="hud-lvl">Lv.1 • T1</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">HP</span>
+          <div class="bar-track"><div class="bar-fill hp" id="hud-hp-fill" style="width:100%"></div></div>
+          <span class="bar-val" id="hud-hp-val">40/40</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">STM</span>
+          <div class="bar-track"><div class="bar-fill stam" id="hud-stam-fill" style="width:100%"></div></div>
+          <span class="bar-val" id="hud-stam-val">115/115</span>
+        </div>
+        <div class="meta-strip">
+          <span>💰 <b id="hud-bronze">120 br</b></span>
+          <span>⚔️ <b id="hud-wpn">Palu Besi Tua (Dekat)</b></span>
+          <span>Mulia <b class="mulia" id="hud-mulia">0</b> • Kejam <b class="kejam" id="hud-kejam">0</b></span>
+        </div>
+      </div>
+
+      <!-- SWTOR / RF Online Center Target Frame -->
+      <div class="panel target-frame hud-interactive" id="target-frame">
+        <div class="target-head">
+          <span class="target-name" id="target-name">Target</span>
+          <span class="lvl-chip" style="font-size:10px">Tab: Ganti</span>
+        </div>
+        <div class="target-meta" id="target-meta"></div>
+        <div class="bar-row" id="target-hp-row">
+          <span class="bar-label">HP</span>
+          <div class="bar-track"><div class="bar-fill hp" id="target-hp-fill" style="width:100%"></div></div>
+          <span class="bar-val" id="target-hp-val">35/35</span>
+        </div>
+        <div class="cast-box" id="target-cast-box">
+          <div class="cast-head">
+            <span id="target-cast-name">⚡ Static Surge — TEKAN [2]!</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill cast" id="target-cast-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Top-Right: Active Node, Camera Switcher, Quality Preset & Telemetry -->
+      <div>
+        <div class="panel node-card hud-interactive">
+          <div class="node-name" id="hud-node-name">Tidewrack Village</div>
+          <div class="node-sub" id="hud-node-sub">Saltgrave Coast • Kota Awal (Tier 1)</div>
+          <div class="ctrl-row">
+            <button class="chip-btn active" id="btn-cam">Kamera: Octopath HD-2D</button>
+            <button class="chip-btn" id="btn-quality">Oppo A54 Lite</button>
+          </div>
+          <div class="telemetry" id="hud-telemetry">60 FPS • Calls: 0 • Geo: 0 • Tex: 0</div>
+        </div>
+
+        <div class="panel quest-tracker hud-interactive">
+          <div class="quest-tracker-title">✦ Sasaran Awal Lv.1</div>
+          <div class="quest-item" id="q-1">• Bicara dengan Master Brann (!)</div>
+          <div class="quest-item" id="q-2">• Tempa / latihan di Bengkel Tempa</div>
+          <div class="quest-item" id="q-3">• Rekrut Kael sebagai Companion</div>
+          <div class="quest-item" id="q-4">• Pindah ke Tidewrack Beach & kalahkan monster (0/3)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="hud-bottom">
+      <!-- Left: Live Log + Dual XP Bars (CD-1.04) -->
+      <div class="panel log-panel hud-interactive">
+        <div class="log-entries" id="log-entries"></div>
+        <div class="dual-xp">
+          <div class="xp-note">
+            <span>Dual XP (Naik Lv jika keduanya penuh)</span>
+            <span>CD-1.04</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">BTL</span>
+            <div class="bar-track"><div class="bar-fill xp-b" id="hud-xpb-fill" style="width:0%"></div></div>
+            <span class="bar-val" id="hud-xpb-val">0/60</span>
+          </div>
+          <div class="bar-row" style="margin-bottom:0">
+            <span class="bar-label">SMT</span>
+            <div class="bar-track"><div class="bar-fill xp-s" id="hud-xps-fill" style="width:0%"></div></div>
+            <span class="bar-val" id="hud-xps-val">0/60</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Context Prompt + Proc Strip + SWTOR 3-Slot Macro Bar -->
+      <div class="action-dock">
+        <button class="context-prompt hud-interactive" id="context-prompt">[E] Interaksi</button>
+        <div class="proc-strip" id="proc-strip"></div>
+        <div class="panel macro-bar hud-interactive">
+          <button class="skill-slot" id="skill-slot-0" title="Opener / Builder (+1 Forge Heat Proc)">
+            <span class="skill-key">[1]</span>
+            <span class="skill-name">Forge Strike</span>
+            <span class="skill-sub">Opener +Heat</span>
+            <div class="cd-mask" id="skill-cd-0"></div>
+          </button>
+          <button class="skill-slot" id="skill-slot-1" title="Batalkan Cast Bar musuh & Stun!">
+            <span class="skill-key">[2]</span>
+            <span class="skill-name">Pommel Bash</span>
+            <span class="skill-sub">Interrupt!</span>
+            <div class="cd-mask" id="skill-cd-1"></div>
+          </button>
+          <button class="skill-slot" id="skill-slot-2" title="Konsumsi Proc Forge Heat untuk burst elemen">
+            <span class="skill-key">[3]</span>
+            <span class="skill-name">Searing Cleave</span>
+            <span class="skill-sub">Proc Burst</span>
+            <div class="cd-mask" id="skill-cd-2"></div>
+          </button>
+          <div class="dock-side-btns">
+            <button class="chip-btn" id="btn-idle">💤 Idle: OFF</button>
+            <button class="chip-btn teal" id="btn-quick-portal">🌀 Portal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Quick Nav + Optional Touch D-Pad for Oppo A54 -->
+      <div class="right-dock">
+        <div class="panel dpad hud-interactive" id="touch-dpad">
+          <div></div><button class="dpad-btn" data-dx="0" data-dz="-1">▲</button><div></div>
+          <button class="dpad-btn" data-dx="-1" data-dz="0">◀</button><div></div><button class="dpad-btn" data-dx="1" data-dz="0">▶</button>
+          <div></div><button class="dpad-btn" data-dx="0" data-dz="1">▼</button><div></div>
+        </div>
+        <div class="panel quick-nav hud-interactive">
+          <button class="chip-btn teal" id="btn-vfx-linker">🎨 VFX Linker</button>
+          <button class="chip-btn" id="btn-sheet">🛡️ Karakter & Tas</button>
+          <button class="chip-btn" id="btn-dpad-toggle">🎮 D-Pad HP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Non-Blocking VFX & Sprite Linker Studio Drawer -->
+  <aside id="vfx-drawer" aria-label="VFX & Sprite Asset Linker">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title">🎨 VFX & Sprite Linker</div>
+        <div style="font-size:10.5px;color:#98a6b3">Link: data/vfx_animation_manifest.json</div>
+      </div>
+      <button class="close-btn" id="btn-close-vfx">Tutup</button>
+    </div>
+    <div class="drawer-tabs">
+      <button class="tab-btn active" data-vtab="vfx">⚡ VFX (12)</button>
+      <button class="tab-btn" data-vtab="sprites">🧍 Sprite (8)</button>
+      <button class="tab-btn" data-vtab="weapons">⚔️ Senjata (4)</button>
+    </div>
+    <div class="drawer-body" id="vfx-drawer-body"></div>
+    <div class="drawer-foot">
+      <button class="btn-secondary" id="btn-copy-manifest">📋 Salin JSON</button>
+      <button class="btn-primary" id="btn-download-manifest">💾 Unduh JSON</button>
+    </div>
+  </aside>
+
+  <!-- Modal Layer -->
+  <div id="modal-backdrop">
+    <div class="modal-box" id="modal-content"></div>
+  </div>
+
+  <!-- Node Switch Transition Overlay -->
+  <div id="node-transition">
+    <div class="trans-title" id="trans-title">Tidewrack Village</div>
+    <div class="trans-sub" id="trans-sub">Memuat Node Aktif...</div>
+  </div>
+
+  <script src="./lib/three.min.js"></script>
+  <script src="./vfx_manager.js"></script>
+  <script src="./tidewrack_game.js"></script>
+</body>
+</html>

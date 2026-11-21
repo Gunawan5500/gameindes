@@ -1,0 +1,323 @@
+{
+  "version": "1.0.0",
+  "project": "Battle-Smith RPG",
+  "description": "Manifest penghubung antara ID VFX, Sprite Karakter/Monster, dan Senjata Paperdoll di Three.js Engine dengan file aset gambar (.webp/.png) di folder assets/. Bila file belum ada, engine otomatis memakai fallback prosedural.",
+  "folders": {
+    "vfx": "assets/vfx/",
+    "sprites": "assets/sprites/",
+    "weapons": "assets/weapons/",
+    "monsters": "assets/monsters/"
+  },
+  "vfx": {
+    "slash_neutral": {
+      "label": "Forge Strike (Tebasan Fisik)",
+      "asset_file": "assets/vfx/vfx_slash_neutral.webp",
+      "fallback": "slash_arc",
+      "color": "#f6c368",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 16, "loop": false },
+      "scale": 1.85,
+      "duration": 0.24,
+      "camera_shake": 0.08,
+      "hit_stop_ms": 22,
+      "particle_count": 14,
+      "flash_light": true,
+      "prompt": "RPG melee weapon slash arc effect, glowing golden steel crescent swipe with hot forge sparks, pure black background for additive blending, crisp game VFX texture, no text"
+    },
+    "slash_fire": {
+      "label": "Searing Cleave (Tebasan Api / Proc)",
+      "asset_file": "assets/vfx/vfx_slash_fire.webp",
+      "fallback": "slash_arc",
+      "color": "#ff822e",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 18, "loop": false },
+      "scale": 2.35,
+      "duration": 0.30,
+      "camera_shake": 0.18,
+      "hit_stop_ms": 48,
+      "particle_count": 26,
+      "flash_light": true,
+      "prompt": "Blazing molten fire sword cleave arc VFX, bright orange and white-hot flame trail with embers, pure black background for additive blending, game sprite sheet style, no text"
+    },
+    "bolt_lightning": {
+      "label": "Arcane Bolt / Petir (Lightning)",
+      "asset_file": "assets/vfx/vfx_bolt_lightning.webp",
+      "fallback": "lightning_bolt",
+      "color": "#6ce0d4",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 20, "loop": false },
+      "scale": 2.2,
+      "duration": 0.28,
+      "camera_shake": 0.16,
+      "hit_stop_ms": 40,
+      "particle_count": 24,
+      "flash_light": true,
+      "prompt": "Crackling cyan-blue electric lightning strike bolt VFX, sharp jagged arcane plasma beam, pure black background for additive blending, crisp RPG spell texture, no text"
+    },
+    "impact_ice": {
+      "label": "Frost Shatter (Ledakan Es)",
+      "asset_file": "assets/vfx/vfx_impact_ice.webp",
+      "fallback": "shockwave",
+      "color": "#78d5ff",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 16, "loop": false },
+      "scale": 2.1,
+      "duration": 0.34,
+      "camera_shake": 0.14,
+      "hit_stop_ms": 38,
+      "particle_count": 22,
+      "flash_light": true,
+      "prompt": "Shattering glacial ice nova shockwave ring VFX, sharp frost crystals radiating outward, pale icy blue glow, pure black background for additive blending, no text"
+    },
+    "impact_earth": {
+      "label": "Earthbreaker (Hentakan Tanah)",
+      "asset_file": "assets/vfx/vfx_impact_earth.webp",
+      "fallback": "shockwave",
+      "color": "#d4a259",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 14, "loop": false },
+      "scale": 2.4,
+      "duration": 0.36,
+      "camera_shake": 0.24,
+      "hit_stop_ms": 55,
+      "particle_count": 28,
+      "flash_light": false,
+      "prompt": "Heavy earth slam impact shockwave ring with golden-brown dust cracks and rock splinters, pure black background for additive blending, RPG VFX texture, no text"
+    },
+    "aura_light": {
+      "label": "Conscience Mulia (Cahaya Radiant)",
+      "asset_file": "assets/vfx/vfx_aura_light.webp",
+      "fallback": "star_burst",
+      "color": "#fff0a6",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 14, "loop": false },
+      "scale": 2.1,
+      "duration": 0.40,
+      "camera_shake": 0.08,
+      "hit_stop_ms": 25,
+      "particle_count": 20,
+      "flash_light": true,
+      "prompt": "Radiant golden starburst holy light pulse VFX, soft warm sun rays and runes, pure black background for additive blending, fantasy RPG effect, no text"
+    },
+    "aura_dark": {
+      "label": "Conscience Kejam (Gelombang Blight)",
+      "asset_file": "assets/vfx/vfx_aura_dark.webp",
+      "fallback": "shockwave",
+      "color": "#d94e5a",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 14, "loop": false },
+      "scale": 2.2,
+      "duration": 0.38,
+      "camera_shake": 0.14,
+      "hit_stop_ms": 35,
+      "particle_count": 22,
+      "flash_light": true,
+      "prompt": "Dark crimson necrotic energy pulse ring VFX, sinister jagged ember wisps, pure black background for additive blending, dark fantasy RPG effect, no text"
+    },
+    "interrupt_shock": {
+      "label": "Pommel Bash (SWTOR Interrupt Ring)",
+      "asset_file": "assets/vfx/vfx_interrupt_shock.webp",
+      "fallback": "shockwave",
+      "color": "#5cf2e2",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 20, "loop": false },
+      "scale": 2.6,
+      "duration": 0.34,
+      "camera_shake": 0.26,
+      "hit_stop_ms": 65,
+      "particle_count": 30,
+      "flash_light": true,
+      "prompt": "High-contrast turquoise kinetic shockwave ring VFX for spell interrupt, crisp concentric energy ripples and sparks, pure black background for additive blending, no text"
+    },
+    "crit_spark": {
+      "label": "Critical / Weakness Exploit Burst",
+      "asset_file": "assets/vfx/vfx_crit_spark.webp",
+      "fallback": "star_burst",
+      "color": "#ffe066",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 20, "loop": false },
+      "scale": 2.2,
+      "duration": 0.28,
+      "camera_shake": 0.20,
+      "hit_stop_ms": 55,
+      "particle_count": 24,
+      "flash_light": true,
+      "prompt": "Sharp golden-white critical hit starburst flare VFX, dramatic anime/HD-2D RPG impact cross flash, pure black background for additive blending, no text"
+    },
+    "aoe_telegraph": {
+      "label": "AoE Cast Telegraph (Lingkaran Bahaya)",
+      "asset_file": "assets/vfx/vfx_aoe_telegraph.webp",
+      "fallback": "telegraph_ring",
+      "color": "#df544c",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 12, "loop": true },
+      "scale": 3.4,
+      "duration": 2.8,
+      "camera_shake": 0.0,
+      "hit_stop_ms": 0,
+      "particle_count": 0,
+      "flash_light": false,
+      "prompt": "Top-down glowing crimson tactical RPG magic danger circle telegraph decal, crisp outer rune border, pure black background for additive blending, no text"
+    },
+    "ranged_throw": {
+      "label": "Proyektil Jauh (Rangesmith Throw)",
+      "asset_file": "assets/vfx/vfx_ranged_throw.webp",
+      "fallback": "projectile_blade",
+      "color": "#d6e6f2",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 18, "loop": true },
+      "scale": 1.0,
+      "duration": 0.22,
+      "camera_shake": 0.06,
+      "hit_stop_ms": 18,
+      "particle_count": 10,
+      "flash_light": false,
+      "prompt": "Glowing silver throwing dagger spinning blur projectile VFX with light streak, pure black background for additive blending, RPG ranged attack sprite, no text"
+    },
+    "levelup_pillar": {
+      "label": "Level Up / Resonance Pillar",
+      "asset_file": "assets/vfx/vfx_levelup_pillar.webp",
+      "fallback": "pillar_glow",
+      "color": "#f6c368",
+      "blending": "additive",
+      "sheet": { "cols": 1, "rows": 1, "fps": 14, "loop": false },
+      "scale": 2.5,
+      "duration": 0.95,
+      "camera_shake": 0.14,
+      "hit_stop_ms": 0,
+      "particle_count": 42,
+      "flash_light": true,
+      "prompt": "Vertical golden beam of ascending light pillar VFX with swirling forge runes, pure black background for additive blending, RPG level up effect, no text"
+    }
+  },
+  "sprites": {
+    "hero_smith": {
+      "label": "Karakter Utama (Pandai Besi)",
+      "asset_file": "assets/sprites/hero_smith_sheet.webp",
+      "fallback": "hero",
+      "scale_w": 1.7,
+      "scale_h": 1.9,
+      "sheet": {
+        "cols": 1,
+        "rows": 1,
+        "fps": 8,
+        "clips": {
+          "idle": { "row": 0, "frames": 1, "fps": 6 },
+          "walk": { "row": 0, "frames": 1, "fps": 10 },
+          "attack": { "row": 0, "frames": 1, "fps": 14 }
+        }
+      },
+      "prompt": "HD-2D RPG character sprite cutout of a medieval battle-smith wearing leather apron and iron pauldron, standing pose, transparent background, Octopath Traveler pixel-painted aesthetic"
+    },
+    "companion_kael": {
+      "label": "Companion Murid (Kael — Elf Scout)",
+      "asset_file": "assets/sprites/companion_kael_sheet.webp",
+      "fallback": "kael",
+      "scale_w": 1.55,
+      "scale_h": 1.8,
+      "sheet": {
+        "cols": 1,
+        "rows": 1,
+        "fps": 8,
+        "clips": {
+          "idle": { "row": 0, "frames": 1, "fps": 6 },
+          "walk": { "row": 0, "frames": 1, "fps": 10 },
+          "attack": { "row": 0, "frames": 1, "fps": 14 }
+        }
+      },
+      "prompt": "HD-2D RPG character sprite cutout of an agile young elf scout apprentice in emerald coastal cloak holding a short spear, transparent background, Octopath Traveler aesthetic"
+    },
+    "npc_brann": {
+      "label": "NPC Master Brann (Dwarf Mentor)",
+      "asset_file": "assets/sprites/npc_brann_sheet.webp",
+      "fallback": "brann",
+      "scale_w": 1.65,
+      "scale_h": 1.75,
+      "sheet": { "cols": 1, "rows": 1, "fps": 6, "clips": { "idle": { "row": 0, "frames": 1, "fps": 6 } } },
+      "prompt": "HD-2D RPG NPC sprite cutout of a stout dwarf master blacksmith with braided orange-grey beard and heavy forge hammer, transparent background"
+    },
+    "npc_mira": {
+      "label": "NPC Mira Saltvein (Pedagang S&D)",
+      "asset_file": "assets/sprites/npc_mira_sheet.webp",
+      "fallback": "mira",
+      "scale_w": 1.55,
+      "scale_h": 1.82,
+      "sheet": { "cols": 1, "rows": 1, "fps": 6, "clips": { "idle": { "row": 0, "frames": 1, "fps": 6 } } },
+      "prompt": "HD-2D RPG NPC sprite cutout of a sharp-eyed coastal merchant informant woman wearing teal cloak, gold sash, holding brass lantern, transparent background"
+    },
+    "mob_crab": {
+      "label": "Monster: Runt Beach Crab (Lv.1 Tank)",
+      "asset_file": "assets/monsters/saltgrave_coast/sp_beach_crab.webp",
+      "fallback": "crab",
+      "scale_w": 1.55,
+      "scale_h": 1.7,
+      "sheet": { "cols": 1, "rows": 1, "fps": 6, "clips": { "idle": { "row": 0, "frames": 1, "fps": 6 } } },
+      "prompt": "HD-2D RPG monster sprite cutout of an armored crimson beach crab with barnacles and massive heavy claws, transparent background"
+    },
+    "mob_gull": {
+      "label": "Monster: Runt Sand Gull (Lv.1 Skirmisher)",
+      "asset_file": "assets/monsters/saltgrave_coast/sp_sand_gull.webp",
+      "fallback": "gull",
+      "scale_w": 1.55,
+      "scale_h": 1.7,
+      "sheet": { "cols": 1, "rows": 1, "fps": 8, "clips": { "idle": { "row": 0, "frames": 1, "fps": 8 } } },
+      "prompt": "HD-2D RPG monster sprite cutout of a fierce oversized coastal gull with razor beak and outstretched wings, transparent background"
+    },
+    "mob_scavenger": {
+      "label": "Monster: Runt Tide Scavenger (Lv.1 Skirmisher)",
+      "asset_file": "assets/monsters/saltgrave_coast/sp_tide_scavenger.webp",
+      "fallback": "scavenger",
+      "scale_w": 1.55,
+      "scale_h": 1.7,
+      "sheet": { "cols": 1, "rows": 1, "fps": 7, "clips": { "idle": { "row": 0, "frames": 1, "fps": 7 } } },
+      "prompt": "HD-2D RPG monster sprite cutout of a ragged hooded pier scavenger bandit wielding a salt-rusted curved dagger, transparent background"
+    },
+    "mob_jellyfish": {
+      "label": "Monster Elite: Runt Jellyfish Drifter (Lv.1 Lightning)",
+      "asset_file": "assets/monsters/saltgrave_coast/sp_jellyfish_drifter.webp",
+      "fallback": "jellyfish",
+      "scale_w": 1.9,
+      "scale_h": 2.1,
+      "sheet": { "cols": 1, "rows": 1, "fps": 8, "clips": { "idle": { "row": 0, "frames": 1, "fps": 8 } } },
+      "prompt": "HD-2D RPG elite monster sprite cutout of a floating bioluminescent cyan electric jellyfish drifter with crackling lightning tendrils, transparent background"
+    }
+  },
+  "weapons": {
+    "wpn_starter_hammer": {
+      "label": "Palu Besi Tua (Paperdoll Tangan)",
+      "asset_file": "assets/weapons/wpn_starter_hammer.webp",
+      "fallback": "hammer",
+      "scale": 1.05,
+      "swing_arc": 1.6,
+      "glow_color": "#f6a844",
+      "prompt": "Single RPG blacksmith iron forge hammer weapon icon sprite, angled upright, glowing heated edge, transparent background"
+    },
+    "wpn_str_axe": {
+      "label": "Kapak Perang Tidewrack (Paperdoll Tangan)",
+      "asset_file": "assets/weapons/wpn_str_axe.webp",
+      "fallback": "axe",
+      "scale": 1.2,
+      "swing_arc": 1.9,
+      "glow_color": "#ff8c38",
+      "prompt": "Single dark fantasy bearded battle axe weapon sprite, heavy forged iron blade with warm amber edge, transparent background"
+    },
+    "wpn_dex_knives": {
+      "label": "Pisau Lempar Kembar (Paperdoll Tangan)",
+      "asset_file": "assets/weapons/wpn_dex_knives.webp",
+      "fallback": "knives",
+      "scale": 0.95,
+      "swing_arc": 1.2,
+      "glow_color": "#d8e7f5",
+      "prompt": "Single sleek curved silver throwing dagger weapon sprite for RPG ranger, gleaming steel tip, transparent background"
+    },
+    "wpn_int_staff": {
+      "label": "Tongkat Rune Petir (Paperdoll Tangan)",
+      "asset_file": "assets/weapons/wpn_int_staff.webp",
+      "fallback": "staff",
+      "scale": 1.25,
+      "swing_arc": 1.1,
+      "glow_color": "#6ce0d4",
+      "prompt": "Single arcane runic staff weapon sprite topped with a glowing cyan salt-lightning crystal orb, transparent background"
+    }
+  }
+}
