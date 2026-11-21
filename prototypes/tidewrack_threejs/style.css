@@ -994,18 +994,331 @@ html, body {
 
 .drawer-foot button { flex: 1; }
 
+/* CD v3.3 — Destiny Chip, Dynamic Macro Bar, RF Mastery XP, Anti-Spam GCD & Skill/Destiny Modal */
+.destiny-chip {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(60, 174, 163, 0.22);
+  border: 1px solid var(--teal);
+  color: var(--teal-bright);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.destiny-chip:hover { background: rgba(60, 174, 163, 0.36); }
+
+.class-slots-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.macro-divider {
+  width: 1px;
+  height: 52px;
+  background: linear-gradient(180deg, transparent, var(--border-warm), transparent);
+  margin: 0 2px;
+}
+
+.skill-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  width: 100%;
+}
+
+.skill-rank {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--teal-bright);
+  font-family: ui-monospace, monospace;
+}
+
+.skill-rank.gm {
+  background: rgba(246, 195, 104, 0.28);
+  border: 1px solid var(--amber-bright);
+  color: #fff2b8;
+}
+
+.skill-xp-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.skill-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--amber-bright));
+  transition: width 0.2s ease-out;
+}
+
+.gcd-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  background: rgba(226, 155, 56, 0.30);
+  border-top: 1px solid rgba(246, 195, 104, 0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cd-mask { z-index: 3; }
+
+.skill-slot {
+  width: 78px;
+  height: 66px;
+  padding: 4px 5px 6px;
+}
+
+.skill-slot.weapon-slot {
+  border-color: var(--teal);
+  background: linear-gradient(180deg, rgba(24, 52, 60, 0.92), rgba(18, 28, 36, 0.94));
+}
+
+.skill-slot.weapon-slot:hover { border-color: var(--teal-bright); }
+.wpn-key { color: var(--teal-bright); }
+
+.skill-slot.locked {
+  opacity: 0.56;
+  border-style: dashed;
+  border-color: var(--danger);
+  cursor: not-allowed;
+}
+
+.skill-slot.buff-active {
+  border-color: var(--teal-bright);
+  box-shadow: 0 0 12px rgba(108, 224, 212, 0.35);
+}
+
+.skill-slot.empty-slot {
+  opacity: 0.45;
+  border-style: dashed;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.buff-pill.destiny {
+  background: rgba(132, 92, 220, 0.24);
+  border-color: #b492ff;
+  color: #e4d4ff;
+}
+
+.buff-pill.gcd-pill {
+  background: rgba(226, 155, 56, 0.16);
+  border-color: rgba(246, 195, 104, 0.55);
+  color: #f6d494;
+}
+
+/* Skill Tree & 29 Destiny Cards Modal */
+.modal-box.wide {
+  max-width: 760px;
+}
+
+.v33-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.v33-tab-btn {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.v33-tab-btn.active {
+  background: rgba(226, 155, 56, 0.22);
+  border-color: var(--amber);
+  color: var(--amber-bright);
+}
+
+.smith-pts-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: rgba(10, 15, 20, 0.65);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.smith-pt-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.smith-pt-pill.active-cls {
+  border-color: var(--amber);
+  background: rgba(226, 155, 56, 0.14);
+}
+
+.mini-step-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: #131a21;
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.mini-step-btn:hover:not(:disabled) { border-color: var(--amber); color: var(--amber-bright); }
+.mini-step-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.preset-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tree-tier-card {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 9px;
+}
+
+.tree-tier-card.unlocked { border-color: rgba(108, 224, 212, 0.45); }
+.tree-tier-card.locked-tier { opacity: 0.58; }
+
+.tier-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.passive-box {
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: rgba(12, 18, 24, 0.6);
+  border-left: 3px solid var(--border);
+  margin: 6px 0;
+  color: var(--muted);
+}
+
+.passive-box.open {
+  border-left-color: var(--teal-bright);
+  color: #c8f5ef;
+}
+
+.morph-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.morph-btn {
+  text-align: left;
+  background: rgba(12, 18, 24, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 7px;
+  color: var(--muted);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.morph-btn:hover:not(:disabled) { border-color: var(--amber); color: var(--text); }
+.morph-btn.picked {
+  border-color: var(--amber-bright);
+  background: rgba(226, 155, 56, 0.18);
+  color: var(--text);
+}
+.morph-btn:disabled { opacity: 0.48; cursor: not-allowed; }
+
+.destiny-hero {
+  background: linear-gradient(135deg, rgba(24, 46, 54, 0.85), rgba(44, 30, 18, 0.85));
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  padding: 11px 12px;
+  margin-bottom: 11px;
+}
+
+.destiny-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.destiny-card {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.destiny-card.unlocked { border-color: rgba(108, 224, 212, 0.5); }
+.destiny-card.active {
+  border-color: var(--amber-bright);
+  box-shadow: 0 0 12px rgba(246, 195, 104, 0.25);
+  background: rgba(226, 155, 56, 0.12);
+}
+.destiny-card.locked { opacity: 0.5; }
+
+.switch-box {
+  background: rgba(12, 18, 24, 0.78);
+  border: 1px solid var(--border-warm);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 11px;
+}
+
 /* Mobile Portrait Adjustments (Oppo A54 720x1600) */
 @media (max-width: 760px) {
-  .player-card { min-width: 175px; max-width: 54%; padding: 6px 8px; }
-  .node-card { min-width: 145px; max-width: 44%; padding: 6px 8px; }
-  .player-title, .node-name { font-size: 12.5px; }
+  .player-card { min-width: 175px; max-width: 55%; padding: 6px 8px; }
+  .node-card { min-width: 140px; max-width: 43%; padding: 6px 8px; }
+  .player-title, .node-name { font-size: 12px; }
+  .destiny-chip { margin-left: 0; margin-top: 2px; font-size: 9.5px; }
   .meta-strip, .telemetry { font-size: 10px; }
   .log-panel { width: 100%; padding: 5px 8px; }
   .log-entries { display: none; }
   .dual-xp { border-top: none; padding-top: 0; }
   .target-frame {
     position: fixed;
-    top: 118px;
+    top: 122px;
     left: 50%;
     transform: translateX(-50%);
     min-width: 220px;
@@ -1024,7 +1337,15 @@ html, body {
     align-items: flex-end;
     width: 100%;
   }
-  .skill-slot { width: 68px; height: 58px; }
+  .macro-bar {
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+    padding: 5px 6px;
+    gap: 5px;
+  }
+  .skill-slot { width: 64px; height: 58px; flex-shrink: 0; }
+  .skill-name { font-size: 10px; }
+  .morph-grid { grid-template-columns: 1fr; }
   .quest-tracker { display: none; }
   #vfx-drawer {
     top: auto;

@@ -1,7 +1,7 @@
 /* ============================================================================
  * BATTLE-SMITH RPG — Tidewrack Village (Lv.1) HD-2D Three.js Node Prototype
- * Arsitektur: 1 Node Panggung Aktif (RF Online / Octopath HD-2D × SWTOR)
- * Sinkronisasi: master_CD_v3.1.md (v3.2) & master_WD_v1.9.md
+ * Arsitektur: 1 Node Panggung Aktif (RF Online / Octopath HD-2D × SWTOR × Amalur)
+ * Sinkronisasi: master_CD_v3.1.md (v3.3) & master_WD_v1.9.md
  * 100% Offline • Target: HP Oppo A54 (<150MB RAM) & Laptop ASUS ROG GL553VD
  * ============================================================================ */
 (function () {
@@ -11,9 +11,18 @@
     document.body.innerHTML = '<div style="padding:24px;color:#f6c368;font-family:sans-serif">Gagal memuat Three.js (lib/three.min.js tidak ditemukan).</div>';
     return;
   }
+  if (typeof window.BattleSmithSkillV33 === 'undefined') {
+    document.body.innerHTML = '<div style="padding:24px;color:#f6c368;font-family:sans-serif">Gagal memuat Skill Engine CD v3.3 (skill_engine_v33.js tidak ditemukan).</div>';
+    return;
+  }
+
+  const skillV33 = window.BattleSmithSkillV33;
+  const skillEngine = skillV33.engine;
+  const skillData = skillV33.skillData;
+  const SMITH_CLASSES = ['Weaponsmith', 'Armorer', 'Rangesmith', 'Runesmith', 'Reforger'];
 
   // --------------------------------------------------------------------------
-  // 1. MASTER DATA SLICE (Tidewrack Village & Saltgrave Coast Lv.1)
+  // 1. MASTER DATA SLICE (Tidewrack Village & Saltgrave Coast Lv.1 + CD v3.3)
   // --------------------------------------------------------------------------
   const ROLE_MOD = {
     Brute:      { hp: 0.90, dmg: 1.25, spd: 0.9, acc: 80, dodge: 3,  armor: 10 },
@@ -31,35 +40,39 @@
   const WEAPON_CATALOG = [
     {
       id: 'wpn_starter_hammer',
+      weaponCatalogId: 'w_str_3',
       name: 'Palu Besi Tua',
-      stat: 'STR', mode: 'Dekat', range: 2.5, dmg: 7, crit: 5, el: 'Neutral',
-      trigger: 'Hammer Blow', smithClass: 'Weaponsmith',
+      stat: 'STR', tier: 1, mode: 'Dekat', tag: 'Dekat', range: 2.5, dmg: 7, crit: 5, el: 'Neutral',
+      trigger: 'Heavy Chain', smithClass: 'Weaponsmith',
       cost: {}, price: 0,
-      desc: 'Senjata awal Pandai Besi di Tidewrack. Seimbang & dapat menangkis (Parry).'
+      desc: 'Senjata awal Pandai Besi di Tidewrack. Jurus [W]: Heavy Chain (Weaponsmith).'
     },
     {
       id: 'wpn_str_axe',
+      weaponCatalogId: 'w_str_1',
       name: 'Kapak Perang Tidewrack',
-      stat: 'STR', mode: 'Dekat', range: 2.6, dmg: 11, crit: 6, el: 'Neutral',
-      trigger: 'Twister (+20% burst)', smithClass: 'Weaponsmith',
+      stat: 'STR', tier: 1, mode: 'Dekat', tag: 'Dekat', range: 2.6, dmg: 11, crit: 6, el: 'Neutral',
+      trigger: 'Twister', smithClass: 'Weaponsmith',
       cost: { 'MAT-A08-02': 2, 'MAT-A08-05': 1 }, price: 65,
-      desc: 'CD-4.01 (T1 STR Dekat). Damage mentah tinggi + Trigger Twister.'
+      desc: 'CD-4.01 (T1 STR Dekat). Jurus [W]: Twister (+burst AoE Weaponsmith).'
     },
     {
       id: 'wpn_dex_knives',
+      weaponCatalogId: 'w_dex_r1',
       name: 'Pisau Lempar Kembar',
-      stat: 'DEX', mode: 'Jauh', range: 6.4, dmg: 9, crit: 12, el: 'Neutral',
-      trigger: 'Fan of Knives (Jauh)', smithClass: 'Rangesmith',
+      stat: 'DEX', tier: 1, mode: 'Jauh', tag: 'Jauh', range: 6.4, dmg: 9, crit: 12, el: 'Neutral',
+      trigger: 'Fan of Knives', smithClass: 'Rangesmith',
       cost: { 'MAT-A08-01': 2, 'MAT-A08-02': 2 }, price: 70,
-      desc: 'CD-4.04 (Jauh — Rangesmith). Serang aman dari jarak jauh + Dodge +8%!'
+      desc: 'CD-4.04 (Jauh — butuh Rangesmith T1 / Omnismith). Jurus [W]: Fan of Knives!'
     },
     {
       id: 'wpn_int_staff',
+      weaponCatalogId: 'w_int_1',
       name: 'Tongkat Rune Petir',
-      stat: 'INT', mode: 'Jauh', range: 5.8, dmg: 10, crit: 8, el: 'Lightning',
-      trigger: 'Arcane Bolt (Weakness +25%)', smithClass: 'Runesmith',
+      stat: 'INT', tier: 1, mode: 'Jauh', tag: 'Jauh', range: 5.8, dmg: 10, crit: 8, el: 'Lightning',
+      trigger: 'Arcane Bolt', smithClass: 'Runesmith',
       cost: { 'MAT-A08-01': 3, 'MAT-A08-05': 1 }, price: 85,
-      desc: 'CD-4.01 (T1 INT). Elemen Lightning — memicu Weakness Exploit pada Drifter!'
+      desc: 'CD-4.01 (T1 INT — butuh Runesmith/Rangesmith T1 atau Omnismith). Jurus [W]: Arcane Bolt (Lightning)!'
     }
   ];
 
@@ -99,7 +112,7 @@
   ];
 
   // --------------------------------------------------------------------------
-  // 2. GAME STATE (Player Lv.1 Pandai Besi — CD-1.01, CD-1.03, CD-1.04)
+  // 2. GAME STATE (Player Lv.1 + Full CD v3.3 Skill Tree, RF Mastery & Destiny)
   // --------------------------------------------------------------------------
   const state = {
     activeNodeId: 'tidewrack_village',
@@ -114,9 +127,18 @@
       level: 1,
       tier: 1,
       smithClass: 'Bladesmith',
+      smithTiers: { Weaponsmith: 1, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 },
+      firstTakenClass: 'Weaponsmith',
+      activeDestinyId: null,
+      skillMastery: {}, // RF Classic XP per skillId & wsk_*
+      selectedMorphs: {}, // { Weaponsmith_T1: 'wpn_t1_m1', ... }
+      equippedSkillIds: ['wpn_t1_a'],
+      fastTraining: true, // Demo 12x RF Mastery XP agar cepat lihat Lv.1 -> Lv.3 -> Lv.5 -> GM
+      isFactionHostile: false, // Uji Shadow Syndicate +50% pada Jalur Ganda Ganti Destiny
       stats: { STR: 3, DEX: 2, CON: 3, INT: 2, WIS: 1, CHA: 2 },
       freePoints: 0,
       hp: 40, maxHp: 40,
+      barrier: 0,
       stamina: 115, maxStamina: 115,
       xpBattle: 0, xpSmith: 0,
       xpQuota: 60, // 60 * 1^1.1
@@ -125,7 +147,13 @@
       bronze: 120,
       mulia: 0,
       kejam: 0,
-      procHeat: 0, // Builder Proc stack (0-2)
+      resources: {
+        forge_heat: 0,
+        bastion_guard: 0,
+        hunters_mark: 0,
+        elemental_charge: 0,
+        overclock: 0
+      },
       equippedWeaponId: 'wpn_starter_hammer',
       ownedWeapons: ['wpn_starter_hammer'],
       inventory: {
@@ -135,11 +163,20 @@
       }
     },
 
-    skills: [
-      { id: 'builder',   key: '1', name: 'Forge Strike',   sub: 'Opener +Heat', cd: 1.2, curCd: 0 },
-      { id: 'interrupt', key: '2', name: 'Pommel Bash',    sub: 'Interrupt!',   cd: 5.0, curCd: 0 },
-      { id: 'combo',     key: '3', name: 'Searing Cleave', sub: 'Proc Burst',   cd: 3.5, curCd: 0 }
-    ],
+    // Anti-Spam GCD (1.3d) + Individual Cooldowns + RF Class Buff + Destiny Combat Procs
+    gcdDuration: skillData.gcd_sec || 1.3,
+    gcdRemaining: 0,
+    skillCooldowns: {},
+    weaponSkillCd: 0,
+    activeClassBuff: null,
+    activeClassBuffName: '',
+    activeClassBuffTimer: 0,
+    runeMarkActive: false,
+    arcaneEdgeTimer: 0,
+    chronosmithIcd: 0,
+    lastCastSkillId: null,
+    recentClasses: [],
+    v33Build: null,
 
     companion: {
       recruited: false,
@@ -176,17 +213,60 @@
     cameraYaw: 0
   };
 
+  function getWeapon() {
+    return WEAPON_CATALOG.find(w => w.id === state.player.equippedWeaponId) || WEAPON_CATALOG[0];
+  }
+
+  function getWeaponEnginePayload() {
+    const w = getWeapon();
+    return {
+      id: w.weaponCatalogId,
+      name: w.name,
+      stat: w.stat,
+      tier: w.tier || 1,
+      tag: w.tag || w.mode,
+      trigger: w.trigger,
+      element: w.el || 'Neutral'
+    };
+  }
+
   function calcPlayerDerived() {
     const p = state.player;
-    p.maxHp = 20 + 5 * p.stats.CON + 5 * p.tier;
+    const hpBonusPct = state.v33Build ? (state.v33Build.passiveTotals.max_hp_pct || 0) : 0;
+    const baseHp = 20 + 5 * p.stats.CON + 5 * p.tier;
+    p.maxHp = Math.round(baseHp * (1 + hpBonusPct / 100));
     p.maxStamina = 100 + 5 * p.stats.CON;
     p.xpQuota = Math.round(60 * Math.pow(p.level, 1.1));
     if (p.hp > p.maxHp) p.hp = p.maxHp;
     if (p.stamina > p.maxStamina) p.stamina = p.maxStamina;
   }
 
-  function getWeapon() {
-    return WEAPON_CATALOG.find(w => w.id === state.player.equippedWeaponId) || WEAPON_CATALOG[0];
+  function refreshBuildV33(skipDomRebuild) {
+    const p = state.player;
+    const build = skillEngine.buildMacroLoadout({
+      stats: p.stats,
+      selectedMorphs: p.selectedMorphs,
+      loadout: p.equippedSkillIds,
+      smithConfig: {
+        tiers: p.smithTiers,
+        firstTakenClass: p.firstTakenClass,
+        activeDestinyId: p.activeDestinyId
+      },
+      skillMasteryState: p.skillMastery,
+      activeDestinyId: p.activeDestinyId,
+      weapon: getWeaponEnginePayload()
+    });
+    state.v33Build = build;
+    p.smithClass = build.activeDestinyCard ? build.activeDestinyCard.displayName : build.smith.singleWordClassName;
+    p.equippedSkillIds = build.equippedSkills.map(s => s.id);
+    if (build.activeDestinyCard?.signatureActive && build.activeDestinyCard.signature?.effect?.min_forge_heat) {
+      p.resources.forge_heat = Math.max(1, p.resources.forge_heat);
+    }
+    calcPlayerDerived();
+    if (!skipDomRebuild && typeof renderMacroBarSlots === 'function') {
+      renderMacroBarSlots();
+    }
+    return build;
   }
 
   function calcMonsterStats(tpl) {
@@ -1296,7 +1376,7 @@
       p.freePoints += 2; // CD-1.01: +2 poin stat per level
       p.stats.STR += 1;
       p.stats.CON += 1;
-      calcPlayerDerived();
+      refreshBuildV33();
       p.xpBattle = carryB;
       p.xpSmith = carryS;
       p.hp = p.maxHp;
@@ -1308,9 +1388,97 @@
     updateHUD();
   }
 
+  function addSmithResource(resId, amount) {
+    const p = state.player;
+    if (!resId || !amount || p.resources[resId] === undefined) return;
+    const pas = state.v33Build?.passiveTotals || {};
+    const cap = resId === 'elemental_charge' ? 3 : (resId === 'forge_heat' ? 5 + (pas.resource_max_bonus || 0) : 5);
+    const before = p.resources[resId];
+    p.resources[resId] = Math.min(cap, before + amount);
+
+    // Synthesist Destiny: 50% echo +1 resource ke pohon lain
+    const destSig = state.v33Build?.activeDestinyCard?.signatureActive
+      ? (state.v33Build.activeDestinyCard.signature?.effect || {})
+      : {};
+    if (p.resources[resId] > before && destSig.cross_resource_share_chance_pct && Math.random() < 0.5) {
+      const unlockedRes = SMITH_CLASSES
+        .filter(c => (p.smithTiers[c] || 0) > 0)
+        .map(c => skillData.smith_skill_trees[c]?.resource?.id)
+        .filter(r => r && r !== resId);
+      if (unlockedRes.length) {
+        const other = unlockedRes[Math.floor(Math.random() * unlockedRes.length)];
+        const oCap = other === 'elemental_charge' ? 3 : 5;
+        p.resources[other] = Math.min(oCap, (p.resources[other] || 0) + 1);
+      }
+    }
+  }
+
+  function awardSkillMasteryXP(skillId, skillName) {
+    const p = state.player;
+    const xpPerUse = p.fastTraining ? 12 : 1;
+    const res = skillEngine.trainSkillMastery(p.skillMastery, skillId, 1, xpPerUse);
+    p.skillMastery = res.masteryState;
+    if (res.leveledUp) {
+      refreshBuildV33();
+      const milestoneMap = {
+        core_passive: 'Core Passive Terbuka!',
+        morph_choice: 'Pilihan Morph 1-dari-3 Terbuka!',
+        gm_morph_peak: 'GRAND MASTER! (+40% Efektivitas, -10% CD, Puncak Morph!)'
+      };
+      const msTxt = res.unlockedMilestones.map(m => milestoneMap[m]).filter(Boolean).join(' • ');
+      vfx.playVFX(res.nextStage.isGM ? 'levelup_pillar' : 'aura_light', state.pos, { silentJuice: !res.nextStage.isGM });
+      spawnFloatingText(state.pos, `${skillName} → ${res.nextStage.label}!`, res.nextStage.isGM ? '#ffe066' : '#6ce0d4');
+      addLog(`✦ RF Mastery: ${skillName} naik ke ${res.nextStage.label}${msTxt ? ' — ' + msTxt : ''}`, 'moral');
+    }
+  }
+
+  function getActiveDestinySignature() {
+    const card = state.v33Build?.activeDestinyCard;
+    return (card && card.signatureActive && card.signature?.effect) ? card.signature.effect : {};
+  }
+
+  function pickVfxForSkill(sk, wpn, resolvedEl) {
+    if (sk.interrupts_cast) return 'interrupt_shock';
+    if (sk.tier === 5) return sk.smithClass === 'Runesmith' ? 'bolt_lightning' : 'slash_fire';
+    if (resolvedEl === 'Lightning') return 'bolt_lightning';
+    if (resolvedEl === 'Fire') return 'slash_fire';
+    if (resolvedEl === 'Ice') return 'impact_ice';
+    if (sk.smithClass === 'Rangesmith' || wpn.mode === 'Jauh') return 'ranged_throw';
+    return 'slash_neutral';
+  }
+
   function triggerSkill(slotIndex) {
-    const sk = state.skills[slotIndex];
-    if (!sk || sk.curCd > 0) return;
+    const build = state.v33Build || refreshBuildV33(true);
+    const sk = build.equippedSkills[slotIndex];
+    if (!sk) return;
+
+    // Anti-Spam Global Cooldown (GCD = 1.3 detik) + Cooldown individual
+    if (state.gcdRemaining > 0) {
+      return;
+    }
+    if ((state.skillCooldowns[sk.id] || 0) > 0) {
+      return;
+    }
+
+    const p = state.player;
+    const wpn = getWeapon();
+    const pas = build.passiveTotals;
+    const destSig = getActiveDestinySignature();
+
+    // Class Buff (RF) bisa diaktifkan langsung tanpa musuh di depan!
+    if (sk.role === 'Class Buff (RF)' && sk.self_buff) {
+      state.gcdRemaining = state.gcdDuration;
+      state.skillCooldowns[sk.id] = sk.effectiveCooldownSec;
+      state.activeClassBuff = { ...sk.self_buff };
+      state.activeClassBuffName = sk.name;
+      state.activeClassBuffTimer = sk.self_buff.duration_sec || 16;
+      vfx.playVFX('aura_light', state.pos);
+      spawnFloatingText(state.pos, `⚡ ${sk.name} (${sk.mastery.label})`, '#6ce0d4');
+      addLog(`⚡ Class Buff RF: ${sk.name} aktif selama ${state.activeClassBuffTimer}d! (${sk.desc})`, 'sys');
+      awardSkillMasteryXP(sk.id, sk.name);
+      updateHUD();
+      return;
+    }
 
     // Pick nearest alive enemy if none targeted
     let target = state.targetEntity;
@@ -1323,86 +1491,299 @@
       return;
     }
 
-    const wpn = getWeapon();
+    const skillRange = (sk.smithClass === 'Rangesmith' || sk.smithClass === 'Runesmith')
+      ? Math.max(wpn.range, 6.0)
+      : wpn.range;
     const dist = state.pos.distanceTo(target.pos);
-    if (dist > wpn.range + 0.6) {
-      // Walk into weapon range automatically (RF Online / SWTOR feel!)
+    if (dist > skillRange + 0.6) {
       const dir = new THREE.Vector3().subVectors(target.pos, state.pos).normalize();
-      state.moveTarget = target.pos.clone().sub(dir.multiplyScalar(Math.max(1.6, wpn.range - 0.5)));
-      addLog(`Mendekati ${target.name} (Jarak ${wpn.mode}: ${wpn.range}m)...`, 'sys');
+      state.moveTarget = target.pos.clone().sub(dir.multiplyScalar(Math.max(1.6, skillRange - 0.5)));
+      addLog(`Mendekati ${target.name} (Jarak ${skillRange.toFixed(1)}m)...`, 'sys');
       return;
     }
 
-    // Face target & trigger lunge + Paperdoll Weapon Swing!
+    // Face target & commit GCD + individual CD
     if (Math.abs(target.pos.x - state.pos.x) > 0.1) {
       state.facing = target.pos.x >= state.pos.x ? 1 : -1;
     }
-    sk.curCd = sk.cd;
+    state.gcdRemaining = state.gcdDuration;
+    state.skillCooldowns[sk.id] = sk.effectiveCooldownSec;
     state.lungeTimer = 0.18;
     state.swingTimer = 0.24;
 
-    // Damage formula aligned with master_CD_v3.1.md (v3.2)
-    const p = state.player;
-    let rawDmg = wpn.dmg + Math.floor(p.stats.STR / 2);
-    let color = '#ffe8c2';
+    // Reforger Clockwork Flow: rotasi 2 tombol berbeda -> +1 Overclock
+    if (pas.overclock_on_rotation && state.lastCastSkillId && state.lastCastSkillId !== sk.id) {
+      addSmithResource('overclock', 1);
+    }
+    state.lastCastSkillId = sk.id;
+
+    // Omnismith Signature: rangkai 3 tombol Smith Class berbeda -> Omni-Surge!
+    let omniSurgeMult = 1.0;
     let labelPrefix = '';
-    let el = wpn.el;
-    let mainVfxId = wpn.el === 'Lightning' ? 'bolt_lightning' : (wpn.mode === 'Jauh' ? 'ranged_throw' : 'slash_neutral');
+    if (destSig.omni_surge_on_3_classes) {
+      state.recentClasses.push(sk.smithClass);
+      if (state.recentClasses.length > 3) state.recentClasses.shift();
+      if (state.recentClasses.length === 3 && new Set(state.recentClasses).size === 3) {
+        omniSurgeMult = 1.25;
+        labelPrefix += 'OMNI-SURGE! ';
+        for (const kId of Object.keys(state.skillCooldowns)) {
+          if (kId !== sk.id && state.skillCooldowns[kId] > 0) {
+            state.skillCooldowns[kId] = Math.max(0, state.skillCooldowns[kId] - 2.0);
+          }
+        }
+        state.weaponSkillCd = Math.max(0, state.weaponSkillCd - 2.0);
+        state.recentClasses.length = 0;
+        vfx.playVFX('levelup_pillar', state.pos, { silentJuice: true });
+        addLog('✦ OMNISMITH OMNI-SURGE! (+25% Dmg & -2d semua Cooldown!)', 'moral');
+      }
+    }
+
+    const modEff = sk.combinedModEffect || {};
+    const masteryMult = 1 + (sk.mastery.effectivenessBonusPct || 0) / 100;
+    const buffDmgPct = (state.activeClassBuff?.dmg_pct || 0) + (p.resources.overclock * 3);
+    const baseStrike = wpn.dmg + Math.floor(p.stats.STR / 2) + (sk.scales_with_con_ac ? Math.floor(p.stats.CON * 0.6) : 0);
+    let skillMult = sk.base_multiplier * masteryMult * (1 + ((modEff.skill_dmg_pct || 0) + (pas.dmg_pct || 0) + buffDmgPct) / 100);
+    let color = '#ffe8c2';
     let extraVfxId = null;
 
-    if (sk.id === 'builder') {
-      p.procHeat = Math.min(2, p.procHeat + 1);
-    } else if (sk.id === 'interrupt') {
-      rawDmg = Math.round(rawDmg * 0.75);
-      mainVfxId = 'interrupt_shock';
+    // Resource Generation
+    if (sk.grants_resource) {
+      addSmithResource(sk.grants_resource.id, sk.grants_resource.amount);
+      if (destSig.barrier_on_opener_pct) {
+        p.barrier = Math.max(p.barrier, Math.round(p.maxHp * (destSig.barrier_on_opener_pct / 100)));
+      }
+    }
+
+    // Interrupt / Stagger
+    if (sk.interrupts_cast) {
       if (target.casting) {
         target.casting = false;
         target.castTimer = 0;
         vfx.syncTelegraph(target.id, target.pos, 0, false);
-        target.stunTimer = 2.0;
-        rawDmg = Math.round(rawDmg * 1.65);
-        labelPrefix = 'INTERRUPTED! ';
+        target.stunTimer = 2.2;
+        skillMult *= 1.45;
+        labelPrefix = 'INTERRUPTED! ' + labelPrefix;
         color = '#6ce0d4';
-        addLog(`✦ Pommel Bash membatalkan ${target.tpl.castSkill} milik ${target.name}! (+Stun 2d)`, 'combat');
+        if (sk.smithClass === 'Weaponsmith') { addSmithResource('forge_heat', 3); state.weaponSkillCd = Math.max(0, state.weaponSkillCd - 2); }
+        if (sk.smithClass === 'Armorer') { addSmithResource('bastion_guard', 5); p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.08)); }
+        if (sk.smithClass === 'Reforger') {
+          for (const kId of Object.keys(state.skillCooldowns)) {
+            if (kId !== sk.id && state.skillCooldowns[kId] > 0) state.skillCooldowns[kId] = Math.max(0, state.skillCooldowns[kId] - 2);
+          }
+        }
+        addLog(`✦ ${sk.name} membatalkan ${target.tpl.castSkill} milik ${target.name}! (+Stun 2.2d)`, 'combat');
       } else {
-        target.stunTimer = 0.8;
-        labelPrefix = 'STAGGER ';
+        target.stunTimer = Math.max(target.stunTimer || 0, 0.9);
       }
-    } else if (sk.id === 'combo') {
-      el = wpn.el === 'Neutral' ? 'Fire' : wpn.el;
-      mainVfxId = el === 'Lightning' ? 'bolt_lightning' : 'slash_fire';
-      if (p.procHeat > 0) {
-        rawDmg = Math.round(rawDmg * (1.45 + 0.25 * p.procHeat));
-        labelPrefix = `PROC x${p.procHeat}! `;
-        p.procHeat = 0;
-        color = '#ffae42';
-      } else {
-        rawDmg = Math.round(rawDmg * 1.15);
+      if (sk.self_buff?.barrier_hp_pct) {
+        p.barrier += Math.round(p.maxHp * (sk.self_buff.barrier_hp_pct / 100));
       }
     }
 
-    // Element Weakness Check (WD-6.05 & CD-2)
+    // Resource Consumption (Core Combo / Hybrid Fusion / Chrono Rewind)
+    if (sk.consumes_resource) {
+      const rId = sk.consumes_resource.id;
+      const floor = (rId === 'forge_heat' && destSig.min_forge_heat) ? 1 : 0;
+      const spent = Math.max(0, (p.resources[rId] || 0) - floor);
+      p.resources[rId] = floor;
+      if (spent > 0) {
+        skillMult += spent * (sk.consumes_resource.per_stack_mult || 0.22);
+        labelPrefix = `BURST x${spent}! ` + labelPrefix;
+        color = '#ffae42';
+        if (sk.heal_per_stack_pct) {
+          const healAmt = Math.round(p.maxHp * ((spent * sk.heal_per_stack_pct) / 100));
+          p.hp = Math.min(p.maxHp, p.hp + healAmt);
+          spawnFloatingText(state.pos, `+${healAmt} HP`, '#8fe3b8');
+        }
+        if (sk.triggers_hybrid_fusion && spent >= 2) {
+          skillMult *= destSig.double_hybrid_fusion ? 1.55 : 1.3;
+          labelPrefix = 'FUSI HIBRIDA! ' + labelPrefix;
+          color = '#7cf5ff';
+          extraVfxId = 'crit_spark';
+          addLog(`✦ ${sk.name} memicu Reaksi Fusi Hibrida (${spent} Elemental Charge)!`, 'combat');
+        }
+        if (sk.consumes_resource.cdr_other_skills_per_stack_sec) {
+          const shave = spent * sk.consumes_resource.cdr_other_skills_per_stack_sec;
+          let count = 0;
+          for (const kId of Object.keys(state.skillCooldowns)) {
+            if (kId !== sk.id && state.skillCooldowns[kId] > 0 && count < 2) {
+              state.skillCooldowns[kId] = Math.max(0, state.skillCooldowns[kId] - shave);
+              count++;
+            }
+          }
+          addLog(`⏱ Chrono Rewind memangkas ${shave.toFixed(1)}d CD skill lain!`, 'sys');
+        }
+      }
+    }
+
+    // Execute (< 35% HP)
+    if (sk.execute_threshold_hp_pct && (target.hp / target.maxHp) * 100 < sk.execute_threshold_hp_pct) {
+      skillMult *= 1.35;
+      labelPrefix = 'EXECUTE! ' + labelPrefix;
+    }
+
+    // Destiny Signatures: Spellblade Rune Mark, Hexblade Arcane Edge, Vanguard Barrier
+    const isElemSkill = sk.smithClass === 'Runesmith' || (sk.finalElement && sk.finalElement !== 'Neutral');
+    if (destSig.spellblade_mark_bonus_pct && isElemSkill && state.runeMarkActive) {
+      state.runeMarkActive = false;
+      skillMult *= 1.3;
+      labelPrefix = 'RUNE MARK! ' + labelPrefix;
+      color = '#c7a4ff';
+      extraVfxId = 'crit_spark';
+    }
+    if (destSig.spellblade_mark_bonus_pct && sk.smithClass === 'Weaponsmith') {
+      state.runeMarkActive = true;
+    }
+    if (destSig.arcane_edge_auto_weakness && isElemSkill) {
+      state.arcaneEdgeTimer = 4.0;
+    }
+    if (destSig.barrier_on_opener_pct && p.barrier > 0 && sk.smithClass === 'Weaponsmith') {
+      skillMult *= 1.18;
+    }
+    if (modEff.heal_on_cast_pct > 0) {
+      const healAmt = Math.max(1, Math.round(p.maxHp * (modEff.heal_on_cast_pct / 100)));
+      p.hp = Math.min(p.maxHp, p.hp + healAmt);
+    }
+    if (modEff.reset_weapon_skill_cd) {
+      state.weaponSkillCd = 0;
+    }
+
+    // Resolve Element & Weakness Exploit
+    let el = sk.finalElement === 'WeaponAttunement' ? wpn.el : sk.finalElement;
+    const autoWeak = sk.auto_match_weakness || modEff.auto_match_weakness || el === 'Adaptive' || state.arcaneEdgeTimer > 0 || (destSig.marked_auto_weakness && p.resources.hunters_mark > 0);
+    if (autoWeak && target.tpl.weak !== 'Neutral') el = target.tpl.weak;
+
+    let rawDmg = baseStrike * skillMult * omniSurgeMult;
     if (el !== 'Neutral' && el === target.tpl.weak) {
-      rawDmg = Math.round(rawDmg * 1.25);
+      rawDmg *= 1.25 + ((pas.weakness_bonus_pct || 0) + (state.activeClassBuff?.weakness_bonus_pct || 0)) / 100;
       labelPrefix = 'WEAKNESS! ' + labelPrefix;
       color = '#7cf5ff';
       extraVfxId = 'crit_spark';
+      if (destSig.weakness_cdr_all_sec && state.chronosmithIcd <= 0) {
+        state.chronosmithIcd = 4.0;
+        for (const kId of Object.keys(state.skillCooldowns)) {
+          if (state.skillCooldowns[kId] > 0) state.skillCooldowns[kId] = Math.max(0, state.skillCooldowns[kId] - 1.5);
+        }
+        addLog('⏱ Chronosmith Temporal Exploit: -1.5d semua CD Macro Bar!', 'sys');
+      }
+      if (destSig.charge_on_weakness) addSmithResource('elemental_charge', 1);
     }
 
-    // Critical Check (WIS + weapon crit)
-    const critChance = p.stats.WIS + wpn.crit;
-    const isCrit = Math.random() * 100 < critChance;
-    if (isCrit) {
-      rawDmg = Math.round(rawDmg * 1.85);
+    // Critical Check
+    const critChance = p.stats.WIS + wpn.crit + (pas.crit_chance_pct || 0) + (state.activeClassBuff?.crit_chance_pct || 0);
+    if (Math.random() * 100 < critChance) {
+      rawDmg *= 1.85 + ((pas.crit_dmg_pct || 0) + p.resources.hunters_mark * 4) / 100;
       labelPrefix = 'CRIT! ' + labelPrefix;
       color = '#ffe066';
       extraVfxId = 'crit_spark';
     }
 
-    // Apply Armor reduction
-    const finalDmg = Math.max(2, Math.round(rawDmg * (1 - target.armor / 100)));
-    applyDamageToEnemy(target, finalDmg, labelPrefix, color, mainVfxId, wpn.mode === 'Jauh', extraVfxId);
+    const armorPen = sk.armor_pen_override_pct
+      ? target.armor
+      : Math.min(target.armor, (pas.armor_pen_pct || 0) + (modEff.armor_pen_pct || 0) + p.resources.forge_heat * 3);
+    const finalDmg = Math.max(2, Math.round(rawDmg * (1 - Math.max(0, target.armor - armorPen) / 100)));
+    const mainVfxId = pickVfxForSkill(sk, wpn, el);
+
+    applyDamageToEnemy(target, finalDmg, labelPrefix, color, mainVfxId, skillRange > 3.5, extraVfxId);
+    awardSkillMasteryXP(sk.id, sk.name);
     updateHUD();
+  }
+
+  function triggerWeaponSkill() {
+    const build = state.v33Build || refreshBuildV33(true);
+    const ws = build.weaponSkill;
+    if (!ws) return;
+    if (!ws.unlocked) {
+      addLog(`🔒 Weapon Skill [W] "${ws.name}" terkunci! Butuh minimal Tier 1 ${ws.governing_smith} (atau Kartu Destiny Omnismith).`, 'sys');
+      return;
+    }
+    if (state.gcdRemaining > 0 || state.weaponSkillCd > 0) return;
+
+    let target = state.targetEntity;
+    if (!target || target.kind !== 'enemy' || !target.alive) {
+      target = findNearestEnemy();
+      if (target) selectEntity(target);
+    }
+    if (!target || target.kind !== 'enemy' || !target.alive) {
+      addLog('Tidak ada musuh di Node ini untuk memakai Weapon Skill [W]!', 'sys');
+      return;
+    }
+
+    const wpn = getWeapon();
+    const dist = state.pos.distanceTo(target.pos);
+    if (dist > wpn.range + 0.6) {
+      const dir = new THREE.Vector3().subVectors(target.pos, state.pos).normalize();
+      state.moveTarget = target.pos.clone().sub(dir.multiplyScalar(Math.max(1.6, wpn.range - 0.5)));
+      addLog(`Mendekati ${target.name} untuk [W] ${ws.name}...`, 'sys');
+      return;
+    }
+
+    if (Math.abs(target.pos.x - state.pos.x) > 0.1) {
+      state.facing = target.pos.x >= state.pos.x ? 1 : -1;
+    }
+    state.gcdRemaining = state.gcdDuration;
+    state.weaponSkillCd = ws.effectiveCooldownSec;
+    state.lungeTimer = 0.22;
+    state.swingTimer = 0.26;
+
+    const p = state.player;
+    const pas = build.passiveTotals;
+    const baseStrike = (wpn.dmg + Math.floor(p.stats.STR / 2)) * 1.15;
+    let rawDmg = baseStrike * ws.effectiveMultiplier * (1 + ((pas.dmg_pct || 0) + (pas.trigger_power_pct || 0) * 0.5) / 100);
+    let labelPrefix = `[W] ${ws.name}! `;
+    let color = '#6ce0d4';
+    let extraVfxId = 'crit_spark';
+
+    // Jika pemain belum membuka T3 Interrupt, [W] Weapon Skill bisa melakukan Stagger-Interrupt darurat di Lv.1!
+    const hasClassInterrupt = build.equippedSkills.some(s => s.interrupts_cast);
+    if (!hasClassInterrupt && target.casting) {
+      target.casting = false;
+      target.castTimer = 0;
+      vfx.syncTelegraph(target.id, target.pos, 0, false);
+      target.stunTimer = 1.8;
+      rawDmg *= 1.35;
+      labelPrefix = 'INTERRUPTED! ' + labelPrefix;
+      addLog(`✦ [W] ${ws.name} menggagalkan ${target.tpl.castSkill} milik ${target.name}!`, 'combat');
+    }
+
+    const el = state.arcaneEdgeTimer > 0 && target.tpl.weak !== 'Neutral' ? target.tpl.weak : wpn.el;
+    if (el !== 'Neutral' && el === target.tpl.weak) {
+      rawDmg *= 1.25;
+      labelPrefix = 'WEAKNESS! ' + labelPrefix;
+    }
+
+    const finalDmg = Math.max(3, Math.round(rawDmg * (1 - target.armor / 100)));
+    const mainVfxId = el === 'Lightning' ? 'bolt_lightning' : (wpn.mode === 'Jauh' ? 'ranged_throw' : 'slash_fire');
+    applyDamageToEnemy(target, finalDmg, labelPrefix, color, mainVfxId, wpn.mode === 'Jauh', extraVfxId);
+    awardSkillMasteryXP(ws.id, `[W] ${ws.name}`);
+    updateHUD();
+  }
+
+  function performAutoAttack(target) {
+    if (!target || target.kind !== 'enemy' || !target.alive) return;
+    const wpn = getWeapon();
+    if (state.pos.distanceTo(target.pos) > wpn.range + 0.6) return;
+
+    if (Math.abs(target.pos.x - state.pos.x) > 0.1) {
+      state.facing = target.pos.x >= state.pos.x ? 1 : -1;
+    }
+    state.swingTimer = 0.2;
+
+    const p = state.player;
+    const build = state.v33Build || refreshBuildV33(true);
+    const pas = build.passiveTotals;
+    const destSig = getActiveDestinySignature();
+
+    if (destSig.spellblade_mark_bonus_pct && wpn.mode === 'Dekat') state.runeMarkActive = true;
+    if ((p.smithTiers.Weaponsmith || 0) >= 1 && Math.random() < 0.25) addSmithResource('forge_heat', 1);
+
+    let rawDmg = (wpn.dmg + Math.floor(p.stats.STR / 2)) * (0.72 + (pas.dmg_pct || 0) / 140);
+    const el = state.arcaneEdgeTimer > 0 && target.tpl.weak !== 'Neutral' ? target.tpl.weak : wpn.el;
+    if (el !== 'Neutral' && el === target.tpl.weak) rawDmg *= 1.25;
+
+    const finalDmg = Math.max(1, Math.round(rawDmg * (1 - target.armor / 100)));
+    const mainVfxId = el === 'Lightning' ? 'bolt_lightning' : (wpn.mode === 'Jauh' ? 'ranged_throw' : 'slash_neutral');
+    applyDamageToEnemy(target, finalDmg, '', '#dce4ec', mainVfxId, wpn.mode === 'Jauh', null);
   }
 
   function applyDamageToEnemy(target, dmg, prefix, color, vfxId, isRanged, extraVfxId) {
@@ -1502,9 +1883,10 @@
     }
   }
 
-  function openModal(html) {
+  function openModal(html, wide) {
     state.modalOpen = true;
     const box = document.getElementById('modal-content');
+    box.classList.toggle('wide', Boolean(wide));
     box.innerHTML = html;
     document.getElementById('modal-backdrop').classList.add('open');
   }
@@ -1559,7 +1941,7 @@
       <div class="modal-head">
         <div>
           <h2 class="modal-title">🔥 Bengkel Tempa Tidewrack (Lv.1)</h2>
-          <div class="modal-sub">Tempa senjata Dekat/Jauh/Rune untuk uji jangkauan 3D & naikkan XP Smith!</div>
+          <div class="modal-sub">Tempa senjata Dekat/Jauh/Rune — jurus [W] Weapon Skill otomatis ikut berganti!</div>
         </div>
         <button class="close-btn" id="btn-close-modal">Tutup</button>
       </div>
@@ -1594,7 +1976,8 @@
         state.player.equippedWeaponId = w.id;
         state.quests.forgedOnce = true;
         refreshHeroSprite();
-        addLog(`🔥 Berhasil menempa & memakai ${w.name} (${w.mode}, ${w.el})!`, 'loot');
+        refreshBuildV33();
+        addLog(`🔥 Berhasil menempa & memakai ${w.name} ([W] ${w.trigger})!`, 'loot');
         grantXP('smith', 25);
         openForgeModal();
       };
@@ -1604,8 +1987,9 @@
       btn.onclick = () => {
         state.player.equippedWeaponId = btn.dataset.equip;
         refreshHeroSprite();
+        refreshBuildV33();
         const w = getWeapon();
-        addLog(`⚔️ Memakai ${w.name} (Jarak ${w.mode}: ${w.range}m, Elemen ${w.el}).`, 'sys');
+        addLog(`⚔️ Memakai ${w.name} (Jarak ${w.mode}: ${w.range}m, [W] ${w.trigger}).`, 'sys');
         updateHUD();
         openForgeModal();
       };
@@ -1854,6 +2238,8 @@
   function openSheetModal() {
     const p = state.player;
     const w = getWeapon();
+    const build = state.v33Build || refreshBuildV33(true);
+    const card = build.activeDestinyCard;
     const statsHtml = Object.entries(p.stats).map(([k, v]) => `<span class="tag"><b>${k}</b>: ${v}</span>`).join(' ');
     const invHtml = Object.keys(MATERIAL_CATALOG).map(id => {
       const m = MATERIAL_CATALOG[id];
@@ -1864,7 +2250,7 @@
       <div class="modal-head">
         <div>
           <h2 class="modal-title">🛡️ Lembar Karakter — Lv.${p.level} ${p.smithClass}</h2>
-          <div class="modal-sub">Tier ${p.tier} (Cap Stat 30) • Senjata: ${w.name} (${w.mode} ${w.range}m)</div>
+          <div class="modal-sub">Kartu Destiny: <b>${card ? card.displayName : p.smithClass}</b> • Macro Bar: ${build.equippedSkills.length}/${build.maxSlots} Slot + [W] • GCD ${state.gcdDuration}d</div>
         </div>
         <button class="close-btn" id="btn-close-modal">Tutup</button>
       </div>
@@ -1872,12 +2258,436 @@
       <div class="dialog-speech" style="margin-bottom:10px">
         <b>Moral Conscience (WD-4.06):</b> Mulia ${p.mulia} | Kejam ${p.kejam}<br>
         <b>Companion Murid:</b> ${state.companion.recruited ? `${state.companion.name} (Aktif — Loyalitas ${state.companion.loyalty}/100)` : 'Belum direkrut (Temui Kael di Tidewrack Village)'}<br>
-        <b>Kontrol Laptop:</b> WASD / Klik Tanah untuk jalan, Klik NPC/Musuh, Tab ganti target, 1/2/3 Skill, E interaksi, Klik-Kanan seret putar kamera.<br>
-        <b>Kontrol HP:</b> Tap tanah untuk jalan, Tap NPC/Portal/Musuh, atau aktifkan tombol D-Pad!
+        <b>Kontrol Laptop:</b> WASD / Klik Tanah jalan • <b>[1–6]</b> Skill Class • <b>[Q]</b> Weapon Skill [W] • <b>[K]</b> Skill Tree & 29 Kartu Destiny • <b>[E]</b> Interaksi • <b>[Tab]</b> Ganti Target • Klik-Kanan putar kamera.<br>
+        <b>Kontrol HP:</b> Tap tanah/NPC/Musuh, tap tombol skill di bawah, atau aktifkan D-Pad!
       </div>
       <div class="item-grid">${invHtml}</div>
     `);
     document.getElementById('btn-close-modal').onclick = closeModal;
+  }
+
+  // --- MODAL CD v3.3: 5 POHON SMITH, RF MASTERY (Lv.1-GM), 29 KARTU DESTINY & WEAPON SKILL [W] ---
+  const v33Ui = { tab: 'tree', selectedClass: 'Weaponsmith', switchTargetId: null };
+
+  function applyBuildPreset(name) {
+    const p = state.player;
+    if (name === 'starter') {
+      p.smithTiers = { Weaponsmith: 1, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
+      p.firstTakenClass = 'Weaponsmith';
+      p.activeDestinyId = null;
+      p.stats.INT = 2;
+      p.equippedSkillIds = ['wpn_t1_a'];
+    } else if (name === 'spellblade') {
+      p.smithTiers = { Weaponsmith: 3, Armorer: 0, Rangesmith: 0, Runesmith: 2, Reforger: 0 };
+      p.firstTakenClass = 'Weaponsmith';
+      p.activeDestinyId = null;
+      p.stats.INT = Math.max(p.stats.INT, 30);
+      p.equippedSkillIds = ['wpn_t1_a', 'wpn_t2_a', 'wpn_t3_a', 'run_t1_a'];
+    } else if (name === 'archblade') {
+      p.smithTiers = { Weaponsmith: 5, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
+      p.firstTakenClass = 'Weaponsmith';
+      p.activeDestinyId = null;
+      p.stats.INT = Math.max(p.stats.INT, 30);
+      p.equippedSkillIds = ['wpn_t1_a', 'wpn_t2_a', 'wpn_t4_a', 'wpn_t5_a'];
+    } else if (name === 'polymath') {
+      p.smithTiers = { Weaponsmith: 1, Armorer: 0, Rangesmith: 0, Runesmith: 2, Reforger: 2 };
+      p.firstTakenClass = 'Runesmith';
+      p.activeDestinyId = null;
+      p.stats.INT = Math.max(p.stats.INT, 30);
+      p.equippedSkillIds = ['run_t1_a', 'run_t2_a', 'ref_t1_a', 'ref_t2_a', 'wpn_t1_a'];
+    } else if (name === 'omnismith') {
+      p.smithTiers = { Weaponsmith: 1, Armorer: 1, Rangesmith: 1, Runesmith: 1, Reforger: 1 };
+      p.firstTakenClass = 'Weaponsmith';
+      p.activeDestinyId = null;
+      p.stats.INT = Math.max(p.stats.INT, 75);
+      p.equippedSkillIds = ['wpn_t1_a', 'run_t1_a', 'ref_t1_a', 'rng_t1_a', 'arm_t1_a'];
+    }
+    v33Ui.switchTargetId = null;
+    refreshBuildV33();
+    updateHUD();
+    addLog(`✦ Preset Build v3.3 aktif: ${state.player.smithClass} (${state.v33Build.equippedSkills.length}/${state.v33Build.maxSlots} slot + [W]).`, 'moral');
+  }
+
+  function openSkillDestinyModal(tab, cls) {
+    if (tab) v33Ui.tab = tab;
+    if (cls) v33Ui.selectedClass = cls;
+
+    const p = state.player;
+    const build = refreshBuildV33(true);
+    const totalPts = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
+    const activeCard = build.activeDestinyCard;
+    const unlockedIds = new Set(build.unlockedDestinyCards.map(c => c.id));
+    const trialDone = state.quests.forgedOnce || state.quests.huntedCount >= 1;
+
+    let bodyHtml = '';
+
+    if (v33Ui.tab === 'tree') {
+      const ptsBar = SMITH_CLASSES.map(c => {
+        const val = p.smithTiers[c] || 0;
+        return `
+          <div class="smith-pt-pill ${v33Ui.selectedClass === c ? 'active-cls' : ''}">
+            <button class="chip-btn ${v33Ui.selectedClass === c ? 'active' : ''}" data-pick-cls="${c}" style="padding:2px 6px">${c}</button>
+            <button class="mini-step-btn" data-pt-dec="${c}" ${val <= 0 || totalPts <= 1 ? 'disabled' : ''}>−</button>
+            <b style="min-width:16px;text-align:center;color:${val > 0 ? '#f6c368' : '#98a6b3'}">T${val}</b>
+            <button class="mini-step-btn" data-pt-inc="${c}" ${totalPts >= 5 || val >= 5 ? 'disabled' : ''}>+</button>
+          </div>
+        `;
+      }).join('');
+
+      const tree = skillData.smith_skill_trees[v33Ui.selectedClass];
+      const clsRank = p.smithTiers[v33Ui.selectedClass] || 0;
+      const isPure5 = totalPts === 5 && clsRank === 5;
+      const tierCards = tree.tiers.map(t => {
+        const sk = t.active_skill;
+        const cp = t.core_passive;
+        const unlocked = t.tier <= clsRank && (!t.pure_only || isPure5);
+        const mastery = skillEngine.getSkillMasteryStage(p.skillMastery[sk.id] || 0);
+        const isEquipped = p.equippedSkillIds.includes(sk.id);
+        const pickedMorphId = p.selectedMorphs[`${v33Ui.selectedClass}_T${t.tier}`] || t.morph_choices[0].id;
+
+        const morphBtns = t.morph_choices.map((m, idx) => {
+          const picked = mastery.morphUnlocked && pickedMorphId === m.id;
+          return `
+            <button class="morph-btn ${picked ? 'picked' : ''}" data-morph-key="${v33Ui.selectedClass}_T${t.tier}" data-morph-id="${m.id}" ${unlocked && mastery.morphUnlocked ? '' : 'disabled'}>
+              <div style="font-weight:700;color:${picked ? '#f6c368' : '#eef1f4'}">${idx + 1}. ${m.name}</div>
+              <div style="font-size:9.5px;color:#6ce0d4;margin:1px 0">${m.branch}${mastery.isGM && picked ? ' • ✦ GM 1.25×' : ''}</div>
+              <div>${m.desc}</div>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="tree-tier-card ${unlocked ? 'unlocked' : 'locked-tier'}">
+            <div class="tier-head">
+              <div>
+                <span class="tag">T${t.tier} ${t.rank_label}</span>
+                <b style="font-size:13px;color:${unlocked ? '#f6c368' : '#98a6b3'};margin-left:4px">${sk.name}</b>
+                <span style="font-size:11px;color:#98a6b3"> • ${sk.role} • CD ${sk.cooldown_sec}d</span>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <span class="skill-rank ${mastery.isGM ? 'gm' : ''}">${mastery.label} (${mastery.xp}${mastery.nextLevelXpReq ? '/' + mastery.nextLevelXpReq : ' MAX'})</span>
+                ${unlocked ? `<button class="chip-btn" data-train-demo="${sk.id}" title="Tambah +60 XP RF Mastery untuk uji cepat">+60 XP</button>` : ''}
+                ${unlocked
+                  ? `<button class="chip-btn ${isEquipped ? 'active' : 'teal'}" data-toggle-equip="${sk.id}">${isEquipped ? '✓ Di Macro Bar' : '+ Pasang Bar'}</button>`
+                  : `<span class="tag">${t.pure_only ? '🔒 5 Poin Murni' : '🔒 Butuh ' + v33Ui.selectedClass + ' T' + t.tier}</span>`
+                }
+              </div>
+            </div>
+            <div style="font-size:11.5px;color:#dce4ec">${sk.desc}</div>
+            <div class="bar-track" style="height:5px;margin:5px 0"><div class="skill-xp-fill" style="width:${mastery.progressToNextPct}%"></div></div>
+            <div class="passive-box ${unlocked && mastery.corePassiveUnlocked ? 'open' : ''}">
+              <b>${unlocked && mastery.corePassiveUnlocked ? '✓ Core Passive:' : '🔒 Core Passive (Buka di Skill Lv.3):'}</b> <b>${cp.name}</b> — ${cp.desc}
+            </div>
+            <div style="font-size:10.5px;color:${unlocked && mastery.morphUnlocked ? '#f6c368' : '#98a6b3'};margin-top:4px">
+              ${unlocked && mastery.morphUnlocked ? '✦ Pilih 1 dari 3 Morph (SWTOR):' : '🔒 Pilihan Morph 1-dari-3 (Terbuka di Skill Lv.5, Puncak di GM):'}
+            </div>
+            <div class="morph-grid">${morphBtns}</div>
+          </div>
+        `;
+      }).join('');
+
+      bodyHtml = `
+        <div class="preset-strip">
+          <span style="font-size:11px;color:#98a6b3">Uji Cepat Build (5 Poin Smith):</span>
+          <button class="chip-btn" data-preset="starter">Lv.1 Pemula</button>
+          <button class="chip-btn teal" data-preset="spellblade">Spellblade (3+2)</button>
+          <button class="chip-btn" data-preset="archblade">Archblade (5 Murni)</button>
+          <button class="chip-btn teal" data-preset="polymath">Polymath (+1 Slot)</button>
+          <button class="chip-btn active" data-preset="omnismith">Omnismith (1×5)</button>
+        </div>
+        <div class="smith-pts-bar">
+          <div style="width:100%;font-size:11px;color:#98a6b3;display:flex;justify-content:space-between">
+            <span>Alokasi 5 Poin Tier Smith (Terpakai: <b style="color:#f6c368">${totalPts}/5</b>)</span>
+            <span>Resource ${tree.smith_class}: <b style="color:#6ce0d4">${tree.resource.name}</b> • Slot Macro: <b>${build.equippedSkills.length}/${build.maxSlots}</b></span>
+          </div>
+          ${ptsBar}
+        </div>
+        ${tierCards}
+      `;
+    } else if (v33Ui.tab === 'destiny') {
+      const switchTarget = v33Ui.switchTargetId && v33Ui.switchTargetId !== activeCard?.id
+        ? skillData.destiny_cards[v33Ui.switchTargetId]
+        : null;
+      let switchBoxHtml = '';
+      if (switchTarget) {
+        const trialEval = skillEngine.evaluateDestinySwitch({
+          currentCardId: activeCard?.id,
+          targetCardId: switchTarget.id,
+          smithTiers: p.smithTiers,
+          firstTakenClass: p.firstTakenClass,
+          level: p.level,
+          method: 'trial',
+          trialCompleted: trialDone,
+          isFactionHostile: p.isFactionHostile,
+          playerBronze: p.bronze
+        });
+        const goldEval = skillEngine.evaluateDestinySwitch({
+          currentCardId: activeCard?.id,
+          targetCardId: switchTarget.id,
+          smithTiers: p.smithTiers,
+          firstTakenClass: p.firstTakenClass,
+          level: p.level,
+          method: 'gold',
+          isFactionHostile: p.isFactionHostile,
+          playerBronze: p.bronze
+        });
+        switchBoxHtml = `
+          <div class="switch-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+              <b style="color:#f6c368">🔄 Konfirmasi Ganti Kartu Destiny → ${switchTarget.name || switchTarget.names_by_tier[0]}</b>
+              <button class="chip-btn" id="btn-cancel-switch">Batal</button>
+            </div>
+            <div style="font-size:11px;color:#98a6b3;margin-bottom:8px">
+              Aturan Jalur Ganda (CD-3.02b): Pilih Misi Forgemasters' Guild (Gratis) atau Bayar Instan (500br × Lv.${p.level} × T${p.tier}${p.isFactionHostile ? ' + 50% Shadow Syndicate!' : ''}).
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button class="btn-primary" id="btn-do-switch-trial" ${trialEval.allowed ? '' : 'disabled'}>
+                ${trialEval.allowed ? '✓ Jalur Misi Guild (GRATIS — Trial Terpenuhi!)' : (p.isFactionHostile ? '🔒 Misi Guild Diblokir (Status Hostile!)' : '🔒 Selesaikan 1 Tempa / 1 Kill Pantai dulu')}
+              </button>
+              <button class="btn-secondary" id="btn-do-switch-gold" ${goldEval.allowed ? '' : 'disabled'}>
+                💰 Bayar via ${goldEval.broker}: ${goldEval.costBronze} br ${goldEval.allowed ? '(Cukup)' : '(Kurang ' + goldEval.shortfallBronze + ' br)'}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      const allCards = Object.values(skillData.destiny_cards);
+      const renderGroup = (title, cards) => `
+        <div style="font-size:11.5px;font-weight:700;color:#f6c368;margin:10px 0 6px">${title}</div>
+        <div class="destiny-grid">
+          ${cards.map(c => {
+            const isUnlocked = unlockedIds.has(c.id);
+            const isActive = activeCard && activeCard.id === c.id;
+            const liveObj = build.unlockedDestinyCards.find(x => x.id === c.id);
+            const label = liveObj ? liveObj.displayName : (c.name || c.names_by_tier[4]);
+            const reqText = c.category === 'pure'
+              ? `${c.smith_class} T1–T5`
+              : (c.category === 'dual' ? `${c.primary} > ${c.secondary}` : `Min. ${c.min_classes} Smith Class`);
+            return `
+              <div class="destiny-card ${isActive ? 'active' : (isUnlocked ? 'unlocked' : 'locked')}">
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
+                    <b style="font-size:12.5px;color:${isActive ? '#ffe066' : (isUnlocked ? '#6ce0d4' : '#98a6b3')}">${label}</b>
+                    <span class="tag">${reqText}</span>
+                  </div>
+                  <div style="font-size:10.5px;color:#dce4ec;margin-top:4px"><b>${c.signature.name}:</b> ${c.signature.desc}</div>
+                </div>
+                <div>
+                  ${isActive
+                    ? `<button class="btn-secondary" disabled style="width:100%">★ Kartu Destiny Aktif</button>`
+                    : (isUnlocked
+                      ? `<button class="btn-primary" data-req-switch="${c.id}" style="width:100%">🔄 Ganti ke Kartu Ini...</button>`
+                      : `<span style="font-size:10px;color:#98a6b3">🔒 Belum memenuhi syarat sebaran poin</span>`)
+                  }
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      bodyHtml = `
+        <div class="destiny-hero">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <div>
+              <div style="font-size:11px;color:#6ce0d4">KARTU DESTINY AKTIF (KINGDOMS OF AMALUR × CD-3.02b)</div>
+              <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#ffe066">🃏 ${activeCard ? activeCard.displayName : '-'} <span class="tag">${activeCard ? activeCard.category.toUpperCase() : ''}</span></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <button class="chip-btn ${p.isFactionHostile ? 'active' : ''}" id="btn-toggle-hostile">
+                ${p.isFactionHostile ? '☠️ Guild Hostile (Syndicate +50%)' : '🏛️ Guild Ramah (Trial Aktif)'}
+              </button>
+              <button class="chip-btn teal" id="btn-demo-gold">+2000 br (Dana Uji)</button>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:#eef1f4;margin-top:6px">
+            <b>Signature (${activeCard?.signature?.name || '-'}):</b> ${activeCard?.signature?.desc || '-'}
+            ${activeCard && !activeCard.signatureActive ? ' <span style="color:#f6c368">(Aktif penuh mulai Tier 3)</span>' : ''}
+          </div>
+          <div style="font-size:11px;color:#98a6b3;margin-top:4px">
+            Koleksi Terbuka: <b style="color:#6ce0d4">${build.unlockedDestinyCards.length}/29 Kartu</b> • Status Misi Trial: <b style="color:${trialDone ? '#8fe3b8' : '#f6c368'}">${trialDone ? '✓ Terpenuhi (Tempa / Patroli)' : 'Belum (Tempa 1 senjata / kalahkan 1 monster)'}</b> • Kas: <b>${p.bronze} br</b>
+          </div>
+        </div>
+        ${switchBoxHtml}
+        ${renderGroup('A. 5 Kartu Destiny Murni (Skala Tier 1–5)', allCards.filter(c => c.category === 'pure'))}
+        ${renderGroup('B. 20 Kartu Destiny Dual-Class Berarah', allCards.filter(c => c.category === 'dual'))}
+        ${renderGroup('C. 4 Kartu Destiny Multi-Class (3–5 Class)', allCards.filter(c => c.category === 'multi'))}
+      `;
+    } else {
+      const ws = build.weaponSkill;
+      const w = getWeapon();
+      bodyHtml = `
+        <div class="destiny-hero">
+          <div style="font-size:11px;color:#6ce0d4">1 SLOT KHUSUS WEAPON SKILL [W] • HOTKEY [Q]</div>
+          <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#ffe066">⚔️ ${ws.name} <span class="skill-rank ${ws.mastery.isGM ? 'gm' : ''}">${ws.mastery.label}</span></div>
+          <div style="font-size:12px;color:#eef1f4;margin-top:4px">Senjata Terpasang: <b>${w.name}</b> (${w.stat} • ${w.mode} ${w.range}m • ${w.el})</div>
+          <div style="font-size:11.5px;color:#98a6b3;margin-top:4px">
+            Status: <b style="color:${ws.unlocked ? '#8fe3b8' : '#ff7c73'}">${ws.unlocked ? (ws.unlockedByOmnismith ? '✓ TERBUKA VIA OMNISMITH (Bebas 48 Senjata!)' : '✓ TERBUKA (' + ws.governing_smith + ' cocok)') : '🔒 TERKUNCI — Butuh min. Tier 1 ' + ws.governing_smith + ' atau Destiny Omnismith'}</b>
+          </div>
+          <div style="font-size:11.5px;color:#dce4ec;margin-top:4px">
+            Cooldown Efektif: <b>${ws.effectiveCooldownSec}d</b> • Multiplier Efektif: <b>${ws.effectiveMultiplier}×</b> • RF XP: <b>${ws.mastery.xp}${ws.mastery.nextLevelXpReq ? '/' + ws.mastery.nextLevelXpReq : ' (GM MAX)'}</b>
+          </div>
+          <div class="bar-track" style="height:6px;margin:7px 0"><div class="skill-xp-fill" style="width:${ws.mastery.progressToNextPct}%"></div></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <button class="btn-primary" id="btn-train-wpn-demo">+60 XP Latih Weapon Skill [W]</button>
+            <button class="chip-btn ${p.fastTraining ? 'active' : ''}" id="btn-toggle-fast-train">
+              ${p.fastTraining ? '⚡ Kecepatan Latih RF: Demo Cepat (12× XP)' : '🐢 Kecepatan Latih RF: Standar Asli (1× XP)'}
+            </button>
+          </div>
+        </div>
+        <div class="dialog-speech">
+          <b>Aturan Anti-Spam (SWTOR × RF Classic):</b><br>
+          • <b>Global Cooldown (GCD): ${state.gcdDuration} detik</b> berlaku lintas semua tombol setiap kali skill digunakan — jeda otomatis diisi oleh <b>Auto-Attack</b> senjata (DEX & Weapon Trigger tetap vital!).<br>
+          • <b>Use-to-Level (Lv.1 → GM):</b> Setiap skill yang digunakan secara manual maupun lewat <b>Mode Idle</b> menaikkan mastery hingga <b>GM (+40% efektivitas, -10% Cooldown, Puncak Morph 1.25×)</b>!
+        </div>
+      `;
+    }
+
+    openModal(`
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title">🌳 Skill Tree Smith, RF Mastery & 29 Kartu Destiny (CD v3.3)</h2>
+          <div class="modal-sub">125 Node Class • RF Classic Lv.1–GM • 29 Kartu Destiny Amalur • 48 Weapon Skills [W] • GCD ${state.gcdDuration}d</div>
+        </div>
+        <button class="close-btn" id="btn-close-modal">Tutup</button>
+      </div>
+      <div class="v33-tabs">
+        <button class="v33-tab-btn ${v33Ui.tab === 'tree' ? 'active' : ''}" data-v33tab="tree">🌳 5 Pohon Smith & Morph</button>
+        <button class="v33-tab-btn ${v33Ui.tab === 'destiny' ? 'active' : ''}" data-v33tab="destiny">🃏 29 Kartu Destiny (${build.unlockedDestinyCards.length})</button>
+        <button class="v33-tab-btn ${v33Ui.tab === 'weapon' ? 'active' : ''}" data-v33tab="weapon">⚔️ Weapon Skill [W] & GCD</button>
+      </div>
+      ${bodyHtml}
+    `, true);
+
+    document.getElementById('btn-close-modal').onclick = closeModal;
+    document.querySelectorAll('[data-v33tab]').forEach(btn => {
+      btn.onclick = () => openSkillDestinyModal(btn.dataset.v33tab);
+    });
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.onclick = () => { applyBuildPreset(btn.dataset.preset); openSkillDestinyModal('tree'); };
+    });
+    document.querySelectorAll('[data-pick-cls]').forEach(btn => {
+      btn.onclick = () => openSkillDestinyModal('tree', btn.dataset.pickCls);
+    });
+    document.querySelectorAll('[data-pt-inc]').forEach(btn => {
+      btn.onclick = () => {
+        const c = btn.dataset.ptInc;
+        const sum = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
+        if (sum < 5 && (p.smithTiers[c] || 0) < 5) {
+          if (sum === 0) p.firstTakenClass = c;
+          p.smithTiers[c] = (p.smithTiers[c] || 0) + 1;
+          refreshBuildV33();
+          updateHUD();
+          openSkillDestinyModal('tree', c);
+        }
+      };
+    });
+    document.querySelectorAll('[data-pt-dec]').forEach(btn => {
+      btn.onclick = () => {
+        const c = btn.dataset.ptDec;
+        const sum = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
+        if (sum > 1 && (p.smithTiers[c] || 0) > 0) {
+          p.smithTiers[c] -= 1;
+          refreshBuildV33();
+          updateHUD();
+          openSkillDestinyModal('tree', c);
+        }
+      };
+    });
+    document.querySelectorAll('[data-train-demo]').forEach(btn => {
+      btn.onclick = () => {
+        const sId = btn.dataset.trainDemo;
+        const res = skillEngine.trainSkillMastery(p.skillMastery, sId, 60, 1);
+        p.skillMastery = res.masteryState;
+        refreshBuildV33();
+        updateHUD();
+        openSkillDestinyModal('tree');
+      };
+    });
+    document.querySelectorAll('[data-toggle-equip]').forEach(btn => {
+      btn.onclick = () => {
+        const sId = btn.dataset.toggleEquip;
+        const idx = p.equippedSkillIds.indexOf(sId);
+        if (idx >= 0) {
+          if (p.equippedSkillIds.length > 1) p.equippedSkillIds.splice(idx, 1);
+        } else {
+          if (p.equippedSkillIds.length >= build.maxSlots) p.equippedSkillIds.shift();
+          p.equippedSkillIds.push(sId);
+        }
+        refreshBuildV33();
+        updateHUD();
+        openSkillDestinyModal('tree');
+      };
+    });
+    document.querySelectorAll('[data-morph-id]').forEach(btn => {
+      btn.onclick = () => {
+        p.selectedMorphs[btn.dataset.morphKey] = btn.dataset.morphId;
+        refreshBuildV33();
+        updateHUD();
+        openSkillDestinyModal('tree');
+      };
+    });
+
+    // Destiny Tab Actions
+    const toggleHostile = document.getElementById('btn-toggle-hostile');
+    if (toggleHostile) toggleHostile.onclick = () => { p.isFactionHostile = !p.isFactionHostile; openSkillDestinyModal('destiny'); };
+    const demoGold = document.getElementById('btn-demo-gold');
+    if (demoGold) demoGold.onclick = () => { p.bronze += 2000; updateHUD(); openSkillDestinyModal('destiny'); };
+    const cancelSw = document.getElementById('btn-cancel-switch');
+    if (cancelSw) cancelSw.onclick = () => { v33Ui.switchTargetId = null; openSkillDestinyModal('destiny'); };
+    document.querySelectorAll('[data-req-switch]').forEach(btn => {
+      btn.onclick = () => { v33Ui.switchTargetId = btn.dataset.reqSwitch; openSkillDestinyModal('destiny'); };
+    });
+    const doTrial = document.getElementById('btn-do-switch-trial');
+    if (doTrial) doTrial.onclick = () => {
+      const res = skillEngine.evaluateDestinySwitch({
+        currentCardId: activeCard?.id, targetCardId: v33Ui.switchTargetId,
+        smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
+        level: p.level, method: 'trial', trialCompleted: trialDone,
+        isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
+      });
+      if (res.allowed) {
+        p.activeDestinyId = res.newActiveDestinyId;
+        v33Ui.switchTargetId = null;
+        refreshBuildV33();
+        updateHUD();
+        vfx.playVFX('levelup_pillar', state.pos);
+        addLog(`🃏 Ganti Kartu Destiny via Misi ${res.broker} (GRATIS) → ${res.newActiveDestinyName}!`, 'moral');
+        openSkillDestinyModal('destiny');
+      }
+    };
+    const doGold = document.getElementById('btn-do-switch-gold');
+    if (doGold) doGold.onclick = () => {
+      const res = skillEngine.evaluateDestinySwitch({
+        currentCardId: activeCard?.id, targetCardId: v33Ui.switchTargetId,
+        smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
+        level: p.level, method: 'gold',
+        isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
+      });
+      if (res.allowed) {
+        p.bronze = res.remainingBronze;
+        p.activeDestinyId = res.newActiveDestinyId;
+        v33Ui.switchTargetId = null;
+        refreshBuildV33();
+        updateHUD();
+        vfx.playVFX('aura_light', state.pos);
+        addLog(`🃏 Ganti Kartu Destiny via ${res.broker} (-${res.costBronze} br) → ${res.newActiveDestinyName}!`, 'moral');
+        openSkillDestinyModal('destiny');
+      }
+    };
+
+    // Weapon Tab Actions
+    const trainWpn = document.getElementById('btn-train-wpn-demo');
+    if (trainWpn) trainWpn.onclick = () => {
+      const res = skillEngine.trainSkillMastery(p.skillMastery, build.weaponSkill.id, 60, 1);
+      p.skillMastery = res.masteryState;
+      refreshBuildV33();
+      updateHUD();
+      openSkillDestinyModal('weapon');
+    };
+    const toggleFast = document.getElementById('btn-toggle-fast-train');
+    if (toggleFast) toggleFast.onclick = () => { p.fastTraining = !p.fastTraining; openSkillDestinyModal('weapon'); };
   }
 
   // --------------------------------------------------------------------------
@@ -1898,9 +2708,9 @@
     }
     const k = e.key.toLowerCase();
     keys[k] = true;
-    if (k === '1') triggerSkill(0);
-    if (k === '2') triggerSkill(1);
-    if (k === '3') triggerSkill(2);
+    if (k >= '1' && k <= '6') triggerSkill(Number(k) - 1);
+    if (k === 'q') triggerWeaponSkill();
+    if (k === 'k') openSkillDestinyModal('tree');
     if (k === 'e' || k === ' ') {
       if (state.nearestInteractable) interactWith(state.nearestInteractable);
       else if (state.targetEntity) interactWith(state.targetEntity);
@@ -2028,8 +2838,50 @@
   });
 
   // --------------------------------------------------------------------------
-  // 9. UI BINDINGS & HUD UPDATES
+  // 9. UI BINDINGS, DYNAMIC CD v3.3 MACRO BAR & HUD UPDATES
   // --------------------------------------------------------------------------
+  function renderMacroBarSlots() {
+    const build = state.v33Build || refreshBuildV33(true);
+    const wrap = document.getElementById('class-skill-slots');
+    if (!wrap) return;
+    const html = [];
+    for (let i = 0; i < build.maxSlots; i++) {
+      const sk = build.equippedSkills[i];
+      if (sk) {
+        const shortSub = sk.role.includes('Buff') ? 'Buff RF'
+          : (sk.interrupts_cast ? 'Interrupt!'
+            : (sk.consumes_resource ? 'Burst'
+              : (sk.tier === 5 ? 'Apex Ult' : 'Opener')));
+        html.push(`
+          <button class="skill-slot" id="skill-slot-${i}" title="${sk.name} (${sk.smithClass} T${sk.tier}, ${sk.mastery.label}) — ${sk.desc}">
+            <div class="skill-top-row">
+              <span class="skill-key">[${i + 1}]</span>
+              <span class="skill-rank ${sk.mastery.isGM ? 'gm' : ''}" id="skill-rank-${i}">${sk.mastery.label}</span>
+            </div>
+            <span class="skill-name">${sk.name}</span>
+            <span class="skill-sub">${shortSub} • ${sk.effectiveCooldownSec}d</span>
+            <div class="skill-xp-bar"><div class="skill-xp-fill" id="skill-xp-${i}" style="width:${sk.mastery.progressToNextPct}%"></div></div>
+            <div class="gcd-mask" id="skill-gcd-${i}"></div>
+            <div class="cd-mask" id="skill-cd-${i}"></div>
+          </button>
+        `);
+      } else {
+        html.push(`
+          <button class="skill-slot empty-slot" id="skill-slot-${i}" data-open-tree="1" title="Slot kosong — klik [K] untuk alokasi Poin Smith & pasang skill">
+            <span>[${i + 1}]<br>+ Skill</span>
+          </button>
+        `);
+      }
+    }
+    wrap.innerHTML = html.join('');
+    for (let i = 0; i < build.maxSlots; i++) {
+      const el = document.getElementById('skill-slot-' + i);
+      if (!el) continue;
+      if (el.dataset.openTree) el.onclick = () => openSkillDestinyModal('tree');
+      else el.onclick = () => triggerSkill(i);
+    }
+  }
+
   function addLog(text, type) {
     const box = document.getElementById('log-entries');
     const div = document.createElement('div');
@@ -2067,7 +2919,9 @@
       if (ent.casting) {
         castBox.classList.add('casting');
         const pct = Math.min(100, Math.round((ent.castTimer / ent.castDuration) * 100));
-        document.getElementById('target-cast-name').textContent = `⚡ ${ent.tpl.castSkill} — TEKAN [2]!`;
+        const intIdx = state.v33Build ? state.v33Build.equippedSkills.findIndex(s => s.interrupts_cast) : -1;
+        const hintKey = intIdx >= 0 ? `[${intIdx + 1}]` : '[Q]';
+        document.getElementById('target-cast-name').textContent = `⚡ ${ent.tpl.castSkill} — TEKAN ${hintKey}!`;
         document.getElementById('target-cast-fill').style.width = pct + '%';
       } else {
         castBox.classList.remove('casting');
@@ -2082,9 +2936,13 @@
   function updateHUD() {
     const p = state.player;
     const w = getWeapon();
+    const build = state.v33Build || refreshBuildV33(true);
+    const card = build.activeDestinyCard;
+
+    document.getElementById('hud-destiny').textContent = `🃏 ${card ? card.displayName : p.smithClass}`;
     document.getElementById('hud-lvl').textContent = `Lv.${p.level} • T${p.tier}`;
     document.getElementById('hud-hp-fill').style.width = Math.round((p.hp / p.maxHp) * 100) + '%';
-    document.getElementById('hud-hp-val').textContent = `${p.hp}/${p.maxHp}`;
+    document.getElementById('hud-hp-val').textContent = `${p.hp}/${p.maxHp}${p.barrier > 0 ? '+' + Math.round(p.barrier) : ''}`;
     document.getElementById('hud-stam-fill').style.width = Math.round((p.stamina / p.maxStamina) * 100) + '%';
     document.getElementById('hud-stam-val').textContent = `${p.stamina}/${p.maxStamina}`;
     document.getElementById('hud-bronze').textContent = `${p.bronze} br`;
@@ -2098,12 +2956,21 @@
     document.getElementById('hud-xps-fill').style.width = Math.min(100, Math.round((p.xpSmith / p.xpQuota) * 100)) + '%';
     document.getElementById('hud-xps-val').textContent = `${p.xpSmith}/${p.xpQuota}`;
 
-    // Proc & Companion pills
+    // Smith Resources, RF Class Buff, Destiny Signature & GCD Pills
     const procStrip = document.getElementById('proc-strip');
     const pills = [];
-    if (p.procHeat > 0) pills.push(`<span class="buff-pill">🔥 Forge Heat x${p.procHeat} (Skill [3] Siap!)</span>`);
-    if (state.companion.recruited) pills.push(`<span class="buff-pill companion">🛡️ Companion: Kael (Loyalitas ${state.companion.loyalty})</span>`);
-    if (state.idleMode) pills.push(`<span class="buff-pill companion">💤 Mode Idle Aktif</span>`);
+    if (p.resources.forge_heat > 0) pills.push(`<span class="buff-pill">🔥 Forge Heat ${p.resources.forge_heat}</span>`);
+    if (p.resources.bastion_guard > 0) pills.push(`<span class="buff-pill">🛡️ Bastion Guard ${p.resources.bastion_guard}</span>`);
+    if (p.resources.hunters_mark > 0) pills.push(`<span class="buff-pill">🎯 Hunter's Mark ${p.resources.hunters_mark}</span>`);
+    if (p.resources.elemental_charge > 0) pills.push(`<span class="buff-pill">✨ Elem Charge ${p.resources.elemental_charge}/3</span>`);
+    if (p.resources.overclock > 0) pills.push(`<span class="buff-pill">⚙️ Overclock ${p.resources.overclock}</span>`);
+    if (state.activeClassBuffTimer > 0) pills.push(`<span class="buff-pill companion">⚡ ${state.activeClassBuffName} ${state.activeClassBuffTimer.toFixed(0)}d</span>`);
+    if (state.runeMarkActive) pills.push(`<span class="buff-pill destiny">✦ Rune Mark Siap!</span>`);
+    if (state.arcaneEdgeTimer > 0) pills.push(`<span class="buff-pill destiny">✦ Arcane Edge ${state.arcaneEdgeTimer.toFixed(1)}d</span>`);
+    if (state.recentClasses.length > 0 && card?.id === 'Omnismith') pills.push(`<span class="buff-pill destiny">✦ Omni-Chain ${state.recentClasses.length}/3</span>`);
+    if (state.gcdRemaining > 0) pills.push(`<span class="buff-pill gcd-pill">⏱ GCD ${state.gcdRemaining.toFixed(1)}d</span>`);
+    if (state.companion.recruited) pills.push(`<span class="buff-pill companion">🛡️ Kael (${state.companion.loyalty})</span>`);
+    if (state.idleMode) pills.push(`<span class="buff-pill companion">💤 Idle ON</span>`);
     procStrip.innerHTML = pills.join('');
 
     // Quest Tracker
@@ -2114,28 +2981,74 @@
     document.getElementById('q-4').className = 'quest-item ' + (q.huntedCount >= q.huntedGoal ? 'done' : '');
     document.getElementById('q-4').textContent = `• Pindah ke Tidewrack Beach & kalahkan monster (${q.huntedCount}/${q.huntedGoal})`;
 
-    // Skill Slot highlights
-    state.skills.forEach((sk, i) => {
+    // Class Skill Slots (CD + Anti-Spam GCD sweep + RF Mastery XP + Proc/Interrupt glow)
+    const gcdPct = state.gcdRemaining > 0 ? Math.min(100, Math.round((state.gcdRemaining / state.gcdDuration) * 100)) : 0;
+    const enemyCasting = state.targetEntity && state.targetEntity.kind === 'enemy' && state.targetEntity.casting;
+
+    build.equippedSkills.forEach((sk, i) => {
       const slot = document.getElementById('skill-slot-' + i);
+      if (!slot) return;
       const mask = document.getElementById('skill-cd-' + i);
-      if (sk.curCd > 0) {
-        mask.classList.add('on');
-        mask.textContent = sk.curCd.toFixed(1);
-      } else {
-        mask.classList.remove('on');
+      const gcdMask = document.getElementById('skill-gcd-' + i);
+      const rankEl = document.getElementById('skill-rank-' + i);
+      const xpEl = document.getElementById('skill-xp-' + i);
+      const curCd = state.skillCooldowns[sk.id] || 0;
+      const liveMastery = skillEngine.getSkillMasteryStage(p.skillMastery[sk.id] || 0);
+
+      if (rankEl) {
+        rankEl.textContent = liveMastery.label;
+        rankEl.classList.toggle('gm', liveMastery.isGM);
       }
-      slot.classList.toggle('proc-ready', i === 2 && p.procHeat > 0 && sk.curCd <= 0);
-      const enemyCasting = state.targetEntity && state.targetEntity.kind === 'enemy' && state.targetEntity.casting;
-      slot.classList.toggle('interrupt-alert', i === 1 && Boolean(enemyCasting) && sk.curCd <= 0);
+      if (xpEl) xpEl.style.width = liveMastery.progressToNextPct + '%';
+      if (gcdMask) gcdMask.style.height = (curCd <= 0 ? gcdPct : 0) + '%';
+      if (mask) {
+        if (curCd > 0) {
+          mask.classList.add('on');
+          mask.textContent = curCd.toFixed(1);
+        } else {
+          mask.classList.remove('on');
+        }
+      }
+
+      const consumerReady = sk.consumes_resource && (p.resources[sk.consumes_resource.id] || 0) >= 2 && curCd <= 0;
+      slot.classList.toggle('proc-ready', Boolean(consumerReady));
+      slot.classList.toggle('interrupt-alert', Boolean(sk.interrupts_cast && enemyCasting && curCd <= 0));
+      slot.classList.toggle('buff-active', Boolean(sk.role === 'Class Buff (RF)' && state.activeClassBuffTimer > 0));
     });
+
+    // Dedicated Weapon Skill [W] Slot (Hotkey Q)
+    const ws = build.weaponSkill;
+    const wsSlot = document.getElementById('weapon-skill-slot');
+    if (ws && wsSlot) {
+      const wsMastery = skillEngine.getSkillMasteryStage(p.skillMastery[ws.id] || 0);
+      document.getElementById('wpn-skill-name').textContent = ws.name;
+      document.getElementById('wpn-skill-sub').textContent = ws.unlocked
+        ? `${ws.effectiveCooldownSec}d${ws.unlockedByOmnismith ? ' • Omni' : ''}`
+        : `🔒 ${ws.governing_smith} T1`;
+      const wsRankEl = document.getElementById('wpn-skill-rank');
+      wsRankEl.textContent = wsMastery.label;
+      wsRankEl.classList.toggle('gm', wsMastery.isGM);
+      document.getElementById('wpn-skill-xp').style.width = wsMastery.progressToNextPct + '%';
+      document.getElementById('wpn-skill-gcd').style.height = (state.weaponSkillCd <= 0 && ws.unlocked ? gcdPct : 0) + '%';
+      const wsCdEl = document.getElementById('wpn-skill-cd');
+      if (state.weaponSkillCd > 0) {
+        wsCdEl.classList.add('on');
+        wsCdEl.textContent = state.weaponSkillCd.toFixed(1);
+      } else {
+        wsCdEl.classList.remove('on');
+      }
+      wsSlot.classList.toggle('locked', !ws.unlocked);
+      const hasClassInt = build.equippedSkills.some(s => s.interrupts_cast);
+      wsSlot.classList.toggle('interrupt-alert', Boolean(!hasClassInt && ws.unlocked && enemyCasting && state.weaponSkillCd <= 0));
+    }
 
     updateTargetFrame();
   }
 
   // Wire HUD Buttons
-  [0, 1, 2].forEach(i => {
-    document.getElementById('skill-slot-' + i).onclick = () => triggerSkill(i);
-  });
+  document.getElementById('weapon-skill-slot').onclick = () => triggerWeaponSkill();
+  document.getElementById('btn-skill-destiny').onclick = () => openSkillDestinyModal('tree');
+  document.getElementById('hud-destiny').onclick = () => openSkillDestinyModal('destiny');
 
   document.getElementById('context-prompt').onclick = () => {
     if (state.nearestInteractable) interactWith(state.nearestInteractable);
@@ -2159,7 +3072,7 @@
     state.idleMode = !state.idleMode;
     document.getElementById('btn-idle').classList.toggle('active', state.idleMode);
     document.getElementById('btn-idle').textContent = state.idleMode ? '💤 Idle: ON' : '💤 Idle: OFF';
-    addLog(state.idleMode ? 'Mode Idle aktif pada Node ini (Auto-Hunt di pantai / Auto-Tempa di desa).' : 'Mode Idle dimatikan (Kendali Manual).', 'sys');
+    addLog(state.idleMode ? 'Mode Idle aktif (Auto-Hunt + Latihan RF Mastery Lv.1-GM otomatis!).' : 'Mode Idle dimatikan (Kendali Manual).', 'sys');
     updateHUD();
   };
 
@@ -2418,6 +3331,7 @@
       if (!state.player.ownedWeapons.includes(id)) state.player.ownedWeapons.push(id);
       state.player.equippedWeaponId = id;
       refreshHeroSprite();
+      refreshBuildV33();
       updateHUD();
       state.swingTimer = 0.28;
       state.lungeTimer = 0.16;
@@ -2504,14 +3418,32 @@
     // Update VFX Manager, GPU Particles, Hit-Stop & Shake
     const dt = vfx.update(rawDt, elapsed);
 
-    // 1. Cooldowns
+    // 1. CD v3.3 Timers: Anti-Spam GCD (1.3s), Individual Skill CDs, [W] CD, RF Class Buff & Destiny Timers
     let cdChanged = false;
-    state.skills.forEach(sk => {
-      if (sk.curCd > 0) {
-        sk.curCd = Math.max(0, sk.curCd - rawDt);
+    if (state.gcdRemaining > 0) {
+      state.gcdRemaining = Math.max(0, state.gcdRemaining - rawDt);
+      cdChanged = true;
+    }
+    if (state.weaponSkillCd > 0) {
+      state.weaponSkillCd = Math.max(0, state.weaponSkillCd - rawDt);
+      cdChanged = true;
+    }
+    for (const sId of Object.keys(state.skillCooldowns)) {
+      if (state.skillCooldowns[sId] > 0) {
+        state.skillCooldowns[sId] = Math.max(0, state.skillCooldowns[sId] - rawDt);
         cdChanged = true;
       }
-    });
+    }
+    if (state.activeClassBuffTimer > 0) {
+      state.activeClassBuffTimer = Math.max(0, state.activeClassBuffTimer - rawDt);
+      if (state.activeClassBuffTimer <= 0) {
+        state.activeClassBuff = null;
+        state.activeClassBuffName = '';
+      }
+      cdChanged = true;
+    }
+    if (state.arcaneEdgeTimer > 0) state.arcaneEdgeTimer = Math.max(0, state.arcaneEdgeTimer - rawDt);
+    if (state.chronosmithIcd > 0) state.chronosmithIcd = Math.max(0, state.chronosmithIcd - rawDt);
 
     // 2. Player Movement (WASD / D-Pad / Click-to-Move / Idle)
     let moveX = dpadDir.x;
@@ -2574,7 +3506,6 @@
     if (state.swingTimer > 0) {
       state.swingTimer = Math.max(0, state.swingTimer - rawDt);
       const prog = 1 - state.swingTimer / 0.24;
-      // Anticipation backswing -> fast forward cleave -> settle
       const arc = Number(wCfg.swing_arc) || 1.6;
       const angle = prog < 0.22
         ? 0.55 * (prog / 0.22)
@@ -2582,6 +3513,19 @@
       weaponPivot.rotation.z = angle;
     } else {
       weaponPivot.rotation.z = -0.22 + Math.sin(elapsed * (isMoving ? 11 : 2.6)) * (isMoving ? 0.14 : 0.05);
+    }
+
+    // 2b. Live Auto-Attack filler selama jeda GCD (1.3d) & Cooldown!
+    if (!state.modalOpen && state.targetEntity && state.targetEntity.kind === 'enemy' && state.targetEntity.alive) {
+      const wpn = getWeapon();
+      if (state.pos.distanceTo(state.targetEntity.pos) <= wpn.range + 0.6) {
+        state.autoAttackTimer -= dt;
+        if (state.autoAttackTimer <= 0) {
+          const aspdBonus = (state.player.stats.DEX * 1.5) + (state.activeClassBuff?.attack_speed_pct || 0) + (state.v33Build?.passiveTotals?.attack_speed_pct || 0);
+          state.autoAttackTimer = Math.max(0.55, 1.25 / (1 + aspdBonus / 100));
+          performAutoAttack(state.targetEntity);
+        }
+      }
     }
 
     // 3. Companion Follower & Auto-Assist (Kael)
@@ -2603,12 +3547,15 @@
       if (state.targetEntity && state.targetEntity.kind === 'enemy' && state.targetEntity.alive && state.companion.attackCd <= 0) {
         if (companionActor.position.distanceTo(state.targetEntity.pos) < 7.0) {
           state.companion.attackCd = 2.4;
-          applyDamageToEnemy(state.targetEntity, 5, 'Kael ', '#6ce0d4', 'ranged_throw', true);
+          const destSig = getActiveDestinySignature();
+          const compDmg = destSig.companion_mirrors_buff && state.activeClassBuffTimer > 0 ? 7 : 5;
+          applyDamageToEnemy(state.targetEntity, compDmg, 'Kael ', '#6ce0d4', 'ranged_throw', true);
+          if ((state.player.smithTiers.Reforger || 0) >= 1) addSmithResource('overclock', 1);
         }
       }
     }
 
-    // 4. Idle Mode Automation (Inside Active Node!)
+    // 4. Idle Mode Automation (CD v3.3 Anti-Spam GCD Rotation + Latihan RF Mastery Otomatis!)
     if (state.idleMode && !state.modalOpen) {
       state.idleActionTimer -= dt;
       if (state.activeNodeId === 'tidewrack_beach') {
@@ -2622,10 +3569,22 @@
           if (d > wpn.range) {
             const dir = new THREE.Vector3().subVectors(mob.pos, state.pos).normalize();
             state.moveTarget = mob.pos.clone().sub(dir.multiplyScalar(Math.max(1.5, wpn.range - 0.5)));
-          } else {
-            if (mob.casting && state.skills[1].curCd <= 0) triggerSkill(1);
-            else if (state.player.procHeat > 0 && state.skills[2].curCd <= 0) triggerSkill(2);
-            else if (state.skills[0].curCd <= 0) triggerSkill(0);
+          } else if (state.gcdRemaining <= 0) {
+            const build = state.v33Build || refreshBuildV33(true);
+            const eq = build.equippedSkills;
+            const buffIdx = eq.findIndex(s => s.role === 'Class Buff (RF)' && (state.skillCooldowns[s.id] || 0) <= 0);
+            const intIdx = eq.findIndex(s => s.interrupts_cast && (state.skillCooldowns[s.id] || 0) <= 0);
+            const ultIdx = eq.findIndex(s => s.tier === 5 && (state.skillCooldowns[s.id] || 0) <= 0);
+            const consIdx = eq.findIndex(s => s.consumes_resource && (state.skillCooldowns[s.id] || 0) <= 0 && (state.player.resources[s.consumes_resource.id] || 0) >= 2);
+            const readyIdx = eq.findIndex(s => s.role !== 'Class Buff (RF)' && (state.skillCooldowns[s.id] || 0) <= 0);
+
+            if (buffIdx >= 0 && state.activeClassBuffTimer <= 0) triggerSkill(buffIdx);
+            else if (mob.casting && intIdx >= 0) triggerSkill(intIdx);
+            else if (mob.casting && intIdx < 0 && build.weaponSkill?.unlocked && state.weaponSkillCd <= 0) triggerWeaponSkill();
+            else if (ultIdx >= 0) triggerSkill(ultIdx);
+            else if (consIdx >= 0) triggerSkill(consIdx);
+            else if (build.weaponSkill?.unlocked && state.weaponSkillCd <= 0) triggerWeaponSkill();
+            else if (readyIdx >= 0) triggerSkill(readyIdx);
           }
         }
       } else if (state.activeNodeId === 'tidewrack_village' && state.idleActionTimer <= 0) {
@@ -2696,7 +3655,6 @@
           vfx.syncTelegraph(ent.id, state.pos, 0, false);
         } else if (ent.casting) {
           ent.castTimer += dt;
-          // Sync expanding 3D AoE Danger Circle directly on the floor!
           vfx.syncTelegraph(ent.id, state.pos, ent.castTimer / ent.castDuration, true);
           if (ent.castTimer >= ent.castDuration) {
             ent.casting = false;
@@ -2719,15 +3677,19 @@
                 ent.casting = true;
                 ent.castTimer = 0;
                 if (state.targetEntity !== ent) selectEntity(ent);
-                addLog(`⚡ ${ent.name} mulai merapal ${ent.tpl.castSkill}! Tekan [2] Pommel Bash untuk INTERRUPT!`, 'combat');
+                const intIdx = state.v33Build ? state.v33Build.equippedSkills.findIndex(s => s.interrupts_cast) : -1;
+                const hintKey = intIdx >= 0 ? `[${intIdx + 1}] ${state.v33Build.equippedSkills[intIdx].name}` : '[Q] Weapon Skill [W]';
+                addLog(`⚡ ${ent.name} mulai merapal ${ent.tpl.castSkill}! Tekan ${hintKey} untuk INTERRUPT!`, 'combat');
               }
             }
             ent.attackTimer -= dt;
             if (ent.attackTimer <= 0 && !ent.casting) {
               ent.attackTimer = 1.9 / ent.spd;
               const mitigate = Math.min(Math.floor(state.player.stats.CON / 2), Math.floor(ent.dmg * 0.5));
-              const finalDmg = Math.max(1, ent.dmg - mitigate);
+              const guardRed = (state.player.resources.bastion_guard * 3 + (state.activeClassBuff?.dmg_reduction_pct || 0)) / 100;
+              const finalDmg = Math.max(1, Math.round((ent.dmg - mitigate) * (1 - Math.min(0.6, guardRed))));
               vfx.playVFX('slash_neutral', state.pos, { silentJuice: true });
+              if ((state.player.smithTiers.Armorer || 0) >= 1) addSmithResource('bastion_guard', 1);
               damagePlayer(finalDmg, `${ent.name} menyerang`);
             }
           }
@@ -2834,12 +3796,19 @@
 
   function damagePlayer(dmg, sourceMsg) {
     const p = state.player;
-    p.hp = Math.max(0, Math.round(p.hp - dmg));
+    let remaining = dmg;
+    if (p.barrier > 0) {
+      const absorbed = Math.min(p.barrier, remaining);
+      p.barrier = Math.max(0, p.barrier - absorbed);
+      remaining = Math.max(0, remaining - absorbed);
+    }
+    p.hp = Math.max(0, Math.round(p.hp - remaining));
     vfx.shakeMag = Math.max(vfx.shakeMag, 0.12);
-    spawnFloatingText(state.pos, `-${dmg}`, '#ff7875');
-    addLog(`${sourceMsg} (-${dmg} HP).`, 'combat');
+    spawnFloatingText(state.pos, remaining > 0 ? `-${remaining}` : 'BLOCKED!', remaining > 0 ? '#ff7875' : '#6ce0d4');
+    addLog(`${sourceMsg} (-${remaining} HP${remaining < dmg ? ', ditahan Barrier' : ''}).`, 'combat');
     if (p.hp <= 0) {
       p.hp = p.maxHp;
+      p.barrier = 0;
       addLog('⚠ HP habis! Mundur darurat ke Tidewrack Village (HP dipulihkan).', 'combat');
       switchNode('tidewrack_village', 'Tidewrack Village (Pulih)');
     }
@@ -2853,14 +3822,14 @@
   });
 
   // --------------------------------------------------------------------------
-  // 11. BOOT INITIAL NODE: TIDEWRACK VILLAGE (Lv.1)
+  // 11. BOOT INITIAL NODE: TIDEWRACK VILLAGE (Lv.1) + CD v3.3 SKILL ENGINE
   // --------------------------------------------------------------------------
-  calcPlayerDerived();
+  refreshBuildV33();
   applyQualityPreset();
   buildTidewrackVillage();
   playerActor.position.copy(state.pos);
   updateHUD();
-  addLog('Selamat datang di Tidewrack Village (Lv.1)! Klik "🎨 VFX Linker" untuk menguji efek, ganti gambar aset custom, dan atur parameter animasi live.', 'sys');
+  addLog('Selamat datang di Tidewrack Village (CD v3.3)! Klik "🌳 Skill & Destiny" [K] untuk uji 5 Pohon Smith, RF Mastery Lv.1-GM, & 29 Kartu Destiny, atau [Q] untuk Weapon Skill [W]!', 'sys');
 
   requestAnimationFrame(tick);
 })();
