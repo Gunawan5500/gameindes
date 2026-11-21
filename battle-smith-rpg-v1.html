@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battle-Smith RPG — MMORPG (RF Online) + 2.5D Octopath + Text Chronicle UI</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --rf-bg: #080b11;
+      --rf-panel: #101622;
+      --rf-panel-header: #182236;
+      --rf-border: #2c3e5e;
+      --rf-gold: #f5b942;
+      --rf-cyan: #22d3ee;
+      --rf-hp: #ef4444;
+      --rf-fp: #3b82f6;
+      --rf-sp: #eab308;
+    }
+    body {
+      background-color: var(--rf-bg);
+      color: #e2e8f0;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+    .rf-window {
+      background: linear-gradient(180deg, rgba(20, 28, 44, 0.96) 0%, rgba(11, 15, 25, 0.98) 100%);
+      border: 1px solid var(--rf-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .rf-header {
+      background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--rf-border);
+      letter-spacing: 0.04em;
+    }
+    .octopath-stage {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 65%, #1e293b 0%, #090d16 70%, #030508 100%);
+      box-shadow: inset 0 0 65px rgba(0, 0, 0, 0.92);
+    }
+    .octopath-floor {
+      position: absolute;
+      bottom: 0;
+      left: -10%;
+      right: -10%;
+      height: 36%;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.25) 0%, rgba(15, 23, 42, 0.85) 40%, #050811 100%);
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      transform: perspective(360px) rotateX(25deg);
+    }
+    @keyframes floatIdle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes pulseAura {
+      0%, 100% { opacity: 0.75; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    .sprite-bob { animation: floatIdle 2.4s ease-in-out infinite; }
+    .aura-pulse { animation: pulseAura 1.8s ease-in-out infinite; }
+  </style>
+</head>
+<body class="p-2 md:p-3 m-0 text-xs select-none">
+  <div class="max-w-7xl mx-auto space-y-2.5">
+
+    <!-- ================= 1. RF ONLINE TOP TACTICAL HUD (HP/FP/SP + TARGET + RADAR + DUAL XP) ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
+      <!-- Top-Left: Character Status Frame (HP / FP / SP + Class 1-Word + Talic/+N Badge) -->
+      <div class="lg:col-span-5 rf-window rounded p-2.5 flex items-center gap-3">
+        <div class="w-12 h-12 rounded bg-slate-900 border-2 border-amber-400 flex flex-col items-center justify-center shrink-0 relative">
+          <span id="hudLvBadge" class="text-[10px] font-mono font-bold text-amber-300">LV 90</span>
+          <span id="hudTierBadge" class="text-[9px] px-1 rounded bg-amber-500/20 text-amber-200 font-mono">TIER 3</span>
+        </div>
+        <div class="flex-1 min-w-0 space-y-1">
+          <div class="flex items-center justify-between gap-1">
+            <div class="truncate">
+              <span class="font-bold text-sm text-white">ALDEN</span>
+              <span id="hudClassBadge" class="ml-1.5 px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-mono font-bold text-[10px]">SPELLBLADE</span>
+            </div>
+            <span id="hudCurseBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Kutukan: 0</span>
+          </div>
+          <!-- HP Bar -->
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 font-mono font-bold text-[10px] text-red-400">HP</span>
+            <div class="flex-1 h-2.5 bg-slate-950 rounded-sm border border-slate-700 overflow-hidden relative">
+              <div id="hudHpBar" style="width:100%" class="h-full bg-gradient-to-r from-red-700 to-red-500"></div>
+              <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold text-white">625 / 625</span>
+            </div>
+          </div>
+          <!-- FP / Force (Macro & Rune Resonance) -->
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 font-mono font-bold text-[10px] text-blue-400">FP</span>
+            <div class="flex-1 h-2.5 bg-slate-950 rounded-sm border border-slate-700 overflow-hidden relative">
+              <div id="hudFpBar" style="width:100%" class="h-full bg-gradient-to-r from-blue-700 to-cyan-400"></div>
+              <span id="hudFpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold text-white">4 Slot Macro • Weak ×1.41</span>
+            </div>
+          </div>
+          <!-- SP / Stamina Idle (CD-7.01) -->
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 font-mono font-bold text-[10px] text-amber-400">SP</span>
+            <div class="flex-1 h-2.5 bg-slate-950 rounded-sm border border-slate-700 overflow-hidden relative">
+              <div id="hudSpBar" style="width:100%" class="h-full bg-gradient-to-r from-amber-600 to-yellow-400"></div>
+              <span id="hudSpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold text-slate-950">325 / 325 (Cap 8j)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-Center: RF Online Target Monster & Break / Element Scanner -->
+      <div class="lg:col-span-4 rf-window rounded p-2.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-700/80 pb-1">
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-red-500/20 border border-red-500/40 text-red-300 font-mono font-bold text-[10px]" id="targetTypeTag">MINI BOSS</span>
+            <span id="targetNameText" class="font-bold text-amber-300 truncate">Cinderwatch Storm-Wyvern</span>
+          </div>
+          <span id="targetLvText" class="font-mono font-bold text-slate-300">Lv90</span>
+        </div>
+        <div class="my-1.5">
+          <div class="w-full h-3 bg-slate-950 rounded-sm border border-red-900/70 overflow-hidden relative">
+            <div id="targetHpBar" style="width:100%" class="h-full bg-gradient-to-r from-red-800 via-red-600 to-orange-500 transition-all duration-150"></div>
+            <span id="targetHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold text-white">1952 / 1952 HP</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[10px] font-mono text-slate-300">
+          <span id="targetRoleElText">Role: Skirmisher • El: Fire</span>
+          <span id="targetWeakText" class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">WEAK: ICE (ES)</span>
+        </div>
+      </div>
+
+      <!-- Top-Right: RF Radar / World Clock / Gold & Mode Controls -->
+      <div class="lg:col-span-3 rf-window rounded p-2.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span id="radarAreaText" class="font-bold text-cyan-300 truncate">📍 Cinderwatch Isles</span>
+          <span id="radarClockText" class="font-mono text-[10px] text-amber-300">Thn 7 • Hari 2410</span>
+        </div>
+        <div class="flex items-center justify-between text-[11px] font-mono my-1">
+          <span>Kas: <strong id="radarGoldText" class="text-amber-400">119g 56s</strong></span>
+          <span>Cabang: <strong id="radarBranchText" class="text-emerald-400">2 Aktif</strong></span>
+        </div>
+        <div class="grid grid-cols-3 gap-1">
+          <button onclick="setStageMode('Battle')" id="btnModeBattle" class="py-1 rounded bg-red-600 text-white font-bold text-[10px]">⚔️ BATTLE</button>
+          <button onclick="setStageMode('Forge')" id="btnModeForge" class="py-1 rounded bg-slate-800 border border-slate-600 text-slate-200 font-bold text-[10px]">🔨 FORGE</button>
+          <button onclick="triggerOffline8h()" class="py-1 rounded bg-cyan-600 text-slate-950 font-bold text-[10px]" title="Simulasi Offline Cap 8 Jam (CD-7.01)">⏩ +8J IDLE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 2. CENTER: 2.5D OCTOPATH DIORAMA STAGE + RF FLOATING WINDOWS ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
+
+      <!-- Left 8 Cols: 2.5D HD-2D Octopath Diorama Stage + RF Online Macro Action Bar -->
+      <div class="lg:col-span-8 space-y-2">
+        <div class="rf-window rounded overflow-hidden">
+          <!-- Stage Header Bar -->
+          <div class="rf-header px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 font-mono font-bold">2.5D HD-2D STAGE</span>
+              <span id="stageSubHeader" class="text-slate-300">Pertempuran Aktif • Assist Strike Murid tiap 3 dtk</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="manualStrike()" class="px-2.5 py-0.5 rounded bg-amber-500 text-slate-950 font-bold hover:opacity-90">⚡ Pukul / Tempa Manual</button>
+              <button onclick="challengeGateBossUI()" class="px-2.5 py-0.5 rounded bg-purple-600 text-white font-bold hover:opacity-90">⛩️ Tantang Gate Boss</button>
+              <button onclick="doLongRestUI()" class="px-2 py-0.5 rounded bg-slate-800 border border-slate-600 text-slate-200">🏕️ Long Rest</button>
+            </div>
+          </div>
+
+          <!-- 2.5D Diorama Canvas -->
+          <div class="octopath-stage h-64 md:h-72 flex flex-col justify-between p-4">
+            <!-- Top Floating Overlay: Talic/+N Aura Indicator & Anti-Farm Badge -->
+            <div class="flex items-center justify-between z-10">
+              <div class="px-2.5 py-1 rounded bg-slate-950/85 border border-slate-700 flex items-center gap-2">
+                <span id="talicGlowDot" class="w-3 h-3 rounded-full bg-cyan-400 aura-pulse"></span>
+                <div>
+                  <div id="stageWeaponTitle" class="font-bold text-amber-300 text-[11px]">Pedang Besar “Bisikan Leluhur” +15 [Epic]</div>
+                  <div id="stageWeaponSub" class="text-[10px] font-mono text-cyan-300">Fase 3: Masterwork Overforge (+115% Daya) • Hibrida: Badai Beku</div>
+                </div>
+              </div>
+              <div class="px-2.5 py-1 rounded bg-slate-950/85 border border-slate-700 text-right font-mono text-[10px]">
+                <div id="stageDpsReadout" class="text-amber-300 font-bold text-xs">184.5 DPS</div>
+                <div id="stageAntiFarmReadout" class="text-emerald-400">Anti-Farm Δ0: XP 100% • Drop 100%</div>
+              </div>
+            </div>
+
+            <!-- Middle 2.5D Characters Row (Player + Companion Squire vs Monster/Anvil) -->
+            <div class="relative z-10 flex items-end justify-between px-4 md:px-10 pb-4">
+              <!-- Player + Companion Group -->
+              <div class="flex items-end gap-4">
+                <!-- Companion Apprentice Sprite (CD-6.02 Seed AI) -->
+                <div id="companionSpriteBox" class="flex flex-col items-center sprite-bob" style="animation-delay: 0.4s">
+                  <div class="px-1.5 py-0.5 rounded bg-slate-900/90 border border-cyan-500/40 text-[9px] font-mono text-cyan-300 mb-1" id="stageCompanionTag">
+                    Squire: APR-7F3A-Kael (Runelord)
+                  </div>
+                  <div class="w-12 h-16 rounded-t-lg bg-gradient-to-b from-cyan-500/30 to-slate-900 border border-cyan-400/60 flex flex-col items-center justify-center shadow-lg">
+                    <span class="text-lg">🧙‍♂️</span>
+                    <span class="text-[9px] font-mono text-cyan-200" id="stageCompanionAssist">44.8%/3s</span>
+                  </div>
+                </div>
+
+                <!-- Main Player Battle-Smith Sprite + RF Online +N Weapon Halo -->
+                <div class="flex flex-col items-center sprite-bob relative">
+                  <div id="floatingPlayerText" class="h-4 text-[10px] font-mono font-bold text-emerald-400"></div>
+                  <div class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400 text-[10px] font-mono font-bold text-amber-300 mb-1" id="stagePlayerTag">
+                    Alden • Spellblade
+                  </div>
+                  <div id="playerAuraBox" class="w-16 h-20 rounded-t-xl bg-gradient-to-b from-amber-500/30 to-slate-900 border-2 border-amber-400 flex flex-col items-center justify-center relative shadow-2xl">
+                    <span class="text-2xl">⚒️</span>
+                    <span id="stagePlusNBadge" class="px-1.5 py-0.2 rounded bg-purple-600 text-white font-mono font-bold text-[10px] mt-0.5">+15</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center Clash / Floating Combat Number -->
+              <div class="flex flex-col items-center justify-center pb-6">
+                <div id="centerCombatFlash" class="text-sm md:text-base font-mono font-extrabold text-amber-300 tracking-wide">⚡ WEAKNESS EXPLOIT!</div>
+                <div id="centerSubFlash" class="text-[10px] font-mono text-cyan-300">Rotasi SWTOR & Weapon Trigger Aktif</div>
+              </div>
+
+              <!-- Right Side: Enemy Monster OR Forge Anvil (2.5D Octopath Boss Presence) -->
+              <div class="flex flex-col items-center sprite-bob" style="animation-delay: 0.2s">
+                <div id="floatingEnemyText" class="h-4 text-xs font-mono font-extrabold text-red-400">-245!</div>
+                <div id="stageEnemyLabel" class="px-2 py-0.5 rounded bg-red-950/90 border border-red-500/60 text-[10px] font-mono font-bold text-red-200 mb-1">
+                  Cinderwatch Storm-Wyvern (Lv90)
+                </div>
+                <div id="enemySpriteFrame" class="w-20 h-24 rounded-t-2xl bg-gradient-to-b from-red-600/30 via-slate-900 to-slate-950 border-2 border-red-500/80 flex flex-col items-center justify-center shadow-2xl">
+                  <span id="enemyEmojiIcon" class="text-3xl">🐉</span>
+                  <span id="enemyBreakShield" class="mt-1 px-1.5 py-0.2 rounded bg-slate-900 border border-amber-400/50 text-[9px] font-mono text-amber-300">🛡 Break: 3/5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.5D Perspective Floor -->
+            <div class="octopath-floor"></div>
+          </div>
+
+          <!-- Bottom of Stage: RF Online / SWTOR Active Macro Skill Bar (3-6 Slots + Cross-Stat Mods + Dual XP Bar) -->
+          <div class="bg-slate-950 border-t border-slate-800 p-2.5 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="font-mono font-bold text-[10px] text-cyan-300">SWTOR / RF MACRO ACTION BAR (Klik Skill untuk Cast Manual / Auto-Rotasi):</span>
+              <span id="macroSlotCountBadge" class="font-mono text-[10px] text-amber-300">Kapasitas INT Macro: 4 / 6 Slot</span>
+            </div>
+            <div id="rfMacroBarGrid" class="grid grid-cols-2 md:grid-cols-4 gap-2"></div>
+
+            <!-- Dual XP Bar (Battle XP & Smith XP + Cross-Buff Charge CD-1.04 & CD-1.05) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              <div class="bg-slate-900/90 border border-slate-800 rounded p-1.5">
+                <div class="flex justify-between text-[10px] font-mono mb-0.5">
+                  <span class="text-red-300 font-bold">BATTLE XP (Buff -> Smith: <b id="buffB2S">+0%</b>)</span>
+                  <span id="xpBattleText">0 / 8500</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-950 rounded overflow-hidden">
+                  <div id="xpBattleBar" style="width:45%" class="h-full bg-red-500"></div>
+                </div>
+              </div>
+              <div class="bg-slate-900/90 border border-slate-800 rounded p-1.5">
+                <div class="flex justify-between text-[10px] font-mono mb-0.5">
+                  <span class="text-amber-300 font-bold">SMITH XP (Buff -> Battle: <b id="buffS2B">+0%</b>)</span>
+                  <span id="xpSmithText">0 / 8500</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-950 rounded overflow-hidden">
+                  <div id="xpSmithBar" style="width:45%" class="h-full bg-amber-400"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= 3. CONCEPT 1: TEXT-BASED RPG CHRONICLE, COMBAT LOG & MORAL ISSUE TERMINAL ================= -->
+        <div class="rf-window rounded overflow-hidden">
+          <div class="rf-header px-3 py-1.5 flex items-center justify-between">
+            <span class="font-bold text-amber-300">📜 TEXT-BASED CHRONICLE & MORAL ISSUE TERMINAL (`WD-4.12` & Combat Log)</span>
+            <span id="conscienceTerminalBadge" class="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-cyan-300">Conscience: +10 (Mulia)</span>
+          </div>
+          <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-3">
+            <!-- Interactive Text-Based Moral Issue Card -->
+            <div class="md:col-span-6 bg-slate-950/90 border border-slate-800 rounded p-2.5 flex flex-col justify-between">
+              <div id="textMoralBox"></div>
+            </div>
+            <!-- Rolling Text-Based Mud/RPG Log -->
+            <div class="md:col-span-6 bg-slate-950/95 border border-slate-800 rounded p-2.5 font-mono text-[11px] h-40 overflow-y-auto space-y-1" id="textTerminalLog"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 4. RIGHT 4 COLS: RF ONLINE FLOATING SYSTEM WINDOWS (PT / TALIC +N / APPRENTICE / MARKET) ================= -->
+      <div class="lg:col-span-4 space-y-2.5">
+        <!-- RF Window Tab Switcher -->
+        <div class="rf-window rounded p-1.5 grid grid-cols-4 gap-1 text-[10px] font-bold">
+          <button onclick="switchRfTab('pt')" id="tabBtn_pt" class="py-1.5 rounded bg-amber-500 text-slate-950">📊 PT & STAT</button>
+          <button onclick="switchRfTab('talic')" id="tabBtn_talic" class="py-1.5 rounded bg-slate-800 text-slate-300">💎 +N & FUSI</button>
+          <button onclick="switchRfTab('squire')" id="tabBtn_squire" class="py-1.5 rounded bg-slate-800 text-slate-300">🧙‍♂️ 5 MURID</button>
+          <button onclick="switchRfTab('world')" id="tabBtn_world" class="py-1.5 rounded bg-slate-800 text-slate-300">🗺️ 16 AREA</button>
+        </div>
+
+        <!-- TAB 1: RF ONLINE PT WINDOW (6 Primary Stats + 5-Tier Smith Class PT + 21 Smith Perks) -->
+        <div id="rfTab_pt" class="rf-window rounded overflow-hidden">
+          <div class="rf-header px-3 py-1.5 flex items-center justify-between">
+            <span class="font-bold text-cyan-300">RF PT WINDOW — 6 STAT & 5 SMITH CLASS</span>
+            <span id="ptPointsBadge" class="font-mono text-[10px] text-amber-300">Poin: 191 / 191</span>
+          </div>
+          <div class="p-3 space-y-3">
+            <!-- Preset Builds -->
+            <div class="flex flex-wrap gap-1">
+              <button onclick="loadRfPreset(30, 'STR', {Weaponsmith:1,Armorer:0,Rangesmith:0,Runesmith:0,Reforger:0}, 5, 'Rare')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-[10px] hover:border-amber-400">Lv30 Bladesmith (+5)</button>
+              <button onclick="loadRfPreset(90, 'STR', {Weaponsmith:2,Armorer:0,Rangesmith:0,Runesmith:1,Reforger:0}, 15, 'Epic')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-[10px] hover:border-amber-400">Lv90 Spellblade (+15)</button>
+              <button onclick="loadRfPreset(150, 'CON', {Weaponsmith:0,Armorer:5,Rangesmith:0,Runesmith:0,Reforger:0}, 25, 'Unique')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-[10px] hover:border-amber-400">Lv150 Aegisborn (+25)</button>
+              <button onclick="loadRfPreset(150, 'INT', {Weaponsmith:1,Armorer:1,Rangesmith:1,Runesmith:1,Reforger:1}, 30, 'Unique')" class="px-2 py-1 rounded bg-amber-500/20 border border-amber-400 text-amber-300 font-bold text-[10px]">Lv150 Omnismith (+30)</button>
+            </div>
+
+            <!-- Level Slider -->
+            <div class="flex items-center justify-between gap-2 bg-slate-950/70 p-2 rounded border border-slate-800">
+              <span>Level Karakter: <strong id="ptLvText" class="text-amber-300 font-mono">90</strong></span>
+              <input id="ptLvSlider" type="range" min="1" max="150" value="90" oninput="onRfLevelChange(this.value)" class="w-40 accent-amber-400" />
+            </div>
+
+            <!-- 6 Primary Stats Grid -->
+            <div id="rfStatsList" class="space-y-1.5"></div>
+
+            <!-- 5-Tier Smith Class PT Bars (CD-3.01 & CD-3.02b) -->
+            <div class="pt-2 border-t border-slate-800 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-bold text-amber-300">5-Tier Smith Class PT (Maks 5 Poin):</span>
+                <span id="rfSmithPtUsed" class="font-mono text-cyan-300">3 / 5 Tier</span>
+              </div>
+              <div id="rfSmithPtBars" class="space-y-1"></div>
+            </div>
+
+            <!-- Active Smith Perks (CD-3.03) -->
+            <div id="rfActivePerkBox" class="p-2 rounded bg-slate-950 border border-slate-800 text-[10px] space-y-1"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2: RF ONLINE TALIC / +N UNCAPPED UPGRADER & ELEMENT FUSION -->
+        <div id="rfTab_talic" class="rf-window rounded overflow-hidden hidden">
+          <div class="rf-header px-3 py-1.5 flex items-center justify-between">
+            <span class="font-bold text-amber-300">TALIC ENHANCE `+N` TANPA BATAS & FUSI INTI</span>
+            <span class="font-mono text-[10px] text-emerald-400">Anti-Hancur (`CD-4.02`)</span>
+          </div>
+          <div class="p-3 space-y-3">
+            <div>
+              <label class="block text-slate-400 mb-1">Pilih Senjata / Armor (63 Item: 48 Senjata + 15 Armor)</label>
+              <select id="rfWeaponSelect" onchange="onRfGearChange()" class="w-full p-1.5 rounded bg-slate-950 border border-slate-700 text-white font-semibold"></select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">Rarity Anggaran (`CD-4.03`)</label>
+                <select id="rfRaritySelect" onchange="onRfGearChange()" class="w-full p-1.5 rounded bg-slate-950 border border-slate-700 text-amber-300 font-bold">
+                  <option value="Common">Common (+0)</option>
+                  <option value="Uncommon">Uncommon (+10)</option>
+                  <option value="Rare">Rare (+22)</option>
+                  <option value="Epic" selected>Epic (+36)</option>
+                  <option value="Legendary">Legendary (+52)</option>
+                  <option value="Unique">Unique (+75 • Resonance)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Tingkat Enhance `+N` (`0..999`)</label>
+                <div class="flex items-center gap-1">
+                  <button onclick="stepPlusN(-1)" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 font-bold">-</button>
+                  <input id="rfPlusNInput" type="number" min="0" max="999" value="15" oninput="onRfGearChange()" class="w-full p-1 rounded bg-slate-950 border border-amber-500/60 text-center font-mono font-bold text-amber-300" />
+                  <button onclick="stepPlusN(1)" class="px-2 py-1 rounded bg-amber-500 text-slate-950 font-bold">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Element Core & Second Core Hybrid Fusion -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-slate-400 mb-1">Inti Elemen 1</label>
+                <select id="rfCore1" onchange="onRfGearChange()" class="w-full p-1.5 rounded bg-slate-950 border border-slate-700">
+                  <option value="Fire">Fire (Api)</option>
+                  <option value="Ice" selected>Ice (Es)</option>
+                  <option value="Lightning">Lightning (Petir)</option>
+                  <option value="Earth">Earth (Tanah)</option>
+                  <option value="Light">Light (Cahaya)</option>
+                  <option value="Dark">Dark (Gelap)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Fusi Inti 2 (Runesmith ≥1)</label>
+                <select id="rfCore2" onchange="onRfGearChange()" class="w-full p-1.5 rounded bg-slate-950 border border-slate-700">
+                  <option value="">(Tanpa Fusi Kedua)</option>
+                  <option value="Badai Beku (Ice+Lightning)" selected>Badai Beku (Ice+Lightning)</option>
+                  <option value="Magma (Fire+Earth)">Magma (Fire+Earth)</option>
+                  <option value="Plasma (Fire+Lightning)">Plasma (Fire+Lightning)</option>
+                  <option value="Gerhana (Light+Dark)">Gerhana (Light+Dark • Auto-Weak)</option>
+                  <option value="Uap (Fire+Ice)">Uap (Fire+Ice)</option>
+                  <option value="Gempa Listrik (Lightning+Earth)">Gempa Listrik (Lightning+Earth)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Talic / +N Curve Readout -->
+            <div id="rfTalicReadout" class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1 text-[11px]"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: 5 APPRENTICES SEED AI & BRANCH SHOPS (CD-6.02 & WD-3.10) -->
+        <div id="rfTab_squire" class="rf-window rounded overflow-hidden hidden">
+          <div class="rf-header px-3 py-1.5 flex items-center justify-between">
+            <span class="font-bold text-cyan-300">5 MURID SEED AI & CABANG TOKO (`CD-6.02`)</span>
+            <span class="font-mono text-[10px] text-amber-300">Ujian 50 & 80</span>
+          </div>
+          <div id="rfApprenticeBox" class="p-3 space-y-2 max-h-96 overflow-y-auto"></div>
+        </div>
+
+        <!-- TAB 4: 16 AREAS WD & REGIONAL S&D MARKET (WD-5.06 & CD-1.08 ANTI-FARM) -->
+        <div id="rfTab_world" class="rf-window rounded overflow-hidden hidden">
+          <div class="rf-header px-3 py-1.5 flex items-center justify-between">
+            <span class="font-bold text-amber-300">16 AREA WD, ANTI-FARM `CD-1.08`, & PASAR S&D</span>
+            <span class="font-mono text-[10px] text-cyan-300">5 Tier Dunia</span>
+          </div>
+          <div class="p-3 space-y-2.5">
+            <div>
+              <label class="block text-slate-400 mb-1">Pilih Zona Berburu / Pasar Regional (16 Area WD)</label>
+              <select id="rfAreaSelect" onchange="onRfAreaChange()" class="w-full p-1.5 rounded bg-slate-950 border border-slate-700 font-semibold text-cyan-300"></select>
+            </div>
+            <div id="rfAreaDetailBox" class="p-2.5 rounded bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]"></div>
+            <div class="pt-1 border-t border-slate-800">
+              <div class="font-bold text-amber-300 mb-1">Pasar Bahan Lokal (`snd_engine.js` Sparse Delta):</div>
+              <div id="rfMarketList" class="space-y-1.5"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const WD_AREAS = [
+      { id: "A03", name: "Greymoor Downs", tier: 1, minLv: 1, maxLv: 15, el: "Dark", weak: "Light", boss: "Moorqueen Banshee", icon: "👻", mat: "Moorqueen's Sorrow Gem", price: 180 },
+      { id: "A06", name: "Rustleaf Weald", tier: 1, minLv: 10, maxLv: 25, el: "Earth", weak: "Fire", boss: "Autumn Crown Stag", icon: "🦌", mat: "Eternal Autumn Ember", price: 210 },
+      { id: "A09", name: "Briarfall Marches", tier: 1, minLv: 15, maxLv: 30, el: "Ice", weak: "Fire", boss: "Briar Queen Dryad", icon: "🌿", mat: "The Thornfall Crown", price: 260 },
+      { id: "A04", name: "Blackmere Fens", tier: 2, minLv: 31, maxLv: 48, el: "Dark", weak: "Light", boss: "Blackmere Hydra", icon: "🐍", mat: "Blackmere's Rotting Heart", price: 540 },
+      { id: "A05", name: "Elderwake Grove", tier: 2, minLv: 40, maxLv: 55, el: "Light", weak: "Dark", boss: "Arch-Druid of Elderwake", icon: "🌳", mat: "Seed of the First Tree", price: 620 },
+      { id: "A12", name: "Ashwind Steppe", tier: 2, minLv: 45, maxLv: 60, el: "Ice", weak: "Fire", boss: "Dustwind Khan Revenant", icon: "🐎", mat: "Steppe Salt-Crystal", price: 700 },
+      { id: "A01", name: "Hollowfrost Range", tier: 3, minLv: 61, maxLv: 80, el: "Ice", weak: "Fire", boss: "The Glacier King", icon: "❄️", mat: "Heart of the Glacier King", price: 1450 },
+      { id: "A02", name: "Cinderwatch Isles", tier: 3, minLv: 75, maxLv: 90, el: "Fire", weak: "Ice", boss: "Cinderwatch Storm-Wyvern", icon: "🐉", mat: "Heart of the Eternal Beacon", price: 1680 },
+      { id: "A11", name: "Wyrmspine Mountains", tier: 4, minLv: 91, maxLv: 120, el: "Lightning", weak: "Earth", boss: "Thunder Dragon Apex", icon: "⚡", mat: "Heart of the Wyrmspine", price: 3800 },
+      { id: "A16", name: "Crownfrost Obsidian Sanctum", tier: 5, minLv: 121, maxLv: 150, el: "Dark", weak: "Light", boss: "Primeval Crown Knight Revenant", icon: "👑", mat: "Obsidian World-Core", price: 8900 }
+    ];
+
+    const GEAR_CATALOG = [
+      { id: "w_str_4", name: "Pedang Besar", stat: "STR", tag: "Dekat", trigger: "Breaker Edge", dmgPct: 35, trgPct: 30 },
+      { id: "w_str_6", name: "Maul Worldbreaker", stat: "STR", tag: "Dekat", trigger: "Earthbreaker", dmgPct: 35, trgPct: 30 },
+      { id: "w_str_r2", name: "Arbalest Baja", stat: "STR", tag: "Jauh", trigger: "Siege Bolt", dmgPct: 35, trgPct: 25 },
+      { id: "w_dex_4", name: "Katana Bayangan", stat: "DEX", tag: "Dekat", trigger: "Iaijutsu", dmgPct: 28, trgPct: 25 },
+      { id: "w_dex_r2", name: "Crossbow Berulang", stat: "DEX", tag: "Jauh", trigger: "Rapid Volley", dmgPct: 25, trgPct: 25 },
+      { id: "w_con_6", name: "Pedang Penjaga Aegis", stat: "CON", tag: "Dekat", trigger: "Sentinel Oath", dmgPct: 25, trgPct: 20 },
+      { id: "w_con_r2", name: "Ballista Perisai", stat: "CON", tag: "Jauh", trigger: "Fortress Shot", dmgPct: 25, trgPct: 20 },
+      { id: "w_int_3", name: "Palu Rune", stat: "INT", tag: "Dekat", trigger: "Runic Shockwave", dmgPct: 20, trgPct: 45 },
+      { id: "w_int_r2", name: "Senapan Rune Arcane", stat: "INT", tag: "Jauh", trigger: "Arcane Snipe", dmgPct: 22, trgPct: 40 },
+      { id: "w_wis_6", name: "Tombak Pemburu", stat: "WIS", tag: "Dekat", trigger: "Prey Sense", dmgPct: 30, trgPct: 20 },
+      { id: "w_cha_6", name: "Pedang Upacara Penguasa", stat: "CHA", tag: "Dekat", trigger: "Grand Ovation", dmgPct: 25, trgPct: 25 },
+      { id: "a_chest_heavy", name: "[Armor] Zirah Pelat Adamantine", stat: "CON", tag: "Armor Berat", trigger: "Adamantine Bulwark", dmgPct: 15, trgPct: 30 }
+    ];
+
+    const SINGLE_CLASS_NAMES = {
+      Weaponsmith: ["Bladesmith", "Edgewright", "Warmonger", "Vanquisher", "Archblade"],
+      Armorer:     ["Platesmith", "Shieldwright", "Bulwark", "Juggernaut", "Aegisborn"],
+      Rangesmith:  ["Bowyer", "Fletcher", "Deadeye", "Ballistary", "Horizoner"],
+      Runesmith:   ["Runescribe", "Glyphwright", "Spellforger", "Arcanist", "Runelord"],
+      Reforger:    ["Tinkerer", "Temperer", "Transmuter", "Alchemizer", "Sovereign"]
+    };
+    const DUAL_CLASS_NAMES = {
+      "Weaponsmith+Armorer": "Vanguard", "Weaponsmith+Rangesmith": "Skirmisher", "Weaponsmith+Runesmith": "Spellblade", "Weaponsmith+Reforger": "Hellforger",
+      "Armorer+Weaponsmith": "Wardensmith", "Armorer+Rangesmith": "Sentinel", "Armorer+Runesmith": "Runeguard", "Armorer+Reforger": "Ironclad",
+      "Rangesmith+Weaponsmith": "Outrider", "Rangesmith+Armorer": "Bastionbow", "Rangesmith+Runesmith": "Arcarcher", "Rangesmith+Reforger": "Artificer",
+      "Runesmith+Weaponsmith": "Hexblade", "Runesmith+Armorer": "Aegisrune", "Runesmith+Rangesmith": "Starfletcher", "Runesmith+Reforger": "Thaumaturge",
+      "Reforger+Weaponsmith": "Reaver", "Reforger+Armorer": "Colossus", "Reforger+Rangesmith": "Machinist", "Reforger+Runesmith": "Chronosmith"
+    };
+
+    const SWTOR_MACROS = {
+      STR: [
+        { name: "Crushing Blow", role: "Builder (Proc)", mult: 1.4, cd: 5, mod: "+DEX Razor Tempo" },
+        { name: "Titan's Roar", role: "Defensive Shield", mult: 1.2, cd: 10, mod: "+CON Granite Skin" },
+        { name: "Sundering Smash", role: "Core Combo", mult: 2.3, cd: 8, mod: "+INT Adaptive Weak" },
+        { name: "Cataclysmic Anvil", role: "Apex Capstone", mult: 3.75, cd: 18, mod: "+STR Worldbreaker" }
+      ],
+      DEX: [
+        { name: "Viper Lunge", role: "Builder (Proc)", mult: 1.35, cd: 4, mod: "+WIS Keen Eye" },
+        { name: "Riposte Veil", role: "Dodge Counter", mult: 1.25, cd: 9, mod: "+CON Mirage Shield" },
+        { name: "Cyclone Slash", role: "Core Combo", mult: 2.2, cd: 7, mod: "+INT Lightning Arc" },
+        { name: "Phantom Horizon", role: "Apex Capstone", mult: 3.6, cd: 16, mod: "+DEX Double Tempo" }
+      ],
+      CON: [
+        { name: "Shield Bash", role: "Guard Builder", mult: 1.3, cd: 5, mod: "+STR Blunt Force" },
+        { name: "Ironclad Fortress", role: "Mitigate +25%", mult: 1.15, cd: 10, mod: "+CHA Command Ward" },
+        { name: "Bulwark Slam", role: "Guard Combo", mult: 2.25, cd: 8, mod: "+CON Quake Nova" },
+        { name: "World-Forge Aegis", role: "Apex Citadel", mult: 3.55, cd: 18, mod: "+INT Prismatic Reflect" }
+      ],
+      INT: [
+        { name: "Arcane Pulse", role: "Rune Builder", mult: 1.4, cd: 4, mod: "+WIS Crit Flux" },
+        { name: "Nullifying Glyph", role: "Elem Barrier", mult: 1.25, cd: 10, mod: "+CON Ward Matrix" },
+        { name: "Runic Shockwave", role: "Core Combo", mult: 2.4, cd: 7, mod: "+INT Auto-Weakness" },
+        { name: "Runic Supernova", role: "Apex Capstone", mult: 3.9, cd: 18, mod: "+CHA Sovereign Overdrive" }
+      ],
+      WIS: [
+        { name: "Tracker's Mark", role: "Crit Builder", mult: 1.35, cd: 5, mod: "+DEX Quick Draw" },
+        { name: "Foresight Parry", role: "Counter Window", mult: 1.25, cd: 10, mod: "+CON Calm Mind" },
+        { name: "Heartpiercer", role: "Core Combo", mult: 2.35, cd: 8, mod: "+STR Armor Pierce" },
+        { name: "All-Seeing Verdict", role: "Apex Capstone", mult: 3.75, cd: 18, mod: "+WIS Lethal Crit" }
+      ],
+      CHA: [
+        { name: "Noble Challenge", role: "Dread Builder", mult: 1.35, cd: 5, mod: "+STR Warcry" },
+        { name: "Sovereign Aegis", role: "Party Rally", mult: 1.2, cd: 10, mod: "+CON Bastion Aura" },
+        { name: "Rallying Strike", role: "Core Combo", mult: 2.3, cd: 8, mod: "+INT Arcane Decree" },
+        { name: "Forge-King Ovation", role: "Apex Capstone", mult: 3.7, cd: 18, mod: "+CHA Apprentice Volleys" }
+      ]
+    };
+
+    const MORAL_ISSUES = [
+      { id: "ISS-07", city: "Cinderwatch Isles", theme: "Suplai Baja Mercusuar", text: "Penjaga mercusuar Cinderwatch meminta 20 pelat baja tahan badai dengan harga subsidi, sementara saudagar gelap menawar 3x lipat untuk kapal bajak laut." },
+      { id: "ISS-14", city: "Hollowfrost Range", theme: "Inti Es Terlarang", text: "Tetua penambang menemukan kristal Glacier Core ber-trait Cursed yang sangat kuat tetapi menguras vitalitas pandai besi muda." },
+      { id: "ISS-22", city: "Briarfall Marches", theme: "Serikat Murid Tempa", text: "Murid senior meminta izin memakai tungku utama di malam hari untuk menempa senjata pertahanan desa perbatasan." }
+    ];
+
+    const RARITY_BUDGET = { Common: 0, Uncommon: 10, Rare: 22, Epic: 36, Legendary: 52, Unique: 75 };
+
+    const uiState = {
+      stageMode: "Battle",
+      lv: 90,
+      day: 2410,
+      year: 7,
+      idleHours: 401,
+      stats: { STR: 82, DEX: 18, CON: 45, INT: 34, WIS: 6, CHA: 6 },
+      smithTiers: { Weaponsmith: 2, Armorer: 0, Rangesmith: 0, Runesmith: 1, Reforger: 0 },
+      gearId: "w_str_4",
+      rarity: "Epic",
+      plusN: 15,
+      core1: "Ice",
+      core2: "Badai Beku (Ice+Lightning)",
+      areaId: "A02",
+      enemyHp: 1952,
+      enemyMaxHp: 1952,
+      breakCount: 3,
+      stamina: 325,
+      maxStamina: 325,
+      xpBattle: 3800,
+      xpSmith: 3450,
+      buffB2S: 10,
+      buffS2B: 5,
+      curses: 0,
+      conscience: 10,
+      bronze: 1195624,
+      issueIdx: 0,
+      apprentices: [
+        { seed: "APR-7F3A-Kael", className: "Runelord", aura: "+15% Elem & Trigger", skill: 85, cap: 88, loyalty: 96, trials: 2, isCompanion: true, branch: null },
+        { seed: "APR-99B1-Lyra", className: "Skirmisher", aura: "+10% Atk Spd & Acc", skill: 68, cap: 86, loyalty: 78, trials: 1, isCompanion: false, branch: "Briarfall City" },
+        { seed: "APR-44C8-Garrick", className: "Aegisborn", aura: "+12% Mitigate Shield", skill: 82, cap: 91, loyalty: 88, trials: 2, isCompanion: false, branch: "Ashwind Steppe" },
+        { seed: "APR-12D9-Vesper", className: "Thaumaturge", aura: "+15% Elem & Trigger", skill: 52, cap: 69, loyalty: 84, trials: 0, isCompanion: false, branch: null },
+        { seed: "APR-88E2-Thorne", className: "Sovereign", aura: "+15% Drop & Stamina", skill: 74, cap: 90, loyalty: 72, trials: 1, isCompanion: false, branch: null }
+      ],
+      marketStock: {
+        "Heart of the Eternal Beacon": { base: 1680, mult: 1.0 },
+        "Lightning-Struck Iron": { base: 420, mult: 0.92 },
+        "Thunderglass Shard": { base: 780, mult: 1.08 }
+      },
+      logs: [
+        "[Thn 7 Hari 2410 • Lv90] Memasuki Cinderwatch Isles (Tier 3). Weak musuh: Ice (Es) -> Weakness Exploit Aktif!",
+        "[SWTOR Macro] Sundering Smash + Mod INT Adaptive Weak menghasilkan 412 Damage (Break 3/5)!",
+        "[Companion AI] APR-7F3A-Kael (Runelord) melepaskan Assist Strike (44.8% Damage + Aura +15% Trigger)."
+      ]
+    };
+
+    function formatBr(br) {
+      let r = Math.round(Math.abs(br));
+      const g = Math.floor(r / 10000); r %= 10000;
+      const s = Math.floor(r / 100);
+      return `${g}g ${s}s`;
+    }
+
+    function getTier(l) { return Math.min(5, Math.max(1, Math.ceil(l / 30))); }
+
+    function resolveClassName(tiers) {
+      const entries = Object.entries(tiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      if (entries.length === 1) return SINGLE_CLASS_NAMES[entries[0][0]][Math.min(5, entries[0][1]) - 1];
+      if (entries.length === 2) return DUAL_CLASS_NAMES[`${entries[0][0]}+${entries[1][0]}`] || "Hybrid";
+      if (entries.length === 3) return "Polymath";
+      if (entries.length === 4) return "Synthesist";
+      if (entries.length >= 5) return "Omnismith";
+      return "Apprentice";
+    }
+
+    function calcEnhancement(n, isUnique) {
+      const lv = Math.max(0, Math.floor(n || 0));
+      let pct = 0;
+      if (lv > 0) pct += Math.min(5, lv) * 4;
+      if (lv > 5) pct += Math.min(5, lv - 5) * 7;
+      if (lv > 10) pct += Math.min(5, lv - 10) * 12;
+      if (lv > 15) pct += 45 * Math.log(1 + (lv - 15) * 0.5);
+      const phase = isUnique
+        ? (lv > 15 ? `Transcendent Resonance (+${lv})` : `Resonance ${Math.min(5, Math.max(1, Math.ceil(lv / 3)))} (+${lv})`)
+        : (lv > 15 ? `Fase 4: Transcendent Infinite (+${lv})` : lv >= 11 ? `Fase 3: Masterwork Overforge (+${lv})` : lv >= 6 ? `Fase 2: Tempa Panas (+${lv})` : `Fase 1: Tempa Stabil (+${lv})`);
+      const glowColor = lv >= 20 ? "#f43f5e" : lv >= 15 ? "#a855f7" : lv >= 10 ? "#f59e0b" : "#22d3ee";
+      return { lv, bonusPct: +pct.toFixed(1), mult: +(1 + pct / 100).toFixed(3), phase, glowColor };
+    }
+
+    function calcAntiFarm(pLv, mLv) {
+      const d = mLv - pLv;
+      if (d >= 5) return { d, xp: 125, drop: 115, label: `Δ+${d}: XP 125% • Drop 115%` };
+      if (d >= -5) return { d, xp: 100, drop: 100, label: `Δ${d}: XP 100% • Drop 100%` };
+      if (d >= -15) {
+        const s = Math.abs(d + 5);
+        return { d, xp: Math.max(20, 100 - 8 * s), drop: Math.max(50, 100 - 5 * s), label: `Δ${d}: XP ${Math.max(20, 100 - 8 * s)}% • Drop ${Math.max(50, 100 - 5 * s)}%` };
+      }
+      return { d, xp: 0, drop: 25, label: `Δ${d}: XP 0% (Anti-Farm) • Drop Bahan 25%` };
+    }
+
+    function pushLog(msg) {
+      uiState.logs.unshift(`[Thn ${uiState.year} Hari ${uiState.day} • Lv${uiState.lv}] ${msg}`);
+      if (uiState.logs.length > 30) uiState.logs.pop();
+    }
+
+    function computeCombatSnapshot() {
+      const tier = getTier(uiState.lv);
+      const gear = GEAR_CATALOG.find(g => g.id === uiState.gearId) || GEAR_CATALOG[0];
+      const area = WD_AREAS.find(a => a.id === uiState.areaId) || WD_AREAS[7];
+      const enh = calcEnhancement(uiState.plusN, uiState.rarity === "Unique");
+      const budget = 100 + 20 * (tier - 1) + (RARITY_BUDGET[uiState.rarity] || 0);
+      const baseW = ((budget * (gear.dmgPct / 100)) / 4) * enh.mult;
+      const mainVal = uiState.stats[gear.stat] || 30;
+      const trig = ((budget * (gear.trgPct / 100)) * 0.8 * (1 + 0.015 * mainVal) * enh.mult) / (gear.stat === "CHA" ? 5 : 4);
+      const conGuard = gear.stat === "CON" ? uiState.stats.CON * 0.15 : 0;
+      const smithPts = Object.values(uiState.smithTiers).reduce((a, b) => a + b, 0);
+
+      const weakMatched = uiState.core1 === area.weak || (uiState.core2 && uiState.core2.includes(area.weak)) || (uiState.core2 && uiState.core2.includes("Gerhana"));
+      const elemMult = weakMatched ? +(1.25 + uiState.stats.INT * 0.0045).toFixed(2) : 1.0;
+
+      const strikeDmg = Math.round((baseW + uiState.stats.STR * 0.625 + trig + conGuard) * (1 + smithPts * 0.06) * elemMult);
+      const dps = +(strikeDmg * 1.45).toFixed(1);
+      const maxHp = Math.round((20 + uiState.stats.CON * 5 * 1.25 + 5 * tier) * (1 + (uiState.smithTiers.Armorer || 0) * 0.06));
+      return { tier, gear, area, enh, weakMatched, elemMult, strikeDmg, dps, maxHp };
+    }
+
+    function manualStrike(skillObj = null) {
+      const snap = computeCombatSnapshot();
+      const mult = skillObj ? skillObj.mult : 1.0;
+      const hitDmg = Math.round(snap.strikeDmg * mult);
+
+      if (uiState.stageMode === "Forge") {
+        uiState.xpSmith += Math.round(180 * snap.tier);
+        document.getElementById("centerCombatFlash").textContent = `🔨 TEMPA PRESISI! (+${180 * snap.tier} Smith XP)`;
+        document.getElementById("floatingEnemyText").textContent = `Kualitas +${snap.enh.lv}`;
+        pushLog(`Menempa ${snap.gear.name} +${uiState.plusN} di paron -> +${180 * snap.tier} Smith XP.`);
+        renderAll();
+        return;
+      }
+
+      uiState.enemyHp = Math.max(0, uiState.enemyHp - hitDmg);
+      uiState.breakCount = Math.max(0, uiState.breakCount - 1);
+      document.getElementById("floatingEnemyText").textContent = `-${hitDmg}!`;
+      document.getElementById("centerCombatFlash").textContent = skillObj
+        ? `⚡ ${skillObj.name.toUpperCase()} (${hitDmg} DMG)!`
+        : (snap.weakMatched ? `⚡ WEAKNESS EXPLOIT (${hitDmg} DMG)!` : `⚔️ STRIKE (${hitDmg} DMG)`);
+
+      if (uiState.breakCount === 0) {
+        uiState.breakCount = 5;
+        document.getElementById("centerSubFlash").textContent = "💥 OCTOPATH BREAK! Pertahanan Musuh Runtuh (Damage ×1.5)!";
+      }
+
+      if (uiState.enemyHp <= 0) {
+        const af = calcAntiFarm(uiState.lv, snap.area.maxLv);
+        const xpGain = Math.round(240 * snap.tier * (af.xp / 100));
+        const brGain = Math.round(snap.area.price * (af.drop / 100));
+        uiState.xpBattle += xpGain;
+        uiState.bronze += brGain;
+        uiState.enemyHp = uiState.enemyMaxHp;
+        pushLog(`Mengalahkan ${snap.area.boss} (Lv${snap.area.maxLv})! +${xpGain} Battle XP, +${formatBr(brGain)} (${snap.area.mat}).`);
+      } else if (skillObj) {
+        pushLog(`[Macro Cast] ${skillObj.name} (${skillObj.mod}) -> ${hitDmg} Damage ke ${snap.area.boss}.`);
+      }
+
+      checkLevelUp();
+      renderAll();
+    }
+
+    function checkLevelUp() {
+      const q = Math.round(60 * Math.pow(uiState.lv, 1.1));
+      if (uiState.xpBattle >= q && uiState.xpSmith >= q && uiState.lv < 150) {
+        uiState.xpBattle -= q;
+        uiState.xpSmith -= q;
+        uiState.lv++;
+        uiState.stats.STR += 2;
+        pushLog(`🎉 NAIK LEVEL -> Lv${uiState.lv}! (+2 Poin Stat, kedua bar XP Battle & Smith penuh).`);
+      }
+    }
+
+    function triggerOffline8h() {
+      const snap = computeCombatSnapshot();
+      const cap = uiState.lv <= 30 ? 1200 : 1200 + 60 * (uiState.lv - 30);
+      const af = calcAntiFarm(uiState.lv, snap.area.maxLv);
+      const bGain = Math.round(4 * cap * (af.xp / 100));
+      const sGain = Math.round(4 * cap);
+      uiState.xpBattle += bGain;
+      uiState.xpSmith += sGain;
+      uiState.idleHours += 8;
+      uiState.day += 48;
+      uiState.year = 1 + Math.floor((uiState.day - 1) / 360);
+
+      const branchCount = uiState.apprentices.filter(a => a.branch).length;
+      const brGain = Math.round(8 * snap.area.price * 2.5 + branchCount * 48 * 450);
+      uiState.bronze += brGain;
+      uiState.stamina = Math.max(20, uiState.stamina - 110);
+
+      for (const a of uiState.apprentices) {
+        a.skill = Math.min(a.cap, +(a.skill + 3.2).toFixed(1));
+      }
+
+      checkLevelUp();
+      pushLog(`⏩ Offline 8 Jam Selesai: +${bGain} Battle XP, +${sGain} Smith XP, +${formatBr(brGain)} (termasuk setoran ${branchCount} Cabang Toko).`);
+      renderAll();
+    }
+
+    function challengeGateBossUI() {
+      const snap = computeCombatSnapshot();
+      const gateTier = snap.tier;
+      pushLog(`⛩️ LULUS GATE BOSS TIER ${gateTier} (${snap.area.boss})! Cap Stat terbuka hingga ${Math.min(150, (gateTier + 1) * 30)}.`);
+      document.getElementById("centerCombatFlash").textContent = `🏆 GATE TIER ${gateTier} CLEARED!`;
+      renderAll();
+    }
+
+    function doLongRestUI() {
+      uiState.stamina = uiState.maxStamina;
+      uiState.curses = 0;
+      pushLog("🏕️ Long Rest di Bengkel Sendiri (0 br): Stamina/SP pulih 100% dan Kutukan Gate bersih.");
+      renderAll();
+    }
+
+    function setStageMode(m) {
+      uiState.stageMode = m;
+      document.getElementById("btnModeBattle").className = m === "Battle"
+        ? "py-1 rounded bg-red-600 text-white font-bold text-[10px]"
+        : "py-1 rounded bg-slate-800 border border-slate-600 text-slate-300 font-bold text-[10px]";
+      document.getElementById("btnModeForge").className = m === "Forge"
+        ? "py-1 rounded bg-amber-500 text-slate-950 font-bold text-[10px]"
+        : "py-1 rounded bg-slate-800 border border-slate-600 text-slate-300 font-bold text-[10px]";
+      renderAll();
+    }
+
+    function switchRfTab(tab) {
+      for (const t of ["pt", "talic", "squire", "world"]) {
+        document.getElementById("rfTab_" + t).classList.toggle("hidden", t !== tab);
+        document.getElementById("tabBtn_" + t).className = t === tab
+          ? "py-1.5 rounded bg-amber-500 text-slate-950 font-bold"
+          : "py-1.5 rounded bg-slate-800 text-slate-300 font-bold";
+      }
+    }
+
+    function adjustStat(st, delta) {
+      const cap = getTier(uiState.lv) * 30;
+      const next = (uiState.stats[st] || 1) + delta;
+      if (next < 1 || next > cap) return;
+      uiState.stats[st] = next;
+      uiState.maxStamina = 100 + 5 * uiState.stats.CON;
+      uiState.stamina = uiState.maxStamina;
+      renderAll();
+    }
+
+    function adjustSmithPt(cls, delta) {
+      const used = Object.values(uiState.smithTiers).reduce((a, b) => a + b, 0);
+      const cur = uiState.smithTiers[cls] || 0;
+      const next = cur + delta;
+      if (next < 0 || next > 5) return;
+      if (delta > 0 && used >= 5) return;
+      uiState.smithTiers[cls] = next;
+      renderAll();
+    }
+
+    function onRfLevelChange(val) {
+      uiState.lv = +val;
+      renderAll();
+    }
+
+    function stepPlusN(d) {
+      const el = document.getElementById("rfPlusNInput");
+      el.value = Math.max(0, +(el.value || 0) + d);
+      onRfGearChange();
+    }
+
+    function onRfGearChange() {
+      uiState.gearId = document.getElementById("rfWeaponSelect").value;
+      uiState.rarity = document.getElementById("rfRaritySelect").value;
+      uiState.plusN = Math.max(0, +(document.getElementById("rfPlusNInput").value || 0));
+      uiState.core1 = document.getElementById("rfCore1").value;
+      uiState.core2 = document.getElementById("rfCore2").value;
+      renderAll();
+    }
+
+    function onRfAreaChange() {
+      uiState.areaId = document.getElementById("rfAreaSelect").value;
+      const area = WD_AREAS.find(a => a.id === uiState.areaId) || WD_AREAS[0];
+      uiState.enemyMaxHp = 150 + area.maxLv * 20;
+      uiState.enemyHp = uiState.enemyMaxHp;
+      pushLog(`Berpindah ke zona ${area.name} (Tier ${area.tier}, Lv${area.minLv}-${area.maxLv}).`);
+      renderAll();
+    }
+
+    function chooseMoralOption(choice) {
+      const iss = MORAL_ISSUES[uiState.issueIdx % MORAL_ISSUES.length];
+      const cDelta = choice === "Mulia" ? 5 : choice === "Kejam" ? -5 : 0;
+      const lDelta = choice === "Mulia" ? 1 : choice === "Kejam" ? -1 : 0;
+      uiState.conscience += cDelta;
+      for (const a of uiState.apprentices) {
+        a.loyalty = Math.max(0, Math.min(100, a.loyalty + lDelta));
+      }
+      pushLog(`[Keputusan Moral ${iss.id}] Memilih ${choice}: Conscience ${uiState.conscience >= 0 ? "+" + uiState.conscience : uiState.conscience}, Loyalitas 5 Murid ${lDelta >= 0 ? "+" + lDelta : lDelta}.`);
+      uiState.issueIdx++;
+      renderAll();
+    }
+
+    function runApprenticeAction(idx, action) {
+      const a = uiState.apprentices[idx];
+      if (action === "companion") {
+        uiState.apprentices.forEach((x, i) => { x.isCompanion = i === idx; });
+        pushLog(`Mengajak ${a.seed} (${a.className}) sebagai Companion Tempur Aktif (${a.aura}).`);
+      } else if (action === "trial") {
+        a.trials = Math.min(2, a.trials + 1);
+        a.cap = Math.min(100, a.cap + 15);
+        a.loyalty = Math.min(100, a.loyalty + 10);
+        pushLog(`🎓 Murid ${a.seed} LULUS Ujian #${a.trials}! Cap Bakat naik ke ${a.cap} & Loyalitas ${a.loyalty}.`);
+      } else if (action === "branch") {
+        const cities = ["Hollowfrost Market", "Wyrmspine Forgecity", "Obsidian City"];
+        a.branch = cities[idx % cities.length];
+        a.isCompanion = false;
+        pushLog(`🏪 Membuka Cabang Bengkel baru di ${a.branch} yang dipimpin oleh ${a.seed} (${a.className})!`);
+      }
+      renderAll();
+    }
+
+    function tradeMarketItem(name, action) {
+      const item = uiState.marketStock[name];
+      if (!item) return;
+      const price = Math.round(item.base * item.mult);
+      if (action === "buy") {
+        uiState.bronze = Math.max(0, uiState.bronze - price);
+        item.mult = +(item.mult * 1.06).toFixed(2);
+        pushLog(`[Pasar SnD] Membeli ${name} seharga ${ price }br -> Permintaan naik (×${item.mult}).`);
+      } else {
+        uiState.bronze += price;
+        item.mult = +(Math.max(0.75, item.mult * 0.95)).toFixed(2);
+        pushLog(`[Pasar SnD] Menjual stok ${name} seharga ${ price }br -> Pasokan bertambah (×${item.mult}).`);
+      }
+      renderAll();
+    }
+
+    function loadRfPreset(lv, mainStat, tiers, plusN, rarity) {
+      uiState.lv = lv;
+      uiState.smithTiers = { ...tiers };
+      uiState.plusN = plusN;
+      uiState.rarity = rarity;
+      if (lv === 30) uiState.stats = { STR: 30, DEX: 12, CON: 18, INT: 5, WIS: 3, CHA: 3 };
+      else if (lv === 90) uiState.stats = { STR: 82, DEX: 18, CON: 45, INT: 34, WIS: 6, CHA: 6 };
+      else if (mainStat === "CON") {
+        uiState.stats = { STR: 65, DEX: 15, CON: 150, INT: 45, WIS: 18, CHA: 18 };
+        uiState.gearId = "a_chest_heavy";
+      } else {
+        uiState.stats = { STR: 45, DEX: 45, CON: 60, INT: 130, WIS: 16, CHA: 15 };
+        uiState.gearId = "w_int_r2";
+      }
+      document.getElementById("ptLvSlider").value = lv;
+      document.getElementById("rfWeaponSelect").value = uiState.gearId;
+      document.getElementById("rfRaritySelect").value = rarity;
+      document.getElementById("rfPlusNInput").value = plusN;
+      pushLog(`Memuat Preset Build Lv${lv} (${resolveClassName(tiers)}, +${plusN} ${rarity}).`);
+      renderAll();
+    }
+
+    function initSelectors() {
+      document.getElementById("rfWeaponSelect").innerHTML = GEAR_CATALOG.map(g =>
+        `<option value="${g.id}" ${g.id === uiState.gearId ? "selected" : ""}>[${g.stat} • ${g.tag}] ${g.name} (${g.trigger})</option>`
+      ).join("");
+
+      document.getElementById("rfAreaSelect").innerHTML = WD_AREAS.map(a =>
+        `<option value="${a.id}" ${a.id === uiState.areaId ? "selected" : ""}>[Tier ${a.tier} • Lv${a.minLv}-${a.maxLv}] ${a.name} (Weak: ${a.weak})</option>`
+      ).join("");
+    }
+
+    function renderAll() {
+      const snap = computeCombatSnapshot();
+      const className = resolveClassName(uiState.smithTiers);
+      const comp = uiState.apprentices.find(a => a.isCompanion) || uiState.apprentices[0];
+      const af = calcAntiFarm(uiState.lv, snap.area.maxLv);
+
+      // 1. Top RF HUD
+      document.getElementById("hudLvBadge").textContent = `LV ${uiState.lv}`;
+      document.getElementById("hudTierBadge").textContent = `TIER ${snap.tier}`;
+      document.getElementById("hudClassBadge").textContent = className.toUpperCase();
+      document.getElementById("hudCurseBadge").textContent = `Kutukan: ${uiState.curses}`;
+      document.getElementById("hudHpText").textContent = `${snap.maxHp} / ${snap.maxHp}`;
+      const macroSlots = uiState.stats.INT >= 120 ? 6 : uiState.stats.INT >= 75 ? 5 : uiState.stats.INT >= 30 ? 4 : 3;
+      document.getElementById("hudFpText").textContent = `${macroSlots} Slot Macro • ${snap.weakMatched ? "Weak ×" + snap.elemMult : "Neutral ×1.0"}`;
+      document.getElementById("hudSpText").textContent = `${uiState.stamina} / ${uiState.maxStamina} (Cap 8j)`;
+      document.getElementById("hudSpBar").style.width = `${Math.min(100, Math.round((uiState.stamina / uiState.maxStamina) * 100))}%`;
+
+      document.getElementById("targetNameText").textContent = snap.area.boss;
+      document.getElementById("targetLvText").textContent = `Lv${snap.area.maxLv}`;
+      const ePct = Math.max(0, Math.round((uiState.enemyHp / uiState.enemyMaxHp) * 100));
+      document.getElementById("targetHpBar").style.width = `${ePct}%`;
+      document.getElementById("targetHpText").textContent = `${uiState.enemyHp} / ${uiState.enemyMaxHp} HP`;
+      document.getElementById("targetRoleElText").textContent = `Zona: ${snap.area.name} • El: ${snap.area.el}`;
+      document.getElementById("targetWeakText").textContent = `WEAK: ${snap.area.weak.toUpperCase()}`;
+
+      document.getElementById("radarAreaText").textContent = `📍 ${snap.area.name}`;
+      document.getElementById("radarClockText").textContent = `Thn ${uiState.year} • Hari ${uiState.day}`;
+      document.getElementById("radarGoldText").textContent = formatBr(uiState.bronze);
+      const activeBranches = uiState.apprentices.filter(a => a.branch).length;
+      document.getElementById("radarBranchText").textContent = `${activeBranches} Aktif`;
+
+      // 2. 2.5D Octopath Diorama Stage
+      document.getElementById("talicGlowDot").style.backgroundColor = snap.enh.glowColor;
+      document.getElementById("playerAuraBox").style.borderColor = snap.enh.glowColor;
+      document.getElementById("playerAuraBox").style.boxShadow = `0 0 24px ${snap.enh.glowColor}66`;
+      document.getElementById("stageWeaponTitle").textContent = `${snap.gear.name} “Bisikan Leluhur” +${snap.enh.lv} [${uiState.rarity}]`;
+      document.getElementById("stageWeaponSub").textContent = `${snap.enh.phase} (+${snap.enh.bonusPct}% Daya) • ${uiState.core2 || uiState.core1}`;
+      document.getElementById("stageDpsReadout").textContent = `${snap.dps} DPS`;
+      document.getElementById("stageAntiFarmReadout").textContent = af.label;
+      document.getElementById("stageCompanionTag").textContent = `Squire: ${comp.seed} (${comp.className})`;
+      document.getElementById("stageCompanionAssist").textContent = `${+(15 + 0.35 * comp.skill).toFixed(1)}%/3s`;
+      document.getElementById("stagePlayerTag").textContent = `Alden • ${className}`;
+      document.getElementById("stagePlusNBadge").textContent = `+${snap.enh.lv}`;
+      document.getElementById("stagePlusNBadge").style.backgroundColor = snap.enh.glowColor;
+
+      if (uiState.stageMode === "Forge") {
+        document.getElementById("stageEnemyLabel").textContent = "Dapur Paron & Tungku Fusi Inti";
+        document.getElementById("enemyEmojiIcon").textContent = "🔥";
+        document.getElementById("enemyBreakShield").textContent = "Attunement: SELARAS";
+      } else {
+        document.getElementById("stageEnemyLabel").textContent = `${snap.area.boss} (Lv${snap.area.maxLv})`;
+        document.getElementById("enemyEmojiIcon").textContent = snap.area.icon;
+        document.getElementById("enemyBreakShield").textContent = `🛡 Break: ${uiState.breakCount}/5`;
+      }
+
+      // Macro Bar
+      const macros = SWTOR_MACROS[snap.gear.stat] || SWTOR_MACROS.STR;
+      document.getElementById("macroSlotCountBadge").textContent = `Disiplin ${snap.gear.stat} • Kapasitas INT Macro: ${macroSlots} / 6 Slot`;
+      document.getElementById("rfMacroBarGrid").innerHTML = macros.map((m, i) => `
+        <button onclick='manualStrike(${JSON.stringify(m)})' class="p-2 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400 text-left transition flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-300 text-[11px]">[${i + 1}] ${m.name}</span>
+            <span class="font-mono text-[9px] px-1 rounded bg-slate-800 text-cyan-300">${m.cd}s</span>
+          </div>
+          <div class="text-[9px] text-slate-400">${m.role} (×${m.mult})</div>
+          <div class="text-[9px] font-mono text-emerald-400 truncate">Mod: ${m.mod}</div>
+        </button>
+      `).join("");
+
+      const quota = Math.round(60 * Math.pow(uiState.lv, 1.1));
+      document.getElementById("xpBattleText").textContent = `${uiState.xpBattle} / ${quota}`;
+      document.getElementById("xpSmithText").textContent = `${uiState.xpSmith} / ${quota}`;
+      document.getElementById("xpBattleBar").style.width = `${Math.min(100, Math.round((uiState.xpBattle / quota) * 100))}%`;
+      document.getElementById("xpSmithBar").style.width = `${Math.min(100, Math.round((uiState.xpSmith / quota) * 100))}%`;
+
+      // 3. Text-Based Chronicle & Moral Issue
+      document.getElementById("conscienceTerminalBadge").textContent =
+        `Conscience: ${uiState.conscience >= 0 ? "+" + uiState.conscience : uiState.conscience} (${uiState.conscience > 0 ? "Mulia" : uiState.conscience < 0 ? "Kejam" : "Netral"})`;
+      const iss = MORAL_ISSUES[uiState.issueIdx % MORAL_ISSUES.length];
+      document.getElementById("textMoralBox").innerHTML = `
+        <div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-amber-300 mb-1">
+            <span>[KARTU ISU MORAL #${iss.id}]</span>
+            <span>📍 ${iss.city}</span>
+          </div>
+          <div class="font-bold text-white mb-1">${iss.theme}</div>
+          <p class="text-slate-300 text-[11px] leading-relaxed mb-2">${iss.text}</p>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 pt-1">
+          <button onclick="chooseMoralOption('Mulia')" class="py-1 px-2 rounded bg-emerald-600 text-white font-bold text-[10px]">Mulia (+1 Loy)</button>
+          <button onclick="chooseMoralOption('Netral')" class="py-1 px-2 rounded bg-slate-800 border border-slate-600 text-slate-200 font-bold text-[10px]">Netral</button>
+          <button onclick="chooseMoralOption('Kejam')" class="py-1 px-2 rounded bg-red-700 text-white font-bold text-[10px]">Kejam (-1 Loy)</button>
+        </div>
+      `;
+      document.getElementById("textTerminalLog").innerHTML = uiState.logs.map(l => `<div>&gt; ${l}</div>`).join("");
+
+      // 4. Right RF Window Tab 1: PT & Stats
+      const totalPts = Object.values(uiState.stats).reduce((a, b) => a + b, 0);
+      const budgetPts = 13 + 2 * (uiState.lv - 1);
+      document.getElementById("ptLvText").textContent = uiState.lv;
+      document.getElementById("ptPointsBadge").textContent = `Poin: ${totalPts} / ${budgetPts} (Cap ${snap.tier * 30})`;
+
+      const statDescs = {
+        STR: "Raw Might, Armor Crush, Enhance +N",
+        DEX: "Accuracy, Speed, Dodge & Parry",
+        CON: "Vitality HP, Mitigate, +15% Guard Dmg",
+        INT: "Elemental, Weak Exploit, Macro Slot",
+        WIS: "Crit Chance/Severity, Rare Drop",
+        CHA: "Dread Debuff, Harga Pasar, Murid"
+      };
+      document.getElementById("rfStatsList").innerHTML = Object.entries(uiState.stats).map(([k, v]) => `
+        <div class="p-1.5 rounded bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="font-bold text-amber-300 w-8 inline-block">${k}</span>
+            <span class="text-[10px] text-slate-400">${statDescs[k]}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="adjustStat('${k}', -2)" class="w-5 h-5 rounded bg-slate-800 border border-slate-600 font-bold">-</button>
+            <span class="font-mono font-bold w-7 text-center text-white">${v}</span>
+            <button onclick="adjustStat('${k}', 2)" class="w-5 h-5 rounded bg-slate-800 border border-slate-600 font-bold">+</button>
+          </div>
+        </div>
+      `).join("");
+
+      const usedSmith = Object.values(uiState.smithTiers).reduce((a, b) => a + b, 0);
+      document.getElementById("rfSmithPtUsed").textContent = `${usedSmith} / 5 Tier (${className})`;
+      document.getElementById("rfSmithPtBars").innerHTML = Object.entries(uiState.smithTiers).map(([cls, rank]) => `
+        <div class="p-1.5 rounded bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <div class="w-24 truncate font-semibold text-cyan-300">${cls}</div>
+          <div class="flex-1 mx-2 h-2 bg-slate-900 rounded overflow-hidden flex gap-0.5">
+            ${[1, 2, 3, 4, 5].map(i => `<div class="flex-1 ${i <= rank ? "bg-amber-400" : "bg-slate-800"}"></div>`).join("")}
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="adjustSmithPt('${cls}', -1)" class="w-4 h-4 rounded bg-slate-800 text-[10px] font-bold">-</button>
+            <span class="font-mono font-bold w-4 text-center">${rank}</span>
+            <button onclick="adjustSmithPt('${cls}', 1)" class="w-4 h-4 rounded bg-amber-500 text-slate-950 text-[10px] font-bold">+</button>
+          </div>
+        </div>
+      `).join("");
+
+      const hasT3Perk = Math.max(...Object.values(uiState.smithTiers)) >= 3;
+      const isPureT5 = Math.max(...Object.values(uiState.smithTiers)) === 5;
+      document.getElementById("rfActivePerkBox").innerHTML = `
+        <div><strong class="text-amber-300">Perk Tier 3:</strong> ${hasT3Perk ? "Titan's Anvil / Runic Overdrive (★Afinitas +25% Aktif)" : "Terkunci (Butuh 1 Class Tier ≥ 3)"}</div>
+        <div><strong class="text-cyan-300">Perk Tier 5:</strong> ${isPureT5 ? "Colossus Might / Living Citadel Aegisborn (★Murni 5+0 Aktif!)" : "Terkunci (Eksklusif Spesialis Murni 5+0)"}</div>
+      `;
+
+      // Tab 2: Talic +N Readout
+      document.getElementById("rfTalicReadout").innerHTML = `
+        <div class="flex justify-between"><span>Fase Enhance:</span><strong class="text-amber-300">${snap.enh.phase}</strong></div>
+        <div class="flex justify-between"><span>Pengali Daya `+N`:</span><strong class="text-cyan-300">+${snap.enh.bonusPct}% (×${snap.enh.mult})</strong></div>
+        <div class="flex justify-between"><span>Total Anggaran Poin:</span><strong class="font-mono">${100 + 20 * (snap.tier - 1) + (RARITY_BUDGET[uiState.rarity] || 0)} Poin</strong></div>
+        <div class="flex justify-between"><span>Keamanan Senjata:</span><strong class="text-emerald-400">100% Anti-Hancur (Checkpoint +15)</strong></div>
+      `;
+
+      // Tab 3: 5 Apprentices Seed AI
+      document.getElementById("rfApprenticeBox").innerHTML = uiState.apprentices.map((a, i) => `
+        <div class="p-2 rounded bg-slate-950 border border-slate-800 space-y-1">
+          <div class="flex items-center justify-between">
+            <div>
+              <strong class="text-amber-300">${a.seed}</strong>
+              <span class="ml-1 px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px]">${a.className}</span>
+            </div>
+            <span class="font-mono text-[10px] text-slate-400">Ujian: ${a.trials}/2</span>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-300 font-mono">
+            <span>Skill: ${a.skill}/${a.cap}</span>
+            <span>Loyalitas: ${a.loyalty}</span>
+          </div>
+          <div class="text-[10px] text-emerald-400">Aura: ${a.aura}</div>
+          <div class="flex flex-wrap gap-1 pt-1">
+            <button onclick="runApprenticeAction(${i}, 'companion')" class="px-2 py-0.5 rounded ${a.isCompanion ? "bg-cyan-500 text-slate-950 font-bold" : "bg-slate-800 text-slate-300"} text-[10px]">
+              ${a.isCompanion ? "★ Companion Aktif" : "Jadikan Companion"}
+            </button>
+            ${a.trials < 2 ? `<button onclick="runApprenticeAction(${i}, 'trial')" class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-bold text-[10px]">Ujian (+15 Cap)</button>` : ""}
+            ${!a.branch && a.skill >= 60 && a.loyalty >= 70 && a.trials >= 1 ? `<button onclick="runApprenticeAction(${i}, 'branch')" class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">Buka Cabang</button>` : ""}
+            ${a.branch ? `<span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/50 text-emerald-300 text-[10px]">🏪 Cabang: ${a.branch}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+
+      // Tab 4: 16 Areas WD & Market
+      document.getElementById("rfAreaDetailBox").innerHTML = `
+        <div class="flex justify-between"><span>Boss Gate / Area:</span><strong class="text-amber-300">${snap.area.boss} (Lv${snap.area.maxLv})</strong></div>
+        <div class="flex justify-between"><span>Elemen & Weak:</span><strong class="text-cyan-300">El: ${snap.area.el} • Weak: ${snap.area.weak}</strong></div>
+        <div class="flex justify-between"><span>Status Anti-Farm (`CD-1.08`):</span><strong class="text-emerald-400">${af.label}</strong></div>
+        <div class="flex justify-between"><span>Drop Utama:</span><strong>${snap.area.mat} (${snap.area.price} br)</strong></div>
+      `;
+      document.getElementById("rfMarketList").innerHTML = Object.entries(uiState.marketStock).map(([mName, obj]) => {
+        const curPrice = Math.round(obj.base * obj.mult);
+        return `
+          <div class="p-1.5 rounded bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-white text-[11px]">${mName}</div>
+              <div class="text-[10px] font-mono text-amber-300">${curPrice} br (SnD ×${obj.mult})</div>
+            </div>
+            <div class="flex gap-1">
+              <button onclick="tradeMarketItem('${mName}', 'buy')" class="px-2 py-0.5 rounded bg-cyan-600 text-slate-950 font-bold text-[10px]">Beli</button>
+              <button onclick="tradeMarketItem('${mName}', 'sell')" class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-bold text-[10px]">Jual</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    initSelectors();
+    renderAll();
+  </script>
+</body>
+</html>

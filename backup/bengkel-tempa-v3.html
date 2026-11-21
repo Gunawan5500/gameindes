@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengkel Tempa v3 — Integrated Forge, Fusi & SWTOR Skill Engine</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 m-0 text-xs">
+  <div class="max-w-7xl mx-auto space-y-4">
+    <!-- Top Banner -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">FORGE + SKILL ENGINE v3.2</span>
+          <h1 class="text-base font-bold">Bengkel Tempa & Fusi Inti Elemen × SWTOR Skill Engine</h1>
+        </div>
+        <p class="text-[var(--muted-foreground)] mt-1">
+          Bahan WD Terbaru (16 Area, Hidden Trait) • 36 Senjata CD-4 & Trigger • Fitur Fusi Inti Kedua (6 Elemen Hibrida) • 24 Sub-Stat Profesi & 5 Smith Class • Uji Tempur Langsung
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="loadPreset(30, {Weaponsmith:1, Armorer:0, Rangesmith:0, Runesmith:0, Reforger:0}, 'w_str_3', 'api')" class="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--content)] hover:opacity-80 font-medium">Preset Tier 1 (Bladesmith)</button>
+        <button onclick="loadPreset(90, {Weaponsmith:2, Armorer:0, Rangesmith:0, Runesmith:1, Reforger:0}, 'w_str_4', 'api')" class="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--content)] hover:opacity-80 font-medium">Preset 2+1 (Spellblade)</button>
+        <button onclick="loadPreset(150, {Weaponsmith:0, Armorer:0, Rangesmith:2, Runesmith:3, Reforger:0}, 'w_int_5', 'cahaya')" class="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--content)] hover:opacity-80 font-medium">Preset 3+2 (Starfletcher)</button>
+        <button onclick="loadPreset(150, {Weaponsmith:1, Armorer:1, Rangesmith:1, Runesmith:1, Reforger:1}, 'w_dex_6', 'petir')" class="px-3 py-1.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Preset 1+1+1+1+1 (Omnismith)</button>
+      </div>
+    </div>
+
+    <!-- Main 12-Col Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- LEFT 5 COLS: BENGKEL TEMPA (Persiapan, 4 Slot Bahan WD, Inti Elemen, Pratinjau Mode & Fusi) -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">1. Dapur Tempa & Alokasi 5 Tier Smith Class (`CD-3`)</span>
+            <span id="singleWordClassBadge" class="font-mono px-2.5 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">Class: Spellblade (3/3 Tier)</span>
+          </div>
+
+          <!-- Smith Level & 5-Tier Class Point Allocator -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <label class="text-[var(--muted-foreground)]">Level Smith (<span id="lvReadout" class="font-bold text-[var(--foreground)]">90</span> • Jatah Maks <span id="maxSmithPtsReadout" class="font-bold text-[var(--primary)]">3</span>/5 Tier)</label>
+              <input id="lvSlider" type="range" min="1" max="150" value="90" oninput="onSmithConfigChange()" class="w-40 accent-[var(--primary)]" />
+            </div>
+            <div id="smithTierAllocGrid" class="grid grid-cols-5 gap-1.5 text-center"></div>
+            <div id="smithComponentSummary" class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)] text-[11px] text-[var(--muted-foreground)]"></div>
+            <!-- 21 Smith Perks (Tier 3 Single Stat & Tier 5 Hybrid Pair) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              <div>
+                <label class="block text-[var(--muted-foreground)] mb-1">Perk Smith Tier 3 (Class ≥3 & Stat ≥45)</label>
+                <select id="perkT3Sel" onchange="onPerkChange()" class="w-full p-1.5 rounded bg-[var(--content)] border border-[var(--border)] font-medium"></select>
+              </div>
+              <div>
+                <label class="block text-[var(--muted-foreground)] mb-1">Perk Smith Tier 5 (Murni 5+0 & 2 Stat ≥75)</label>
+                <select id="perkT5Sel" onchange="onPerkChange()" class="w-full p-1.5 rounded bg-[var(--content)] border border-[var(--border)] font-medium"></select>
+              </div>
+            </div>
+            <div id="activePerksReadout" class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)] text-[11px]"></div>
+          </div>
+
+          <!-- Weapon Choice (48 Weapons grouped by 6 Stats: 32 Dekat + 16 Jauh) -->
+          <div>
+            <label class="block text-[var(--muted-foreground)] mb-1">Pilih Senjata (48 Senjata CD-4.01: 32 Dekat + 16 Jauh — Semua Bisa Ditempa, Izin Pakai Mengikuti Class!)</label>
+            <select id="weaponSel" onchange="updateForgePreview()" class="w-full p-1.5 rounded bg-[var(--content)] border border-[var(--border)] font-semibold"></select>
+          </div>
+
+          <!-- Material Filters (Search, Rarity, Area/Element) -->
+          <div class="grid grid-cols-3 gap-2 pt-1">
+            <input id="matSearch" type="text" placeholder="Cari bahan / trait..." oninput="rebuildMaterialSlots()" class="p-1.5 rounded bg-[var(--content)] border border-[var(--border)]" />
+            <select id="matRarityFilter" onchange="rebuildMaterialSlots()" class="p-1.5 rounded bg-[var(--content)] border border-[var(--border)]">
+              <option value="">Semua Rarity</option>
+              <option value="Common">Common (q2)</option>
+              <option value="Uncommon">Uncommon (q3)</option>
+              <option value="Rare">Rare (q4)</option>
+              <option value="Epic">Epic (q5)</option>
+              <option value="Legendary">Legendary (q6)</option>
+            </select>
+            <select id="matElemFilter" onchange="rebuildMaterialSlots()" class="p-1.5 rounded bg-[var(--content)] border border-[var(--border)]">
+              <option value="">Semua Elemen</option>
+              <option value="api">api (Fire)</option>
+              <option value="es">es (Ice)</option>
+              <option value="petir">petir (Lightning)</option>
+              <option value="tanah">tanah (Earth)</option>
+              <option value="cahaya">cahaya (Light)</option>
+              <option value="gelap">gelap (Dark)</option>
+            </select>
+          </div>
+
+          <!-- 4 Material Slots: Inti, Badan, Pengikat, Aksen -->
+          <div id="materialSlotsContainer" class="space-y-2"></div>
+
+          <!-- Core Element & Size -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <div>
+              <label class="block text-[var(--muted-foreground)] mb-1">Inti Elemen Pertama</label>
+              <select id="coreElemSel" onchange="updateForgePreview()" class="w-full p-1.5 rounded bg-[var(--content)] border border-[var(--border)] font-semibold">
+                <option value="">(Tanpa Elemen / Neutral)</option>
+                <option value="api">api (Fire)</option>
+                <option value="es" selected>es (Ice)</option>
+                <option value="petir">petir (Lightning)</option>
+                <option value="tanah">tanah (Earth)</option>
+                <option value="cahaya">cahaya (Light)</option>
+                <option value="gelap">gelap (Dark)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[var(--muted-foreground)] mb-1">Tingkat Inti</label>
+              <select id="coreSizeSel" onchange="updateForgePreview()" class="w-full p-1.5 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="kecil">Kecil (+5% Elem)</option>
+                <option value="sedang">Sedang (+10% Elem)</option>
+                <option value="besar" selected>Besar (+15% Elem)</option>
+              </select>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 pt-1 cursor-pointer">
+            <input id="idleChk" type="checkbox" onchange="updateForgePreview()" class="accent-[var(--primary)]" />
+            <span class="text-[var(--muted-foreground)]">Mode antrean idle (peluang Fusi & trait langka lebih rendah)</span>
+          </label>
+        </div>
+
+        <!-- Forge Preview Panel (Attunement, Sub-Stat Profession Bonuses, Mode Meter) -->
+        <div id="forgePreviewBox" class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-2.5"></div>
+
+        <div class="flex gap-2">
+          <button onclick="doForge(false)" class="flex-1 py-2.5 px-4 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold text-sm hover:opacity-90">
+            TEMPA SENJATA
+          </button>
+          <button onclick="doForge(true)" class="py-2.5 px-3 rounded border border-[var(--primary)] text-[var(--primary)] font-bold hover:opacity-80" title="Jamin hasil Mode Fusi untuk langsung mencoba fitur Fusi Inti Kedua">
+            Tempa (Jamin Mode Fusi)
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT 7 COLS: HASIL TEMPA, GALERI & FUSI INTI KEDUA, SERTA SIMULASI SKILL SWTOR -->
+      <div class="lg:col-span-7 space-y-4">
+        <!-- 2. Profession Sub-Stats & Character Stats Summary -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-2.5">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">2. Kontribusi 6 Stat & Sub-Stat Profesi (`CD-1.02b`) ke Bengkel Tempa</span>
+            <span id="statPointsSummary" class="font-mono px-2 py-0.5 rounded bg-[var(--secondary)] text-[var(--secondary-foreground)]">Total Poin: 191</span>
+          </div>
+          <div id="miniStatSliders" class="grid grid-cols-2 md:grid-cols-3 gap-2.5"></div>
+          <div id="professionSubStatReadout" class="grid grid-cols-2 md:grid-cols-5 gap-2 pt-1"></div>
+        </div>
+
+        <!-- 3. Hasil Tempaan Terakhir & Galeri Fusi -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">3. Hasil Tempaan & Meja Fusi Inti Kedua (Butuh Minimal Runesmith Tier 1)</span>
+            <span id="hudDayReadout" class="font-mono text-[var(--muted-foreground)]">Hari 1 • Musim Semi</span>
+          </div>
+          <div id="latestForgeOutput" class="p-3 rounded bg-[var(--content)] border border-[var(--card-border)]"></div>
+          <div class="space-y-2">
+            <div class="font-bold text-[var(--muted-foreground)]">Galeri Senjata Tersimpan (Cek Status Izin Pakai Class & Fusi Inti Kedua):</div>
+            <div id="galleryList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+        <!-- 4. Live Combat & SWTOR Skill Rotation Test for Selected Forged Weapon -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--card-border)] pb-2">
+            <div>
+              <span class="font-bold text-sm">4. Uji Sinkronisasi Senjata × Enhance `+N` Tanpa Batas × Murid AI Seed × Skill SWTOR</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1 bg-[var(--content)] px-2 py-1 rounded border border-[var(--border)]">
+                <span>Enhance `+N`:</span>
+                <input id="testEnhancePlus" type="number" min="0" max="999" value="15" oninput="runEquippedSimulation()" class="w-14 bg-transparent font-mono font-bold text-[var(--primary)] text-center" />
+              </div>
+              <select id="testApprenticeSeed" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="APR-7F3A-Kael">Murid: APR-7F3A-Kael (Skill 85, Ujian 2)</option>
+                <option value="APR-99B1-Lyra">Murid: APR-99B1-Lyra (Skill 62, Ujian 1)</option>
+                <option value="APR-44C8-Garrick">Murid: APR-44C8-Garrick (Skill 92, Ujian 2)</option>
+                <option value="">(Tanpa Companion Murid)</option>
+              </select>
+              <select id="testEnemyRole" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="Brute">Musuh: Brute</option>
+                <option value="Skirmisher">Musuh: Skirmisher</option>
+                <option value="Caster">Musuh: Caster</option>
+                <option value="Tank">Musuh: Tank</option>
+                <option value="Support">Musuh: Support</option>
+              </select>
+              <select id="testEnemyType" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="Reguler">Reguler</option>
+                <option value="Reguler Khusus">Reg. Khusus</option>
+                <option value="Mini Boss" selected>Mini Boss</option>
+                <option value="Boss">Boss</option>
+              </select>
+              <select id="testEnemyWeak" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="Fire">Weak: Fire (api)</option>
+                <option value="Ice" selected>Weak: Ice (es)</option>
+                <option value="Lightning">Weak: Lightning (petir)</option>
+                <option value="Earth">Weak: Earth (tanah)</option>
+                <option value="Light">Weak: Light (cahaya)</option>
+                <option value="Dark">Weak: Dark (gelap)</option>
+              </select>
+            </div>
+          </div>
+          <div id="equippedSimBox" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MATERIALS = [{"id":"MAT-A01-01","n":"Frostbite Pelt","g":"Hollowfrost Range","tier":3,"r":"Common","k":"Kulit","a":"es","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A01-02","n":"Pine Resin","g":"Hollowfrost Range","tier":3,"r":"Common","k":"Kayu","a":"es","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A01-03","n":"Snow Quartz Chip","g":"Hollowfrost Range","tier":3,"r":"Common","k":"Kristal","a":"es","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A01-04","n":"Rimeclaw Talon","g":"Hollowfrost Range","tier":3,"r":"Uncommon","k":"Tulang","a":"es","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A01-05","n":"Frostiron Ore","g":"Hollowfrost Range","tier":3,"r":"Uncommon","k":"Logam","a":"es","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A01-06","n":"Glacial Sinew","g":"Hollowfrost Range","tier":3,"r":"Uncommon","k":"Serat","a":"es","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A01-07","n":"Whitepine Heartwood","g":"Hollowfrost Range","tier":3,"r":"Rare","k":"Kayu","a":"es","t":["ringan"],"q":4,"cp":4,"ps":"CON","sb":2,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A01-08","n":"Hoarfrost Crystal","g":"Hollowfrost Range","tier":3,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A01-09","n":"Glacier Core","g":"Hollowfrost Range","tier":3,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A01-10","n":"Rimeborn Antler","g":"Hollowfrost Range","tier":3,"r":"Epic","k":"Tulang","a":"es","t":["tumpul","buas"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A01-11","n":"Avalanche Heartstone","g":"Hollowfrost Range","tier":3,"r":"Epic","k":"Logam","a":"es","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A01-12","n":"Throne Shard of Eternal Ice","g":"Hollowfrost Range","tier":3,"r":"Epic","k":"Kristal","a":"es","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A01-13","n":"Heart of the Glacier King","g":"Hollowfrost Range","tier":3,"r":"Legendary","k":"Esensi","a":"es","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A02-01","n":"Gull Feather","g":"Cinderwatch Isles","tier":3,"r":"Common","k":"Serat","a":"petir","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A02-02","n":"Barnacle Shell","g":"Cinderwatch Isles","tier":3,"r":"Common","k":"Tulang","a":"petir","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A02-03","n":"Driftwood Plank","g":"Cinderwatch Isles","tier":3,"r":"Common","k":"Kayu","a":"petir","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A02-04","n":"Stormpetrel Quill","g":"Cinderwatch Isles","tier":3,"r":"Uncommon","k":"Tulang","a":"petir","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A02-05","n":"Lightning-Struck Iron","g":"Cinderwatch Isles","tier":3,"r":"Uncommon","k":"Logam","a":"petir","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A02-06","n":"Bellmetal Scrap","g":"Cinderwatch Isles","tier":3,"r":"Uncommon","k":"Logam","a":"petir","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A02-07","n":"Brine Pearl of Gullrock","g":"Cinderwatch Isles","tier":3,"r":"Rare","k":"Kristal","a":"petir","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A02-08","n":"Fogbell Clapper","g":"Cinderwatch Isles","tier":3,"r":"Rare","k":"Logam","a":"petir","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A02-09","n":"Thunderglass Shard","g":"Cinderwatch Isles","tier":3,"r":"Rare","k":"Kristal","a":"petir","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A02-10","n":"Kraken Ink","g":"Cinderwatch Isles","tier":3,"r":"Epic","k":"Esensi","a":"petir","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A02-11","n":"Stormcaller's Core","g":"Cinderwatch Isles","tier":3,"r":"Epic","k":"Kristal","a":"petir","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A02-12","n":"Beacon Flame Ember","g":"Cinderwatch Isles","tier":3,"r":"Epic","k":"Esensi","a":"petir","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A02-13","n":"Heart of the Eternal Beacon","g":"Cinderwatch Isles","tier":3,"r":"Legendary","k":"Esensi","a":"petir","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A03-01","n":"Coarse Wool Tuft","g":"Greymoor Downs","tier":1,"r":"Common","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A03-02","n":"Gnawed Moor Bone","g":"Greymoor Downs","tier":1,"r":"Common","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A03-03","n":"Peat Charcoal","g":"Greymoor Downs","tier":1,"r":"Common","k":"Kayu","a":"gelap","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A03-04","n":"Cairn Stone Chip","g":"Greymoor Downs","tier":1,"r":"Uncommon","k":"Kristal","a":"gelap","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A03-05","n":"Greyiron Nail","g":"Greymoor Downs","tier":1,"r":"Uncommon","k":"Logam","a":"gelap","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A03-06","n":"Wraith-Thread","g":"Greymoor Downs","tier":1,"r":"Uncommon","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A03-07","n":"Shepherd's Crook Tip","g":"Greymoor Downs","tier":1,"r":"Rare","k":"Logam","a":"gelap","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A03-08","n":"Whispering Stone Fragment","g":"Greymoor Downs","tier":1,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A03-09","n":"Banshee Tear","g":"Greymoor Downs","tier":1,"r":"Rare","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A03-10","n":"Scarecrow's Heartseed","g":"Greymoor Downs","tier":1,"r":"Epic","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A03-11","n":"Cairn Heart","g":"Greymoor Downs","tier":1,"r":"Epic","k":"Kristal","a":"gelap","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A03-12","n":"Mind-Silk Veil","g":"Greymoor Downs","tier":1,"r":"Epic","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A03-13","n":"Moorqueen's Sorrow Gem","g":"Greymoor Downs","tier":1,"r":"Legendary","k":"Kristal","a":"gelap","t":["murni"],"q":6,"cp":16,"ps":"INT","sb":8,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A04-01","n":"Mire Hide","g":"Blackmere Fens","tier":2,"r":"Common","k":"Kulit","a":"gelap","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A04-02","n":"Reed Fiber","g":"Blackmere Fens","tier":2,"r":"Common","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A04-03","n":"Peat Bark","g":"Blackmere Fens","tier":2,"r":"Common","k":"Kayu","a":"gelap","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A04-04","n":"Venom Sac","g":"Blackmere Fens","tier":2,"r":"Uncommon","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":3,"cp":2,"ps":"WIS","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A04-05","n":"Bog Iron","g":"Blackmere Fens","tier":2,"r":"Uncommon","k":"Logam","a":"gelap","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A04-06","n":"Glow-Mire Spore","g":"Blackmere Fens","tier":2,"r":"Uncommon","k":"Kristal","a":"gelap","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A04-07","n":"Gilded Toad Eye","g":"Blackmere Fens","tier":2,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A04-08","n":"Hag's Mire Pearl","g":"Blackmere Fens","tier":2,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A04-09","n":"Hydra Fang","g":"Blackmere Fens","tier":2,"r":"Rare","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A04-10","n":"Heart of Mire Reed","g":"Blackmere Fens","tier":2,"r":"Epic","k":"Kayu","a":"gelap","t":["ringan"],"q":5,"cp":8,"ps":"CON","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A04-11","n":"Witchlight Lantern Core","g":"Blackmere Fens","tier":2,"r":"Epic","k":"Kristal","a":"gelap","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A04-12","n":"Drowned Heartstone","g":"Blackmere Fens","tier":2,"r":"Epic","k":"Logam","a":"gelap","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A04-13","n":"Blackmere's Rotting Heart","g":"Blackmere Fens","tier":2,"r":"Legendary","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A05-01","n":"Moss Fiber","g":"Elderwake Grove","tier":2,"r":"Common","k":"Serat","a":"cahaya","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A05-02","n":"Elder Bark","g":"Elderwake Grove","tier":2,"r":"Common","k":"Kayu","a":"cahaya","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A05-03","n":"Amber Sap","g":"Elderwake Grove","tier":2,"r":"Common","k":"Kristal","a":"cahaya","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A05-04","n":"Stag Antler","g":"Elderwake Grove","tier":2,"r":"Uncommon","k":"Tulang","a":"cahaya","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A05-05","n":"Heartwood Plank","g":"Elderwake Grove","tier":2,"r":"Uncommon","k":"Kayu","a":"cahaya","t":["ringan"],"q":3,"cp":2,"ps":"CON","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A05-06","n":"Hollow Silk","g":"Elderwake Grove","tier":2,"r":"Uncommon","k":"Serat","a":"cahaya","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A05-07","n":"Rootling Core","g":"Elderwake Grove","tier":2,"r":"Rare","k":"Kayu","a":"cahaya","t":["ringan"],"q":4,"cp":4,"ps":"CON","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A05-08","n":"Whisper Pearl","g":"Elderwake Grove","tier":2,"r":"Rare","k":"Kristal","a":"cahaya","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A05-09","n":"Crown Petal","g":"Elderwake Grove","tier":2,"r":"Rare","k":"Esensi","a":"cahaya","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A05-10","n":"Verge Bloom Seed","g":"Elderwake Grove","tier":2,"r":"Epic","k":"Esensi","a":"cahaya","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A05-11","n":"Dream Owl Pinion","g":"Elderwake Grove","tier":2,"r":"Epic","k":"Serat","a":"cahaya","t":["pengikat","stabil"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A05-12","n":"Sunlit Heartwood","g":"Elderwake Grove","tier":2,"r":"Epic","k":"Kayu","a":"cahaya","t":["ringan"],"q":5,"cp":8,"ps":"CON","sb":4,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A05-13","n":"Seed of the First Tree","g":"Elderwake Grove","tier":2,"r":"Legendary","k":"Esensi","a":"cahaya","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A06-01","n":"Rusted Nail","g":"Rustleaf Weald","tier":1,"r":"Common","k":"Logam","a":"tanah","t":["tajam","berat"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A06-02","n":"Autumn Leaf Bundle","g":"Rustleaf Weald","tier":1,"r":"Common","k":"Serat","a":"tanah","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A06-03","n":"Fallen Bough","g":"Rustleaf Weald","tier":1,"r":"Common","k":"Kayu","a":"tanah","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A06-04","n":"Amber Resin","g":"Rustleaf Weald","tier":1,"r":"Uncommon","k":"Kristal","a":"tanah","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A06-05","n":"Rustwolf Pelt","g":"Rustleaf Weald","tier":1,"r":"Uncommon","k":"Kulit","a":"tanah","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A06-06","n":"Corroded Iron Plate","g":"Rustleaf Weald","tier":1,"r":"Uncommon","k":"Logam","a":"tanah","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A06-07","n":"Rustleaf Heart","g":"Rustleaf Weald","tier":1,"r":"Rare","k":"Esensi","a":"tanah","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A06-08","n":"Fossil Amber","g":"Rustleaf Weald","tier":1,"r":"Rare","k":"Kristal","a":"tanah","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A06-09","n":"Witchlight Lantern Glass","g":"Rustleaf Weald","tier":1,"r":"Rare","k":"Kristal","a":"tanah","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A06-10","n":"Autumn Crown Leaf","g":"Rustleaf Weald","tier":1,"r":"Epic","k":"Esensi","a":"tanah","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A06-11","n":"Amberdeep Heart Sap","g":"Rustleaf Weald","tier":1,"r":"Epic","k":"Kristal","a":"tanah","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A06-12","n":"Hex-Wrought Cauldron Shard","g":"Rustleaf Weald","tier":1,"r":"Epic","k":"Logam","a":"tanah","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A06-13","n":"Eternal Autumn Ember","g":"Rustleaf Weald","tier":1,"r":"Legendary","k":"Esensi","a":"tanah","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A07-01","n":"Bone Splinter","g":"Hollowbarrow Highlands","tier":1,"r":"Common","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A07-02","n":"Burial Cloth","g":"Hollowbarrow Highlands","tier":1,"r":"Common","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A07-03","n":"Tarnished Grave Coin","g":"Hollowbarrow Highlands","tier":1,"r":"Common","k":"Logam","a":"gelap","t":["tajam","berat"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A07-04","n":"Wight Iron","g":"Hollowbarrow Highlands","tier":1,"r":"Uncommon","k":"Logam","a":"gelap","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A07-05","n":"Mourning Silk","g":"Hollowbarrow Highlands","tier":1,"r":"Uncommon","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A07-06","n":"Skeletal Femur","g":"Hollowbarrow Highlands","tier":1,"r":"Uncommon","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A07-07","n":"Drowned Pearl","g":"Hollowbarrow Highlands","tier":1,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A07-08","n":"Barrow Crown Fragment","g":"Hollowbarrow Highlands","tier":1,"r":"Rare","k":"Logam","a":"gelap","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A07-09","n":"Lich Phylactery Shard","g":"Hollowbarrow Highlands","tier":1,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A07-10","n":"Kelpie Tear","g":"Hollowbarrow Highlands","tier":1,"r":"Epic","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A07-11","n":"Barrow King's Signet","g":"Hollowbarrow Highlands","tier":1,"r":"Epic","k":"Logam","a":"gelap","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A07-12","n":"Kingless Bone Throne Shard","g":"Hollowbarrow Highlands","tier":1,"r":"Epic","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A07-13","n":"The Hollow Crown Relic","g":"Hollowbarrow Highlands","tier":1,"r":"Legendary","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A08-01","n":"Salt Crystal","g":"Saltgrave Coast","tier":1,"r":"Common","k":"Kristal","a":"petir","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A08-02","n":"Crab Shell","g":"Saltgrave Coast","tier":1,"r":"Common","k":"Tulang","a":"petir","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A08-03","n":"Frayed Rope","g":"Saltgrave Coast","tier":1,"r":"Common","k":"Serat","a":"petir","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A08-04","n":"Salt-Cured Hide","g":"Saltgrave Coast","tier":1,"r":"Uncommon","k":"Kulit","a":"petir","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A08-05","n":"Anchor Iron","g":"Saltgrave Coast","tier":1,"r":"Uncommon","k":"Logam","a":"petir","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A08-06","n":"Brine Pearl","g":"Saltgrave Coast","tier":1,"r":"Uncommon","k":"Kristal","a":"petir","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A08-07","n":"Tidewrack Amber","g":"Saltgrave Coast","tier":1,"r":"Rare","k":"Kristal","a":"petir","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A08-08","n":"Rotdock Ledger Plate","g":"Saltgrave Coast","tier":1,"r":"Rare","k":"Logam","a":"petir","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A08-09","n":"Reef Coral Heart","g":"Saltgrave Coast","tier":1,"r":"Rare","k":"Kristal","a":"petir","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A08-10","n":"Washed-Up Treasure Locket","g":"Saltgrave Coast","tier":1,"r":"Epic","k":"Logam","a":"petir","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A08-11","n":"Brine Hag Eye","g":"Saltgrave Coast","tier":1,"r":"Epic","k":"Esensi","a":"petir","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A08-12","n":"Drowned Captain's Compass","g":"Saltgrave Coast","tier":1,"r":"Epic","k":"Logam","a":"petir","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A08-13","n":"Heart of the Sunken Lighthouse","g":"Saltgrave Coast","tier":1,"r":"Legendary","k":"Esensi","a":"petir","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A09-01","n":"Briar Thorn","g":"Briarfall Marches","tier":1,"r":"Common","k":"Kayu","a":"es","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A09-02","n":"Wolf Fang","g":"Briarfall Marches","tier":1,"r":"Common","k":"Tulang","a":"es","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A09-03","n":"Coarse Cloth","g":"Briarfall Marches","tier":1,"r":"Common","k":"Serat","a":"es","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A09-04","n":"Thornwood Plank","g":"Briarfall Marches","tier":1,"r":"Uncommon","k":"Kayu","a":"es","t":["ringan"],"q":3,"cp":2,"ps":"CON","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A09-05","n":"Pikeman's Rivet","g":"Briarfall Marches","tier":1,"r":"Uncommon","k":"Logam","a":"es","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A09-06","n":"Hardened Hide","g":"Briarfall Marches","tier":1,"r":"Uncommon","k":"Kulit","a":"es","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A09-07","n":"Thistle Heart","g":"Briarfall Marches","tier":1,"r":"Rare","k":"Esensi","a":"es","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A09-08","n":"Hollowroad Waystone","g":"Briarfall Marches","tier":1,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A09-09","n":"Redoubt Banner Steel","g":"Briarfall Marches","tier":1,"r":"Rare","k":"Logam","a":"es","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A09-10","n":"Briar Queen's Barb","g":"Briarfall Marches","tier":1,"r":"Epic","k":"Kayu","a":"es","t":["ringan"],"q":5,"cp":8,"ps":"CON","sb":4,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A09-11","n":"Hollowroad Dryad Seed","g":"Briarfall Marches","tier":1,"r":"Epic","k":"Esensi","a":"es","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A09-12","n":"Thornfall Siege Core","g":"Briarfall Marches","tier":1,"r":"Epic","k":"Logam","a":"es","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A09-13","n":"The Thornfall Crown","g":"Briarfall Marches","tier":1,"r":"Legendary","k":"Logam","a":"es","t":["tajam","berat"],"q":6,"cp":16,"ps":"STR","sb":8,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A10-01","n":"Bone Shard","g":"Bonethorn Peninsula","tier":1,"r":"Common","k":"Tulang","a":"tanah","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A10-02","n":"Jungle Vine","g":"Bonethorn Peninsula","tier":1,"r":"Common","k":"Serat","a":"tanah","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A10-03","n":"Thornback Scale","g":"Bonethorn Peninsula","tier":1,"r":"Common","k":"Kulit","a":"tanah","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A10-04","n":"Marrow Ore","g":"Bonethorn Peninsula","tier":1,"r":"Uncommon","k":"Logam","a":"tanah","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A10-05","n":"Spiked Bone Plate","g":"Bonethorn Peninsula","tier":1,"r":"Uncommon","k":"Tulang","a":"tanah","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A10-06","n":"Venom Thorn","g":"Bonethorn Peninsula","tier":1,"r":"Uncommon","k":"Esensi","a":"tanah","t":["murni","stabil"],"q":3,"cp":2,"ps":"WIS","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A10-07","n":"Greenmaw Fang","g":"Bonethorn Peninsula","tier":1,"r":"Rare","k":"Tulang","a":"tanah","t":["tumpul","buas"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A10-08","n":"Witch Doctor's Mask Shard","g":"Bonethorn Peninsula","tier":1,"r":"Rare","k":"Kayu","a":"tanah","t":["ringan"],"q":4,"cp":4,"ps":"CON","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A10-09","n":"Marrow Core","g":"Bonethorn Peninsula","tier":1,"r":"Rare","k":"Kristal","a":"tanah","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A10-10","n":"Bonethorn Spike","g":"Bonethorn Peninsula","tier":1,"r":"Epic","k":"Tulang","a":"tanah","t":["tumpul","buas"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A10-11","n":"Skullmask Totem Heart","g":"Bonethorn Peninsula","tier":1,"r":"Epic","k":"Esensi","a":"tanah","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A10-12","n":"Wyrm Marrow Gem","g":"Bonethorn Peninsula","tier":1,"r":"Epic","k":"Kristal","a":"tanah","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A10-13","n":"The Spine of Bonethorn","g":"Bonethorn Peninsula","tier":1,"r":"Legendary","k":"Tulang","a":"tanah","t":["tumpul","buas"],"q":6,"cp":16,"ps":"STR","sb":8,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A11-01","n":"Mountain Goat Hide","g":"Wyrmspine Mountains","tier":3,"r":"Common","k":"Kulit","a":"petir","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A11-02","n":"Iron-Flecked Stone","g":"Wyrmspine Mountains","tier":3,"r":"Common","k":"Logam","a":"petir","t":["tajam","berat"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A11-03","n":"Eagle Feather","g":"Wyrmspine Mountains","tier":3,"r":"Common","k":"Serat","a":"petir","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A11-04","n":"Wyrm Scale Fragment","g":"Wyrmspine Mountains","tier":3,"r":"Uncommon","k":"Kulit","a":"petir","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A11-05","n":"Ironroot Ore","g":"Wyrmspine Mountains","tier":3,"r":"Uncommon","k":"Logam","a":"petir","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A11-06","n":"Troll Tooth","g":"Wyrmspine Mountains","tier":3,"r":"Uncommon","k":"Tulang","a":"petir","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A11-07","n":"Foothill Iron Heart","g":"Wyrmspine Mountains","tier":3,"r":"Rare","k":"Logam","a":"petir","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A11-08","n":"Wyrmling Horn","g":"Wyrmspine Mountains","tier":3,"r":"Rare","k":"Tulang","a":"petir","t":["tumpul","buas"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A11-09","n":"Stormdrake Scale","g":"Wyrmspine Mountains","tier":3,"r":"Rare","k":"Kulit","a":"petir","t":["stabil","ringan"],"q":4,"cp":4,"ps":"DEX","sb":2,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A11-10","n":"Ironroot Core","g":"Wyrmspine Mountains","tier":3,"r":"Epic","k":"Kristal","a":"petir","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A11-11","n":"Wyvern Venom Gland","g":"Wyrmspine Mountains","tier":3,"r":"Epic","k":"Esensi","a":"petir","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A11-12","n":"Thunder Dragon Heartscale","g":"Wyrmspine Mountains","tier":3,"r":"Epic","k":"Kulit","a":"petir","t":["stabil","ringan"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A11-13","n":"Heart of the Wyrmspine","g":"Wyrmspine Mountains","tier":3,"r":"Legendary","k":"Esensi","a":"petir","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A12-01","n":"Jackal Pelt","g":"Ashwind Steppe","tier":2,"r":"Common","k":"Kulit","a":"es","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A12-02","n":"Dry Reed Bundle","g":"Ashwind Steppe","tier":2,"r":"Common","k":"Serat","a":"es","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A12-03","n":"Steppe Salt","g":"Ashwind Steppe","tier":2,"r":"Common","k":"Kristal","a":"es","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A12-04","n":"Nomad Bonehook","g":"Ashwind Steppe","tier":2,"r":"Uncommon","k":"Tulang","a":"es","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A12-05","n":"Plains Iron Nugget","g":"Ashwind Steppe","tier":2,"r":"Uncommon","k":"Logam","a":"es","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A12-06","n":"Windworn Leather","g":"Ashwind Steppe","tier":2,"r":"Uncommon","k":"Kulit","a":"es","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A12-07","n":"Steppe Hawk Talon","g":"Ashwind Steppe","tier":2,"r":"Rare","k":"Tulang","a":"es","t":["tumpul","buas"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A12-08","n":"Salt-Lake Crystal","g":"Ashwind Steppe","tier":2,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A12-09","n":"Ruin Glass Shard","g":"Ashwind Steppe","tier":2,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A12-10","n":"Dryreed Wind Knot","g":"Ashwind Steppe","tier":2,"r":"Epic","k":"Serat","a":"es","t":["pengikat","stabil"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A12-11","n":"Mirage Pearl","g":"Ashwind Steppe","tier":2,"r":"Epic","k":"Kristal","a":"es","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A12-12","n":"Dustwind Warlord's Signet","g":"Ashwind Steppe","tier":2,"r":"Epic","k":"Logam","a":"es","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A12-13","n":"Banner of the Last Khan","g":"Ashwind Steppe","tier":2,"r":"Legendary","k":"Serat","a":"es","t":["pengikat","stabil"],"q":6,"cp":16,"ps":"DEX","sb":8,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A13-01","n":"Taiga Wolf Pelt","g":"Frostpine Taiga","tier":2,"r":"Common","k":"Kulit","a":"es","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A13-02","n":"Frost Pine Bark","g":"Frostpine Taiga","tier":2,"r":"Common","k":"Kayu","a":"es","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A13-03","n":"Pine Resin Lump","g":"Frostpine Taiga","tier":2,"r":"Common","k":"Kristal","a":"es","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A13-04","n":"Elk Antler","g":"Frostpine Taiga","tier":2,"r":"Uncommon","k":"Tulang","a":"es","t":["tumpul","buas"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A13-05","n":"Frostpine Plank","g":"Frostpine Taiga","tier":2,"r":"Uncommon","k":"Kayu","a":"es","t":["ringan"],"q":3,"cp":2,"ps":"CON","sb":1,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A13-06","n":"Hunter's Sinew","g":"Frostpine Taiga","tier":2,"r":"Uncommon","k":"Serat","a":"es","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A13-07","n":"Pinewatch Heartwood","g":"Frostpine Taiga","tier":2,"r":"Rare","k":"Kayu","a":"es","t":["ringan"],"q":4,"cp":4,"ps":"CON","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A13-08","n":"Moonsilver Dust","g":"Frostpine Taiga","tier":2,"r":"Rare","k":"Esensi","a":"es","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A13-09","n":"Deepfrost Crystal","g":"Frostpine Taiga","tier":2,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A13-10","n":"Ghost Trapper's Snare Wire","g":"Frostpine Taiga","tier":2,"r":"Epic","k":"Logam","a":"es","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A13-11","n":"Wolfmoon Silver Fang","g":"Frostpine Taiga","tier":2,"r":"Epic","k":"Tulang","a":"es","t":["tumpul","buas"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A13-12","n":"Hollow Warden Core","g":"Frostpine Taiga","tier":2,"r":"Epic","k":"Kristal","a":"es","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A13-13","n":"Frozen Heart of the Great Pine","g":"Frostpine Taiga","tier":2,"r":"Legendary","k":"Kayu","a":"es","t":["ringan"],"q":6,"cp":16,"ps":"CON","sb":8,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A14-01","n":"Scorpion Chitin","g":"Emberwaste","tier":4,"r":"Common","k":"Tulang","a":"api","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A14-02","n":"Dune Glass","g":"Emberwaste","tier":4,"r":"Common","k":"Kristal","a":"api","t":["murni"],"q":2,"cp":1,"ps":"INT","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A14-03","n":"Ash Cloth","g":"Emberwaste","tier":4,"r":"Common","k":"Serat","a":"api","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A14-04","n":"Cooled Lava Rock","g":"Emberwaste","tier":4,"r":"Uncommon","k":"Logam","a":"api","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A14-05","n":"Sunscorched Leather","g":"Emberwaste","tier":4,"r":"Uncommon","k":"Kulit","a":"api","t":["stabil","ringan"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A14-06","n":"Cinder Glass Shard","g":"Emberwaste","tier":4,"r":"Uncommon","k":"Kristal","a":"api","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A14-07","n":"Ember Crystal","g":"Emberwaste","tier":4,"r":"Rare","k":"Kristal","a":"api","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A14-08","n":"Obsidian Heart","g":"Emberwaste","tier":4,"r":"Rare","k":"Kristal","a":"api","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A14-09","n":"Magma Core","g":"Emberwaste","tier":4,"r":"Rare","k":"Kristal","a":"api","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Cursed","hte":"Damage +8%, HP maks -5% (efek samping)"},{"id":"MAT-A14-10","n":"Mirage Imp Eye","g":"Emberwaste","tier":4,"r":"Epic","k":"Esensi","a":"api","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A14-11","n":"Sun Priest's Brand","g":"Emberwaste","tier":4,"r":"Epic","k":"Logam","a":"api","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A14-12","n":"Cinder Drake Heartscale","g":"Emberwaste","tier":4,"r":"Epic","k":"Kulit","a":"api","t":["stabil","ringan"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Blessed","hte":"WIS +1"},{"id":"MAT-A14-13","n":"The Maw's Undying Ember","g":"Emberwaste","tier":4,"r":"Legendary","k":"Esensi","a":"api","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A15-01","n":"Seal Hide","g":"Crownfrost Isle","tier":5,"r":"Common","k":"Kulit","a":"es","t":["stabil","ringan"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A15-02","n":"Rime Crab Shell","g":"Crownfrost Isle","tier":5,"r":"Common","k":"Tulang","a":"es","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A15-03","n":"Sled Rope Fiber","g":"Crownfrost Isle","tier":5,"r":"Common","k":"Serat","a":"es","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A15-04","n":"Frozen Barbican Steel","g":"Crownfrost Isle","tier":5,"r":"Uncommon","k":"Logam","a":"es","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A15-05","n":"Ice Shard","g":"Crownfrost Isle","tier":5,"r":"Uncommon","k":"Kristal","a":"es","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Tempered","hte":"Durabilitas +20%"},{"id":"MAT-A15-06","n":"Knight's Frozen Plate","g":"Crownfrost Isle","tier":5,"r":"Uncommon","k":"Logam","a":"es","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Piercing","hte":"Abaikan 1 AC target"},{"id":"MAT-A15-07","n":"Whaler's Frozen Harpoon","g":"Crownfrost Isle","tier":5,"r":"Rare","k":"Logam","a":"es","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A15-08","n":"Frostforged Link","g":"Crownfrost Isle","tier":5,"r":"Rare","k":"Logam","a":"es","t":["tajam","berat"],"q":4,"cp":4,"ps":"STR","sb":2,"ht":"Heavy","hte":"Damage +4%, inisiatif -1"},{"id":"MAT-A15-09","n":"Crown Ice Gem","g":"Crownfrost Isle","tier":5,"r":"Rare","k":"Kristal","a":"es","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A15-10","n":"Landing Beacon Glass","g":"Crownfrost Isle","tier":5,"r":"Epic","k":"Kristal","a":"es","t":["murni"],"q":5,"cp":8,"ps":"INT","sb":4,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A15-11","n":"Barbican Gate Rune","g":"Crownfrost Isle","tier":5,"r":"Epic","k":"Esensi","a":"es","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A15-12","n":"Frost Phoenix Feather","g":"Crownfrost Isle","tier":5,"r":"Epic","k":"Serat","a":"es","t":["pengikat","stabil"],"q":5,"cp":8,"ps":"DEX","sb":4,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A15-13","n":"The Crownfrost Diadem","g":"Crownfrost Isle","tier":5,"r":"Legendary","k":"Kristal","a":"es","t":["murni"],"q":6,"cp":16,"ps":"INT","sb":8,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A16-01","n":"Ghost Plank","g":"Wraithtide Isles","tier":4,"r":"Common","k":"Kayu","a":"gelap","t":["ringan"],"q":2,"cp":1,"ps":"CON","sb":1,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A16-02","n":"Brine Cloth","g":"Wraithtide Isles","tier":4,"r":"Common","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":2,"cp":1,"ps":"DEX","sb":1,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A16-03","n":"Drowned Bone","g":"Wraithtide Isles","tier":4,"r":"Common","k":"Tulang","a":"gelap","t":["tumpul","buas"],"q":2,"cp":1,"ps":"STR","sb":1,"ht":"Lucky","hte":"Peluang drop +3% saat senjata terpasang"},{"id":"MAT-A16-04","n":"Wraith Silk","g":"Wraithtide Isles","tier":4,"r":"Uncommon","k":"Serat","a":"gelap","t":["pengikat","stabil"],"q":3,"cp":2,"ps":"DEX","sb":1,"ht":"Dormant","hte":"Tidak ada efek (sifat tertidur)"},{"id":"MAT-A16-05","n":"Ghost Iron","g":"Wraithtide Isles","tier":4,"r":"Uncommon","k":"Logam","a":"gelap","t":["tajam","berat"],"q":3,"cp":2,"ps":"STR","sb":1,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A16-06","n":"Spectral Pearl","g":"Wraithtide Isles","tier":4,"r":"Uncommon","k":"Kristal","a":"gelap","t":["murni"],"q":3,"cp":2,"ps":"INT","sb":1,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A16-07","n":"Drift Wraith Wisp","g":"Wraithtide Isles","tier":4,"r":"Rare","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":4,"cp":4,"ps":"WIS","sb":2,"ht":"Resonant","hte":"Damage elemen +10%"},{"id":"MAT-A16-08","n":"Siren Scale","g":"Wraithtide Isles","tier":4,"r":"Rare","k":"Kulit","a":"gelap","t":["stabil","ringan"],"q":4,"cp":4,"ps":"DEX","sb":2,"ht":"Featherlight","hte":"Inisiatif +2"},{"id":"MAT-A16-09","n":"Abyssal Soul Gem","g":"Wraithtide Isles","tier":4,"r":"Rare","k":"Kristal","a":"gelap","t":["murni"],"q":4,"cp":4,"ps":"INT","sb":2,"ht":"Keen","hte":"Peluang critical +3%"},{"id":"MAT-A16-10","n":"Drowned Fisherman's Lantern","g":"Wraithtide Isles","tier":4,"r":"Epic","k":"Logam","a":"gelap","t":["tajam","berat"],"q":5,"cp":8,"ps":"STR","sb":4,"ht":"Leeching","hte":"2% damage menjadi HP pemakai"},{"id":"MAT-A16-11","n":"Ghost Ship Helm Shard","g":"Wraithtide Isles","tier":4,"r":"Epic","k":"Kayu","a":"gelap","t":["ringan"],"q":5,"cp":8,"ps":"CON","sb":4,"ht":"Venomous","hte":"5% peluang poison 3 giliran"},{"id":"MAT-A16-12","n":"Soul Reaper's Hourglass Sand","g":"Wraithtide Isles","tier":4,"r":"Epic","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":5,"cp":8,"ps":"WIS","sb":4,"ht":"Brittle","hte":"Damage +10%, durabilitas -20% (efek samping)"},{"id":"MAT-A16-13","n":"The Wraith Spire's Heart","g":"Wraithtide Isles","tier":4,"r":"Legendary","k":"Esensi","a":"gelap","t":["murni","stabil"],"q":6,"cp":16,"ps":"WIS","sb":8,"ht":"Tempered","hte":"Durabilitas +20%"}];
+
+    const WEAPONS = [
+      { id: "w_str_1", name: "Kapak Perang", stat: "STR", tier: 1, tag: "Dekat", trigger: "Twister", modeWeights: [55, 30, 15], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_2", name: "Kapak Besar", stat: "STR", tier: 2, tag: "Dekat", trigger: "Cleave", modeWeights: [60, 25, 15], budget: { damage: 42, speed: 13, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_r1", name: "Kapak Lempar Berat", stat: "STR", tier: 2, tag: "Jauh", trigger: "Splitting Throw", modeWeights: [40, 40, 20], budget: { damage: 35, speed: 15, accuracy: 25, defense: 0, trigger: 25 } },
+      { id: "w_str_3", name: "Palu Perang", stat: "STR", tier: 3, tag: "Dekat", trigger: "Heavy Chain", modeWeights: [55, 35, 10], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_4", name: "Pedang Besar", stat: "STR", tier: 4, tag: "Dekat", trigger: "Breaker Edge", modeWeights: [50, 30, 20], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_5", name: "Gada Berduri", stat: "STR", tier: 5, tag: "Dekat", trigger: "Spike Burst", modeWeights: [55, 25, 20], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_6", name: "Maul", stat: "STR", tier: 6, tag: "Dekat", trigger: "Earthbreaker", modeWeights: [60, 20, 20], budget: { damage: 45, speed: 10, accuracy: 15, defense: 5, trigger: 25 } },
+      { id: "w_str_r2", name: "Arbalest Baja", stat: "STR", tier: 6, tag: "Jauh", trigger: "Siege Bolt", modeWeights: [35, 35, 30], budget: { damage: 38, speed: 12, accuracy: 25, defense: 0, trigger: 25 } },
+
+      { id: "w_dex_1", name: "Belati", stat: "DEX", tier: 1, tag: "Dekat", trigger: "Quick Stab", modeWeights: [30, 50, 20], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
+      { id: "w_dex_2", name: "Pedang Pendek", stat: "DEX", tier: 2, tag: "Dekat", trigger: "Riposte", modeWeights: [30, 50, 20], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
+      { id: "w_dex_r1", name: "Pisau Lempar Kembar", stat: "DEX", tier: 2, tag: "Jauh", trigger: "Fan of Knives", modeWeights: [25, 45, 30], budget: { damage: 22, speed: 28, accuracy: 25, defense: 0, trigger: 25 } },
+      { id: "w_dex_3", name: "Belati Kembar", stat: "DEX", tier: 3, tag: "Dekat", trigger: "Dual Flurry", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
+      { id: "w_dex_4", name: "Katana", stat: "DEX", tier: 4, tag: "Dekat", trigger: "Iaijutsu", modeWeights: [35, 40, 25], budget: { damage: 28, speed: 25, accuracy: 20, defense: 2, trigger: 25 } },
+      { id: "w_dex_5", name: "Busur Pendek", stat: "DEX", tier: 5, tag: "Jauh", trigger: "Quick Draw", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
+      { id: "w_dex_6", name: "Busur Panjang", stat: "DEX", tier: 6, tag: "Jauh", trigger: "Piercing Shot", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
+      { id: "w_dex_r2", name: "Crossbow Berulang", stat: "DEX", tier: 6, tag: "Jauh", trigger: "Rapid Volley", modeWeights: [20, 45, 35], budget: { damage: 24, speed: 26, accuracy: 25, defense: 0, trigger: 25 } },
+
+      { id: "w_con_1", name: "Gada Penjaga", stat: "CON", tier: 1, tag: "Dekat", trigger: "Guard Strike", modeWeights: [50, 35, 15], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_2", name: "Flail Baja", stat: "CON", tier: 2, tag: "Dekat", trigger: "Swing Lash", modeWeights: [45, 35, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_3", name: "Gauntlet Baja", stat: "CON", tier: 3, tag: "Dekat", trigger: "Counter Fist", modeWeights: [50, 30, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_r1", name: "Bola Rantai Berat", stat: "CON", tier: 3, tag: "Jauh", trigger: "Entangling Weight", modeWeights: [40, 35, 25], budget: { damage: 25, speed: 15, accuracy: 25, defense: 15, trigger: 20 } },
+      { id: "w_con_4", name: "Palu Penjaga", stat: "CON", tier: 4, tag: "Dekat", trigger: "Bulwark Slam", modeWeights: [55, 30, 15], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_5", name: "Rantai Berduri", stat: "CON", tier: 5, tag: "Dekat", trigger: "Thorn Chain", modeWeights: [40, 35, 25], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_6", name: "Pedang Penjaga", stat: "CON", tier: 6, tag: "Dekat", trigger: "Sentinel Oath", modeWeights: [50, 30, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+      { id: "w_con_r2", name: "Ballista Perisai", stat: "CON", tier: 6, tag: "Jauh", trigger: "Fortress Shot", modeWeights: [45, 30, 25], budget: { damage: 25, speed: 12, accuracy: 23, defense: 20, trigger: 20 } },
+
+      { id: "w_int_1", name: "Tongkat Rune", stat: "INT", tier: 1, tag: "Dekat", trigger: "Arcane Bolt", modeWeights: [15, 35, 50], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+      { id: "w_int_2", name: "Pedang Rune", stat: "INT", tier: 2, tag: "Dekat", trigger: "Rune Edge", modeWeights: [20, 35, 45], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+      { id: "w_int_r1", name: "Orb Rune Melayang", stat: "INT", tier: 2, tag: "Jauh", trigger: "Prismatic Beam", modeWeights: [10, 30, 60], budget: { damage: 20, speed: 15, accuracy: 20, defense: 0, trigger: 45 } },
+      { id: "w_int_3", name: "Palu Rune", stat: "INT", tier: 3, tag: "Dekat", trigger: "Runic Shockwave", modeWeights: [20, 30, 50], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+      { id: "w_int_4", name: "Sabit Arcane", stat: "INT", tier: 4, tag: "Dekat", trigger: "Soul Reap", modeWeights: [15, 30, 55], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+      { id: "w_int_5", name: "Cakram Rune", stat: "INT", tier: 5, tag: "Jauh", trigger: "Orbit Discs", modeWeights: [10, 30, 60], budget: { damage: 20, speed: 15, accuracy: 20, defense: 0, trigger: 45 } },
+      { id: "w_int_6", name: "Rantai Rune", stat: "INT", tier: 6, tag: "Dekat", trigger: "Binding Chain", modeWeights: [15, 30, 55], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+      { id: "w_int_r2", name: "Senapan Rune", stat: "INT", tier: 6, tag: "Jauh", trigger: "Arcane Snipe", modeWeights: [15, 25, 60], budget: { damage: 22, speed: 15, accuracy: 23, defense: 0, trigger: 40 } },
+
+      { id: "w_wis_1", name: "Tombak", stat: "WIS", tier: 1, tag: "Dekat", trigger: "Keen Thrust", modeWeights: [35, 45, 20], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+      { id: "w_wis_2", name: "Trisula", stat: "WIS", tier: 2, tag: "Dekat", trigger: "Triple Prong", modeWeights: [30, 45, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+      { id: "w_wis_r1", name: "Sumpit Pemburu", stat: "WIS", tier: 2, tag: "Jauh", trigger: "Neurotoxin Dart", modeWeights: [25, 45, 30], budget: { damage: 24, speed: 22, accuracy: 30, defense: 0, trigger: 24 } },
+      { id: "w_wis_3", name: "Naginata", stat: "WIS", tier: 3, tag: "Dekat", trigger: "Sweeping Arc", modeWeights: [35, 40, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+      { id: "w_wis_4", name: "Tongkat Bo", stat: "WIS", tier: 4, tag: "Dekat", trigger: "Disarm Sweep", modeWeights: [30, 50, 20], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+      { id: "w_wis_5", name: "Tombak Lempar", stat: "WIS", tier: 5, tag: "Jauh", trigger: "Tracker Mark", modeWeights: [35, 45, 20], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
+      { id: "w_wis_6", name: "Tombak Pemburu", stat: "WIS", tier: 6, tag: "Dekat", trigger: "Prey Sense", modeWeights: [35, 40, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+      { id: "w_wis_r2", name: "Busur Silang Pemburu", stat: "WIS", tier: 6, tag: "Jauh", trigger: "Deadeye Pin", modeWeights: [30, 40, 30], budget: { damage: 28, speed: 17, accuracy: 30, defense: 0, trigger: 25 } },
+
+      { id: "w_cha_1", name: "Rapier", stat: "CHA", tier: 1, tag: "Dekat", trigger: "Feint", modeWeights: [30, 45, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_2", name: "Saber", stat: "CHA", tier: 2, tag: "Dekat", trigger: "Rally Cut", modeWeights: [35, 40, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_3", name: "Pedang Bangsawan", stat: "CHA", tier: 3, tag: "Dekat", trigger: "Noble Challenge", modeWeights: [30, 40, 30], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_r1", name: "Pistol Flintlock Duel", stat: "CHA", tier: 3, tag: "Jauh", trigger: "Point-Blank Decree", modeWeights: [25, 40, 35], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
+      { id: "w_cha_4", name: "Tongkat Penguasa", stat: "CHA", tier: 4, tag: "Dekat", trigger: "Command Aura", modeWeights: [25, 40, 35], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_5", name: "Cambuk Dagang", stat: "CHA", tier: 5, tag: "Dekat", trigger: "Debt Lash", modeWeights: [30, 45, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_6", name: "Pedang Upacara", stat: "CHA", tier: 6, tag: "Dekat", trigger: "Grand Ovation", modeWeights: [25, 35, 40], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+      { id: "w_cha_r2", name: "Meriam Genggam Komando", stat: "CHA", tier: 6, tag: "Jauh", trigger: "Salvo Signal", modeWeights: [25, 35, 40], budget: { damage: 27, speed: 18, accuracy: 28, defense: 0, trigger: 27 } },
+
+      // 15 Jenis Armor Resmi CD-5.02b (5 Slot x 3 Kelas: Ringan, Sedang, Berat)
+      { id: "a_chest_light", isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Ringan", name: "Zirah Kulit Bayangan", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Shadow Weave", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 20, accuracy: 15, defense: 30, trigger: 25 } },
+      { id: "a_chest_med",   isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Sedang", name: "Zirah Sisik Elemen", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Elemental Carapace", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 10, accuracy: 10, defense: 35, trigger: 35 } },
+      { id: "a_chest_heavy", isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Berat",  name: "Zirah Pelat Adamantine", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Adamantine Bulwark", modeWeights: [55, 25, 20], budget: { damage: 5, speed: 5, accuracy: 10, defense: 50, trigger: 30 } },
+
+      { id: "a_shield_light", isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Ringan", name: "Buckler Tangkis Cepat", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Buckler Riposte", modeWeights: [30, 50, 20], budget: { damage: 15, speed: 20, accuracy: 15, defense: 25, trigger: 25 } },
+      { id: "a_shield_med",   isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Sedang", name: "Perisai Segel Rune", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Runic Ward Shield", modeWeights: [20, 30, 50], budget: { damage: 10, speed: 10, accuracy: 15, defense: 30, trigger: 35 } },
+      { id: "a_shield_heavy", isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Berat",  name: "Perisai Menara Benteng", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Fortress Wall", modeWeights: [60, 25, 15], budget: { damage: 5, speed: 5, accuracy: 10, defense: 55, trigger: 25 } },
+
+      { id: "a_helm_light", isArmor: true, slot: "Helm", acPct: 15, armorClass: "Ringan", name: "Tudung Bidik Pemburu", stat: "WIS", tier: 1, tag: "Armor Ringan", trigger: "Predator's Visor", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 15, accuracy: 30, defense: 20, trigger: 25 } },
+      { id: "a_helm_med",   isArmor: true, slot: "Helm", acPct: 15, armorClass: "Sedang", name: "Mahkota Pelindung Pikiran", stat: "CHA", tier: 2, tag: "Armor Sedang", trigger: "Mind-Ward Circlet", modeWeights: [25, 35, 40], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+      { id: "a_helm_heavy", isArmor: true, slot: "Helm", acPct: 15, armorClass: "Berat",  name: "Helm Baja Juggernaut", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Iron Juggernaut Helm", modeWeights: [55, 30, 15], budget: { damage: 5, speed: 5, accuracy: 15, defense: 50, trigger: 25 } },
+
+      { id: "a_glove_light", isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Ringan", name: "Sarung Tangan Presisi", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Sleight Grips", modeWeights: [30, 50, 20], budget: { damage: 10, speed: 25, accuracy: 20, defense: 20, trigger: 25 } },
+      { id: "a_glove_med",   isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Sedang", name: "Bracer Penyalur Inti", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Channeler's Bracers", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+      { id: "a_glove_heavy", isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Berat",  name: "Gauntlet Penghancur Baja", stat: "STR", tier: 3, tag: "Armor Berat", trigger: "Crushing Gauntlets", modeWeights: [55, 25, 20], budget: { damage: 20, speed: 10, accuracy: 10, defense: 35, trigger: 25 } },
+
+      { id: "a_boot_light", isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Ringan", name: "Sepatu Langkah Angin", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Windstep Boots", modeWeights: [30, 50, 20], budget: { damage: 5, speed: 30, accuracy: 15, defense: 25, trigger: 25 } },
+      { id: "a_boot_med",   isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Sedang", name: "Sepatu Penjelajah Medan", stat: "WIS", tier: 2, tag: "Armor Sedang", trigger: "Strider Treads", modeWeights: [30, 40, 30], budget: { damage: 5, speed: 20, accuracy: 15, defense: 30, trigger: 30 } },
+      { id: "a_boot_heavy", isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Berat",  name: "Greaves Pengguncang Bumi", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Earthshaker Greaves", modeWeights: [55, 30, 15], budget: { damage: 10, speed: 15, accuracy: 10, defense: 45, trigger: 20 } }
+    ];
+
+    const ARMORER_SECONDARY_TRIGGERS = {
+      Zirah:   { req: 1, name: "Heart of the Forge (+12% HP & Regen 2%)" },
+      Perisai: { req: 2, name: "Unbreakable Aegis (+10% Block & 30% Mit->Might)" },
+      Helm:    { req: 3, name: "Tactical Command Crown (-1.5s CD Skill)" },
+      Sarung:  { req: 4, name: "Ironclad Grip (+15% Daya Weapon Trigger)" },
+      Sepatu:  { req: 5, name: "Seismic Stride (-12% Acc & Spd Musuh)" }
+    };
+
+    const ARMORER_ULTIMATE_TRIGGERS = {
+      Berat:  "Living Citadel of the World-Forge (-20% Dmg Masuk, Cap Mitigate 70%, & Citadel Nova 50% HP tiap 5s)",
+      Sedang: "Prismatic Sanctuary Matrix (+25% Resist 6 Elemen & Pantulan Weakness Exploit ×1.5)",
+      Ringan: "Phantom Mirage Carapace (Cap Dodge+Parry 45% & Counter-Slash 120% Dmg)"
+    };
+
+    const HYBRIDS = {
+      "api+es": { name: "Uap (Steam)", elements_wd: ["Fire", "Ice"], desc: "Mengurangi akurasi musuh -12% & +12% Skill Damage", combat_bonus: { enemy_acc_debuff_pct: 12, skill_dmg_pct: 12 } },
+      "api+tanah": { name: "Magma", elements_wd: ["Fire", "Earth"], desc: "Luka bakar berat (+20% Skill & Trigger Damage, +10% Armor Crush)", combat_bonus: { skill_dmg_pct: 20, armor_pen_pct: 10 } },
+      "es+petir": { name: "Badai Beku (Froststorm)", elements_wd: ["Ice", "Lightning"], desc: "Peluang membeku (+15% Attack Speed & +14% Skill Damage)", combat_bonus: { attack_speed_pct: 15, skill_dmg_pct: 14 } },
+      "cahaya+gelap": { name: "Gerhana (Eclipse)", elements_wd: ["Light", "Dark"], desc: "Sangat kuat (+28% Skill Damage & Auto-Weakness Exploit semua musuh!)", combat_bonus: { skill_dmg_pct: 28, auto_match_weakness: true } },
+      "petir+tanah": { name: "Gempa Listrik (Electro-Quake)", elements_wd: ["Lightning", "Earth"], desc: "Getaran elektromagnetik (+18% Trigger Power & +10% Reduksi Damage)", combat_bonus: { trigger_power_pct: 18, dmg_reduction_pct: 10 } },
+      "api+petir": { name: "Plasma", elements_wd: ["Fire", "Lightning"], desc: "Panas bertegangan tinggi (+18% Armor Pen & +15% Skill Damage)", combat_bonus: { armor_pen_pct: 18, skill_dmg_pct: 15 } }
+    };
+
+    const SYNERGIES = [
+      { el: "api", tag: "tajam", name: "Gigitan Membara", bonus: { skill_dmg_pct: 10 } },
+      { el: "es", tag: "berat", name: "Hantaman Beku", bonus: { skill_dmg_pct: 8 } },
+      { el: "petir", tag: "ringan", name: "Kilat Cepat", bonus: { skill_dmg_pct: 10 } },
+      { el: "tanah", tag: "tumpul", name: "Guncang Bumi", bonus: { skill_dmg_pct: 8 } },
+      { el: "cahaya", tag: "murni", name: "Cahaya Suci", bonus: { skill_dmg_pct: 10 } },
+      { el: "gelap", tag: "buas", name: "Taring Senyap", bonus: { skill_dmg_pct: 12 } }
+    ];
+
+    const RARES = [
+      { name: "Bara Abadi", bonus: { skill_dmg_pct: 18 } },
+      { name: "Bisikan Leluhur", bonus: { skill_dmg_pct: 15 } },
+      { name: "Retakan Bintang", bonus: { skill_dmg_pct: 20 } }
+    ];
+
+    const DISCIPLINE_ACTIVES = {
+      STR: { name: "Juggernaut Forgebreaker", skills: [{ req: 30, name: "Crushing Blow", role: "Builder", cd: 5, mult: 1.35 }, { req: 60, name: "Titan's Roar", role: "Defensive", cd: 12, mult: 1.15 }, { req: 90, name: "Sundering Smash", role: "Core Combo", cd: 8, mult: 2.2 }, { req: 120, name: "Earthshaker Quake", role: "High-Impact", cd: 15, mult: 2.2 }, { req: 150, name: "Cataclysmic Anvil Fall", role: "Apex Capstone", cd: 22, mult: 3.75 }] },
+      DEX: { name: "Phantom Bladeweaver", skills: [{ req: 30, name: "Viper Lunge", role: "Builder", cd: 4, mult: 1.25 }, { req: 60, name: "Riposte Veil", role: "Defensive", cd: 10, mult: 1.2 }, { req: 90, name: "Cyclone Slash", role: "Core Combo", cd: 7, mult: 2.1 }, { req: 120, name: "Lightning Barrage", role: "High-Impact", cd: 14, mult: 2.1 }, { req: 150, name: "Phantom Horizon Dance", role: "Apex Capstone", cd: 20, mult: 3.6 }] },
+      CON: { name: "Immortal Bastion", skills: [{ req: 30, name: "Shield Bash", role: "Builder", cd: 5, mult: 1.25 }, { req: 60, name: "Ironclad Fortress", role: "Defensive", cd: 12, mult: 1.1 }, { req: 90, name: "Bulwark Slam", role: "Core Combo", cd: 8, mult: 2.2 }, { req: 120, name: "Juggernaut Avalanche", role: "High-Impact", cd: 15, mult: 2.15 }, { req: 150, name: "Aegis of the World-Forge", role: "Apex Capstone", cd: 22, mult: 3.55 }] },
+      INT: { name: "Arcane Runelord", skills: [{ req: 30, name: "Arcane Pulse", role: "Builder", cd: 4, mult: 1.35 }, { req: 60, name: "Nullifying Glyph", role: "Defensive", cd: 11, mult: 1.25 }, { req: 90, name: "Runic Shockwave", role: "Core Combo", cd: 8, mult: 2.35 }, { req: 120, name: "Astral Singularity", role: "High-Impact", cd: 15, mult: 2.3 }, { req: 150, name: "Grand Runic Supernova", role: "Apex Capstone", cd: 21, mult: 3.9 }] },
+      WIS: { name: "Seeker Inquisitor", skills: [{ req: 30, name: "Tracker's Mark", role: "Builder", cd: 5, mult: 1.3 }, { req: 60, name: "Foresight Parry", role: "Defensive", cd: 11, mult: 1.25 }, { req: 90, name: "Heartpiercer Thrust", role: "Core Combo", cd: 8, mult: 2.3 }, { req: 120, name: "Skyfall Javelin", role: "High-Impact", cd: 15, mult: 2.25 }, { req: 150, name: "Judgment of the All-Seeing", role: "Apex Capstone", cd: 21, mult: 3.75 }] },
+      CHA: { name: "Sovereign Marshal", skills: [{ req: 30, name: "Noble Challenge", role: "Builder", cd: 5, mult: 1.3 }, { req: 60, name: "Sovereign Aegis", role: "Defensive", cd: 11, mult: 1.2 }, { req: 90, name: "Rallying Strike", role: "Core Combo", cd: 8, mult: 2.25 }, { req: 120, name: "Dread Edict", role: "High-Impact", cd: 15, mult: 2.2 }, { req: 150, name: "Grand Ovation of the Forge-King", role: "Apex Capstone", cd: 21, mult: 3.7 }] }
+    };
+
+    const SINGLE_CLASS_NAMES = {
+      Weaponsmith: ["Bladesmith", "Edgewright", "Warmonger", "Vanquisher", "Archblade"],
+      Armorer:     ["Platesmith", "Shieldwright", "Bulwark", "Juggernaut", "Aegisborn"],
+      Rangesmith:  ["Bowyer", "Fletcher", "Deadeye", "Ballistary", "Horizoner"],
+      Runesmith:   ["Runescribe", "Glyphwright", "Spellforger", "Arcanist", "Runelord"],
+      Reforger:    ["Tinkerer", "Temperer", "Transmuter", "Alchemizer", "Sovereign"]
+    };
+
+    const DUAL_CLASS_NAMES = {
+      "Weaponsmith+Armorer": "Vanguard",
+      "Weaponsmith+Rangesmith": "Skirmisher",
+      "Weaponsmith+Runesmith": "Spellblade",
+      "Weaponsmith+Reforger": "Hellforger",
+      "Armorer+Weaponsmith": "Wardensmith",
+      "Armorer+Rangesmith": "Sentinel",
+      "Armorer+Runesmith": "Runeguard",
+      "Armorer+Reforger": "Ironclad",
+      "Rangesmith+Weaponsmith": "Outrider",
+      "Rangesmith+Armorer": "Bastionbow",
+      "Rangesmith+Runesmith": "Arcarcher",
+      "Rangesmith+Reforger": "Artificer",
+      "Runesmith+Weaponsmith": "Hexblade",
+      "Runesmith+Armorer": "Aegisrune",
+      "Runesmith+Rangesmith": "Starfletcher",
+      "Runesmith+Reforger": "Thaumaturge",
+      "Reforger+Weaponsmith": "Reaver",
+      "Reforger+Armorer": "Colossus",
+      "Reforger+Rangesmith": "Machinist",
+      "Reforger+Runesmith": "Chronosmith"
+    };
+
+    const SMITH_CLASS_AFFINITY = {
+      Weaponsmith: ["STR", "DEX"],
+      Armorer:     ["CON", "STR"],
+      Rangesmith:  ["DEX", "WIS"],
+      Runesmith:   ["INT", "WIS"],
+      Reforger:    ["CHA", "CON"]
+    };
+
+    const SMITH_PERKS_T3 = [
+      { id: "STR", stat: "STR", name: "Titan's Anvil", desc: "+10 Kualitas Berat/+1 +N Mahakarya & +15% Armor Crush", qBonus: 10, dmgPct: 10 },
+      { id: "DEX", stat: "DEX", name: "Quicksilver Edge", desc: "+8% Speed/Acc Tempa & +10% Attack Speed", spdPct: 10, dmgPct: 8 },
+      { id: "CON", stat: "CON", name: "Unbreakable Crucible", desc: "-50% Bahan Hilang/-10% Gagal Fusi & +15% Max HP", fuseSafe: 10, hpPct: 15 },
+      { id: "INT", stat: "INT", name: "Runic Overdrive", desc: "+20 Bobot Mode Fusi & +20% Trigger / +15% Weak Exploit", fuseWeight: 20, dmgPct: 15 },
+      { id: "WIS", stat: "WIS", name: "Seeker's Eye", desc: "+12% Trait Langka & +8% Crit / +25% Crit Dmg", rareBonus: 12, dmgPct: 14 },
+      { id: "CHA", stat: "CHA", name: "Sovereign Seal", desc: "+20% Harga Jual/+15% Laju Murid & -10% Dmg/Acc Musuh", dmgPct: 10, defPct: 10 }
+    ];
+
+    const SMITH_PERKS_T5 = [
+      { id: "STR+DEX", s1: "STR", s2: "DEX", name: "Venomed Blade", desc: "+20% Bleed/Poison DPS & -15% Armor Musuh", dmgPct: 22 },
+      { id: "STR+CON", s1: "STR", s2: "CON", name: "Colossus Might", desc: "+15% CON ke Raw Might & +12% Dmg Reduction", dmgPct: 18, hpPct: 12 },
+      { id: "STR+INT", s1: "STR", s2: "INT", name: "Spellforged Impact", desc: "+25% Elem-Physical Hybrid Dmg & +25 Bobot Fusi", fuseWeight: 25, dmgPct: 25 },
+      { id: "STR+WIS", s1: "STR", s2: "WIS", name: "Executioner's Verdict", desc: "+35% Crit Damage & +20% Armor Pen", dmgPct: 26 },
+      { id: "STR+CHA", s1: "STR", s2: "CHA", name: "Warlord's Dreadblade", desc: "-15% Armor/Dmg Musuh & +20% Skill Active Dmg", dmgPct: 20, defPct: 12 },
+      { id: "DEX+CON", s1: "DEX", s2: "CON", name: "Mirage Bastion", desc: "Pulihkan 4% HP saat Dodge/Parry & +15% Mitigate", hpPct: 15, defPct: 15 },
+      { id: "DEX+INT", s1: "DEX", s2: "INT", name: "Chrono Trigger", desc: "-20% Cooldown Skill & +30% Weapon Trigger DPS", dmgPct: 25 },
+      { id: "DEX+WIS", s1: "DEX", s2: "WIS", name: "Phantom Deadeye", desc: "Akurasi 95% (Abaikan Dodge) & +25% Crit Dmg", dmgPct: 25 },
+      { id: "DEX+CHA", s1: "DEX", s2: "CHA", name: "Duelist's Encore", desc: "+18% Attack Speed & Double Strike setelah Skill", dmgPct: 22 },
+      { id: "CON+INT", s1: "CON", s2: "INT", name: "Aegis of the Runelord", desc: "-15% Damage Masuk & Pantulkan 30% Elemen Weak", fuseSafe: 15, dmgPct: 18, defPct: 15 },
+      { id: "CON+WIS", s1: "CON", s2: "WIS", name: "Immortal Foresight", desc: "Regen 2% HP/dtk, Kebal Crit, & +15 Kualitas Tempa", qBonus: 15, hpPct: 18 },
+      { id: "CON+CHA", s1: "CON", s2: "CHA", name: "Citadel of Command", desc: "+20% Max HP, +15% Dmg Reduction, & Counter Def", hpPct: 20, defPct: 15 },
+      { id: "INT+WIS", s1: "INT", s2: "WIS", name: "Omniscient Artificer", desc: "+1 Slot Macro, Auto-Weakness (+30% Elem), & +25% Trait Langka", rareBonus: 25, dmgPct: 30, autoWeak: true },
+      { id: "INT+CHA", s1: "INT", s2: "CHA", name: "Sovereign Runecaster", desc: "+25% Cross-Mod, Risiko Gagal Fusi 2%, & +22% Dmg Hibrida", fuseSafe: 25, fuseWeight: 25, dmgPct: 24 },
+      { id: "WIS+CHA", s1: "WIS", s2: "CHA", name: "Grand Inquisitor's Grace", desc: "Musuh Terima +25% Dmg, +10% Crit, & +25% Rare Drop", rareBonus: 20, dmgPct: 25 }
+    ];
+
+    const OPP = { api: "es", es: "api", petir: "tanah", tanah: "petir", cahaya: "gelap", gelap: "cahaya" };
+    const EL_TO_WD = { api: "Fire", es: "Ice", petir: "Lightning", tanah: "Earth", cahaya: "Light", gelap: "Dark" };
+    const TIER_NAMES = ["Cacat", "Biasa", "Bagus", "Istimewa", "Mahakarya"];
+    const TIER_MULTS = [0.8, 1.0, 1.1, 1.25, 1.5];
+    const MODE_NAMES = ["Terkunci", "Fleksibel", "Fusi"];
+    const SLOT_NAMES = ["Inti", "Badan", "Pengikat", "Aksen"];
+    const SEASONS = ["Semi", "Panas", "Gugur", "Dingin"];
+    const SMITH_CLASSES = ["Weaponsmith", "Armorer", "Rangesmith", "Runesmith", "Reforger"];
+
+    const state = {
+      lv: 90,
+      day: 1,
+      stats: { STR: 70, DEX: 20, CON: 45, INT: 35, WIS: 15, CHA: 6 },
+      smithTiers: { Weaponsmith: 3, Armorer: 0, Rangesmith: 0, Runesmith: 1, Reforger: 0 },
+      selectedPerkT3: "STR",
+      selectedPerkT5: "STR+CON",
+      gallery: [],
+      equippedIdx: 0
+    };
+
+    function getTier(l) { return Math.min(5, Math.max(1, Math.ceil(l / 30))); }
+    function getCap(l) { return getTier(l) * 30; }
+    function getSlotCount(l) { return l <= 10 ? 2 : l <= 20 ? 3 : 4; }
+
+    function resolveSmithIdentity() {
+      const entries = Object.entries(state.smithTiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      const used = entries.reduce((acc, [, v]) => acc + v, 0);
+      const maxAllowed = getTier(state.lv);
+      const pType = entries.length ? entries[0][0] : "Weaponsmith";
+      const pRank = entries.length ? entries[0][1] : 0;
+      const sType = entries.length > 1 ? entries[1][0] : null;
+      const isPure5 = entries.length === 1 && pRank === 5;
+      const affStats = SMITH_CLASS_AFFINITY[pType] || ["STR", "DEX"];
+
+      let className = "Apprentice";
+      if (entries.length === 1) {
+        className = SINGLE_CLASS_NAMES[pType][Math.min(5, Math.max(1, pRank)) - 1];
+      } else if (entries.length === 2) {
+        className = DUAL_CLASS_NAMES[`${pType}+${sType}`] || "Hybrid";
+      } else if (entries.length === 3) {
+        const magic = (state.smithTiers.Runesmith || 0) + (state.smithTiers.Reforger || 0);
+        const martial = (state.smithTiers.Weaponsmith || 0) + (state.smithTiers.Armorer || 0) + (state.smithTiers.Rangesmith || 0);
+        className = magic >= martial ? "Polymath" : "Arsenist";
+      } else if (entries.length === 4) {
+        className = "Synthesist";
+      } else if (entries.length >= 5) {
+        className = "Omnismith";
+      }
+
+      // Eligible Perks
+      const eligibleT3 = pRank >= 3 ? SMITH_PERKS_T3.filter(p => (state.stats[p.stat] || 1) >= 45).map(p => ({
+        ...p,
+        hasAffinity: affStats.includes(p.stat),
+        mult: affStats.includes(p.stat) ? 1.25 : 1.0
+      })) : [];
+
+      const eligibleT5 = isPure5 ? SMITH_PERKS_T5.filter(p => (state.stats[p.s1] || 1) >= 75 && (state.stats[p.s2] || 1) >= 75).map(p => ({
+        ...p,
+        hasAffinity: affStats.includes(p.s1) || affStats.includes(p.s2),
+        mult: (affStats.includes(p.s1) || affStats.includes(p.s2)) ? 1.25 : 1.0
+      })) : [];
+
+      const activeT3 = eligibleT3.find(p => p.id === state.selectedPerkT3) || eligibleT3[0] || null;
+      const activeT5 = eligibleT5.find(p => p.id === state.selectedPerkT5) || eligibleT5[0] || null;
+
+      return { className, used, maxAllowed, pType, pRank, sType, isPure5, affStats, eligibleT3, eligibleT5, activeT3, activeT5, tiers: state.smithTiers };
+    }
+
+    function onPerkChange() {
+      state.selectedPerkT3 = document.getElementById("perkT3Sel").value;
+      state.selectedPerkT5 = document.getElementById("perkT5Sel").value;
+      renderSmithAllocator();
+      updateForgePreview();
+      runEquippedSimulation();
+    }
+
+    function checkItemCompatibility(g) {
+      const t = state.smithTiers;
+      const armTier = t.Armorer || 0;
+      const isPureArmorer = armTier === 5;
+      const matches = [];
+
+      if (g.isArmor || (g.tag && g.tag.startsWith("Armor"))) {
+        if (g.armorClass === "Ringan") matches.push("Armorer", "Rangesmith", "Weaponsmith");
+        else if (g.armorClass === "Sedang") matches.push("Armorer", "Runesmith", "Reforger");
+        else matches.push("Armorer"); // Berat eksklusif Armorer
+      } else {
+        if (g.tag === "Jauh") matches.push("Rangesmith");
+        else matches.push("Weaponsmith");
+
+        if (g.stat === "CON") matches.push("Armorer");
+        if (g.stat === "INT" || g.fused || g.hybrid) matches.push("Runesmith");
+        if (g.stat === "CHA" || g.stat === "WIS" || (g.enhancePlus || 0) > 0) matches.push("Reforger");
+      }
+
+      let bestRank = 0, matchedClass = null;
+      for (const c of matches) {
+        if ((t[c] || 0) > bestRank) {
+          bestRank = t[c];
+          matchedClass = c;
+        }
+      }
+
+      // Cek +1 Secondary Armor Trigger & +1 Ultimate Armor Trigger (khusus Armorer CD-5.02b)
+      let secondaryTrigger = null;
+      let ultimateTrigger = null;
+      if (g.slot && ARMORER_SECONDARY_TRIGGERS[g.slot]) {
+        const secCfg = ARMORER_SECONDARY_TRIGGERS[g.slot];
+        if (armTier >= secCfg.req) secondaryTrigger = secCfg.name;
+      }
+      if (isPureArmorer && g.armorClass) {
+        ultimateTrigger = ARMORER_ULTIMATE_TRIGGERS[g.armorClass];
+      }
+
+      return {
+        ok: bestRank >= 1,
+        matchedClass,
+        rank: bestRank,
+        bonusPct: bestRank >= 1 ? bestRank * 6 : -25,
+        requiredHint: [...new Set(matches)].join(" / "),
+        secondaryTrigger,
+        ultimateTrigger
+      };
+    }
+
+    function adjustSmithTier(cls, delta) {
+      const id = resolveSmithIdentity();
+      const cur = state.smithTiers[cls] || 0;
+      const next = cur + delta;
+      if (next < 0 || next > 5) return;
+      if (delta > 0 && id.used >= 5) return;
+      state.smithTiers[cls] = next;
+      renderSmithAllocator();
+      updateForgePreview();
+      renderGallery();
+      runEquippedSimulation();
+    }
+
+    function renderSmithAllocator() {
+      const id = resolveSmithIdentity();
+      document.getElementById("maxSmithPtsReadout").textContent = id.maxAllowed;
+      document.getElementById("singleWordClassBadge").textContent = `Class: ${id.className} (${id.used}/5 Tier)`;
+
+      const labels = {
+        Weaponsmith: "Bilah Dekat",
+        Armorer: "Zirah/CON",
+        Rangesmith: "Mekanik Jauh",
+        Runesmith: "Inti/Fusi",
+        Reforger: "Enhance +N"
+      };
+
+      document.getElementById("smithTierAllocGrid").innerHTML = SMITH_CLASSES.map(c => {
+        const v = state.smithTiers[c] || 0;
+        return `
+          <div class="p-1.5 rounded border ${v > 0 ? "border-[var(--primary)] bg-[var(--secondary)]" : "border-[var(--card-border)] bg-[var(--content)]"}">
+            <div class="font-bold text-[11px] truncate">${c}</div>
+            <div class="text-[9px] text-[var(--muted-foreground)] truncate">${labels[c]}</div>
+            <div class="flex items-center justify-center gap-1.5 mt-1">
+              <button onclick="adjustSmithTier('${c}', -1)" class="w-5 h-5 rounded bg-[var(--card)] border border-[var(--border)] font-bold">-</button>
+              <span class="font-mono font-bold text-sm">${v}</span>
+              <button onclick="adjustSmithTier('${c}', 1)" class="w-5 h-5 rounded bg-[var(--card)] border border-[var(--border)] font-bold">+</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const t = state.smithTiers;
+      const armTier = t.Armorer || 0;
+      const initPlus = Math.floor((t.Reforger || 0) / 2);
+      document.getElementById("smithComponentSummary").innerHTML = `
+        <strong>5 Komponen Barang (` + id.className + `):</strong>
+        Bilah Dekat <b>+${(t.Weaponsmith||0)*2}%</b> ·
+        Armor Trigger+1 <b>${armTier}/5 Slot${armTier===5 ? " + ULTIMATE AEGISBORN!" : ""}</b> ·
+        Mekanik Jauh <b>+${(t.Rangesmith||0)*2.5}%</b> ·
+        Fusi/Rune <b>${t.Runesmith>=1 ? `Terbuka (+${t.Runesmith*6} Bobot)` : "Terkunci"}</b> ·
+        Tempa Awal <b>+${initPlus} (+N)</b>
+      `;
+
+      // Populate Perk Tier 3 & Tier 5 Selectors
+      const sel3 = document.getElementById("perkT3Sel");
+      if (!id.eligibleT3.length) {
+        sel3.innerHTML = `<option value="">(Terkunci: Butuh Class Tier ≥3 & Stat ≥45)</option>`;
+      } else {
+        sel3.innerHTML = id.eligibleT3.map(p =>
+          `<option value="${p.id}" ${id.activeT3?.id === p.id ? "selected" : ""}>[${p.stat}] ${p.name} ${p.hasAffinity ? "(★Afinitas +25%)" : ""}</option>`
+        ).join("");
+      }
+
+      const sel5 = document.getElementById("perkT5Sel");
+      if (!id.eligibleT5.length) {
+        sel5.innerHTML = `<option value="">(Terkunci: Butuh Spesialis Murni 5+0 & 2 Stat ≥75)</option>`;
+      } else {
+        sel5.innerHTML = id.eligibleT5.map(p =>
+          `<option value="${p.id}" ${id.activeT5?.id === p.id ? "selected" : ""}>[${p.id}] ${p.name} ${p.hasAffinity ? "(★Afinitas +25%)" : ""}</option>`
+        ).join("");
+      }
+
+      const p3Text = id.activeT3
+        ? `<div><strong class="text-[var(--primary)]">Perk T3 [${id.activeT3.stat}] ${id.activeT3.name}${id.activeT3.hasAffinity ? " (★Afinitas ×1.25)" : ""}:</strong> ${id.activeT3.desc}</div>`
+        : `<div class="text-[var(--muted-foreground)]">Perk T3: Belum aktif (Butuh 1 Smith Class Tier ≥ 3 dan 1 Stat Utama ≥ 45).</div>`;
+      const p5Text = id.activeT5
+        ? `<div><strong class="text-[var(--primary)]">Perk T5 [${id.activeT5.id}] ${id.activeT5.name}${id.activeT5.hasAffinity ? " (★Afinitas ×1.25)" : ""}:</strong> ${id.activeT5.desc}</div>`
+        : `<div class="text-[var(--muted-foreground)]">Perk T5: Belum aktif (Eksklusif Spesialis Murni 5+0 dan 2 Stat Pasangan ≥ 75).</div>`;
+      document.getElementById("activePerksReadout").innerHTML = p3Text + p5Text;
+    }
+
+    function initWeaponSelect() {
+      const sel = document.getElementById("weaponSel");
+      const stats = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+      const weaponGroups = stats.map(st => {
+        const list = WEAPONS.filter(w => !w.isArmor && w.stat === st);
+        return `<optgroup label="Senjata ${st} (8)">` + list.map(w =>
+          `<option value="${w.id}">[${w.stat} T${w.tier} • ${w.tag}] ${w.name} — Trigger: ${w.trigger}</option>`
+        ).join("") + `</optgroup>`;
+      }).join("");
+
+      const armorList = WEAPONS.filter(w => w.isArmor);
+      const armorGroup = `<optgroup label="15 Armor CD-5.02b (5 Slot × 3 Kelas + Trigger Armorer)">` + armorList.map(a =>
+        `<option value="${a.id}">[${a.slot} ${a.acPct}% AC • ${a.armorClass}] ${a.name} — Base Trigger: ${a.trigger}</option>`
+      ).join("") + `</optgroup>`;
+
+      sel.innerHTML = weaponGroups + armorGroup;
+      sel.value = "w_str_4";
+    }
+
+    function rebuildMaterialSlots() {
+      const slotCount = getSlotCount(state.lv);
+      const container = document.getElementById("materialSlotsContainer");
+      const oldValues = [...container.querySelectorAll("select")].map(s => s.value);
+
+      const q = (document.getElementById("matSearch").value || "").toLowerCase();
+      const rf = document.getElementById("matRarityFilter").value;
+      const ef = document.getElementById("matElemFilter").value;
+
+      const areas = [...new Set(MATERIALS.map(m => m.g))];
+      const buildOptions = (keepId) => {
+        return areas.map(area => {
+          const items = MATERIALS.filter(m => m.g === area && (m.id === keepId || (
+            (!q || (m.n + " " + m.g + " " + m.k + " " + m.ht).toLowerCase().includes(q)) &&
+            (!rf || m.r === rf) &&
+            (!ef || m.a === ef)
+          )));
+          if (!items.length) return "";
+          return `<optgroup label="${area} (Tier ${items[0].tier})">` + items.map(m =>
+            `<option value="${m.id}">${m.n} [${m.r} • ${m.k}: ${m.t.join(",")}] (${m.a} | +${m.sb} ${m.ps} | ${m.ht})</option>`
+          ).join("") + `</optgroup>`;
+        }).join("");
+      };
+
+      const defaults = ["MAT-A01-13", "MAT-A01-11", "MAT-A01-06", "MAT-A01-09"];
+      let html = "";
+      for (let i = 0; i < slotCount; i++) {
+        const curVal = oldValues[i] !== undefined ? oldValues[i] : defaults[i];
+        html += `
+          <div class="flex items-center gap-2">
+            <span class="w-24 font-semibold text-[var(--muted-foreground)]">Slot ${i + 1} (${SLOT_NAMES[i]}):</span>
+            <select id="matSlot_${i}" onchange="updateForgePreview()" class="flex-1 p-1.5 rounded bg-[var(--content)] border border-[var(--border)]">
+              <option value="">(Kosong)</option>
+              ${buildOptions(curVal)}
+            </select>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+      for (let i = 0; i < slotCount; i++) {
+        const curVal = oldValues[i] !== undefined ? oldValues[i] : defaults[i];
+        const el = document.getElementById("matSlot_" + i);
+        if (el && curVal) el.value = curVal;
+      }
+      updateForgePreview();
+    }
+
+    function renderMiniStatSliders() {
+      const cap = getCap(state.lv);
+      const budget = 13 + 2 * (state.lv - 1);
+      const used = Object.values(state.stats).reduce((a, b) => a + b, 0);
+      document.getElementById("statPointsSummary").textContent = `Poin Stat: ${used} / ${budget} (Cap ${cap})`;
+
+      const stats = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+      document.getElementById("miniStatSliders").innerHTML = stats.map(s => `
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)] flex items-center gap-2">
+          <span class="font-bold w-8">${s}</span>
+          <input type="range" min="1" max="${cap}" value="${state.stats[s]}" oninput="onMiniStatChange('${s}', this.value)" class="flex-1 accent-[var(--primary)]" />
+          <span class="font-mono font-bold w-7 text-right">${state.stats[s]}</span>
+        </div>
+      `).join("");
+
+      const hammer = +(state.stats.STR * 0.25 * 1.25).toFixed(1);
+      const conserve = +(Math.min(45, state.stats.CON * 0.20 * 1.25)).toFixed(1);
+      const quench = +(state.stats.CON * 0.20 * 1.25).toFixed(1);
+      const tools = +(state.stats.INT * 0.25 * 1.25).toFixed(1);
+      const attune = +(state.stats.INT * 0.25 * 1.25).toFixed(1);
+      const purity = +(state.stats.WIS * 0.20 * 1.25).toFixed(1);
+
+      document.getElementById("professionSubStatReadout").innerHTML = `
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)]">
+          <div class="text-[var(--muted-foreground)] text-[10px]">STR Hammer Strike</div>
+          <div class="font-mono font-bold">+${(hammer * 0.4).toFixed(1)}% Sukses</div>
+        </div>
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)]">
+          <div class="text-[var(--muted-foreground)] text-[10px]">CON Conservation & Quench</div>
+          <div class="font-mono font-bold">-${conserve}% Hilang | -${(quench * 0.35).toFixed(1)}% Gagal Fusi</div>
+        </div>
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)]">
+          <div class="text-[var(--muted-foreground)] text-[10px]">INT Smith Tools</div>
+          <div class="font-mono font-bold">+${(tools * 0.4).toFixed(1)} Skor Kualitas</div>
+        </div>
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)]">
+          <div class="text-[var(--muted-foreground)] text-[10px]">INT Attunement Craft</div>
+          <div class="font-mono font-bold">+${(attune * 0.35).toFixed(1)} Bobot Fusi</div>
+        </div>
+        <div class="p-1.5 rounded bg-[var(--content)] border border-[var(--card-border)]">
+          <div class="text-[var(--muted-foreground)] text-[10px]">WIS Material Purity</div>
+          <div class="font-mono font-bold">+${(purity * 0.35).toFixed(1)}% Trait Langka</div>
+        </div>
+      `;
+    }
+
+    function onMiniStatChange(s, val) {
+      state.stats[s] = +val;
+      renderMiniStatSliders();
+      updateForgePreview();
+      runEquippedSimulation();
+    }
+
+    function onSmithConfigChange() {
+      state.lv = +document.getElementById("lvSlider").value;
+      document.getElementById("lvReadout").textContent = state.lv;
+      const cap = getCap(state.lv);
+      for (const k of Object.keys(state.stats)) {
+        if (state.stats[k] > cap) state.stats[k] = cap;
+      }
+      renderSmithAllocator();
+      renderMiniStatSliders();
+      rebuildMaterialSlots();
+      runEquippedSimulation();
+    }
+
+    function calcCurrentForge() {
+      const wId = document.getElementById("weaponSel").value;
+      const weapon = WEAPONS.find(w => w.id === wId) || WEAPONS[0];
+      const slotCount = getSlotCount(state.lv);
+      const picks = [];
+      for (let i = 0; i < slotCount; i++) {
+        const el = document.getElementById("matSlot_" + i);
+        if (el && el.value) {
+          const m = MATERIALS.find(x => x.id === el.value);
+          if (m) picks.push(m);
+        }
+      }
+      if (!picks.length) return { valid: false };
+
+      const coreEl = document.getElementById("coreElemSel").value;
+      const coreSize = document.getElementById("coreSizeSel").value;
+      const isIdle = document.getElementById("idleChk").checked;
+      const id = resolveSmithIdentity();
+
+      const n = picks.length;
+      const avgQ = picks.reduce((a, m) => a + m.q, 0) / n;
+      const totalCp = picks.reduce((a, m) => a + m.cp, 0);
+      const cnt = t => picks.filter(m => m.t.includes(t)).length;
+
+      let res = "tanpa";
+      if (coreEl) {
+        res = "netral";
+        if (picks.some(m => m.a === OPP[coreEl])) res = "tegang";
+        else if (picks.some(m => m.a === coreEl)) res = "selaras";
+      }
+
+      const bind = cnt("pengikat") > 0;
+      const hammerBonus = state.stats.STR * 0.25 * 1.25 * 0.4;
+      const attuneBonus = state.stats.INT * 0.25 * 1.25 * 0.35;
+      const toolsBonus = state.stats.INT * 0.25 * 1.25 * 0.4;
+      const purityBonus = state.stats.WIS * 0.20 * 1.25 * 0.35;
+
+      const effLv = Math.min(40, state.lv);
+      let ch = 50 + 1.1 * effLv - 6 * n + avgQ * 4 + (bind ? 8 : 0)
+        + (res === "selaras" ? 8 + attuneBonus : res === "tegang" ? Math.min(0, -10 + attuneBonus * 0.5) : 0)
+        + hammerBonus;
+      if (coreEl && coreSize === "besar" && state.lv < 20) ch -= 12;
+      if (coreEl && coreSize === "sedang" && state.lv < 10) ch -= 6;
+      ch = Math.max(5, Math.min(98, +ch.toFixed(1)));
+
+      const runesmithBoost = (state.smithTiers.Runesmith || 0) * 6;
+      const mw = [
+        weapon.modeWeights[0] + 8 * cnt("stabil"),
+        weapon.modeWeights[1] + 8 * cnt("pengikat"),
+        weapon.modeWeights[2] + 8 * cnt("murni") + Math.min(45, state.lv * 0.3) + attuneBonus + runesmithBoost
+      ];
+      if (isIdle) mw[2] *= 0.5;
+      const totMw = mw.reduce((a, b) => a + b, 0);
+      const modePct = mw.map(v => Math.round((v / totMw) * 100));
+
+      let traitName = "Polos", traitBonus = {};
+      if (coreEl) {
+        const syn = SYNERGIES.find(x => x.el === coreEl && cnt(x.tag) > 0);
+        if (syn) { traitName = syn.name; traitBonus = syn.bonus; }
+      }
+      if (traitName === "Polos") {
+        const baseMap = { tajam: "Tajam", berat: "Kokoh", buas: "Liar", murni: "Murni", ringan: "Lincah", stabil: "Teguh", tumpul: "Padat" };
+        const top = Object.keys(baseMap).sort((a, b) => cnt(b) - cnt(a))[0];
+        if (cnt(top) > 0) traitName = baseMap[top];
+      }
+
+      const rarePct = Math.min(65, +(4 + (res === "tegang" ? 10 : 0) + purityBonus + id.used * 1.5 - (isIdle ? 2 : 0)).toFixed(1));
+      const mainMat = picks.slice().sort((a, b) => b.cp - a.cp)[0];
+
+      return {
+        valid: true, weapon, picks, n, avgQ, totalCp, cnt, coreEl, coreSize, isIdle,
+        smithId: id, res, bind, ch, mw, modePct, traitName, traitBonus, rarePct,
+        toolsBonus, attuneBonus, mainMat
+      };
+    }
+
+    function updateForgePreview() {
+      const c = calcCurrentForge();
+      const box = document.getElementById("forgePreviewBox");
+      if (!c.valid) {
+        box.innerHTML = "<p>Pilih minimal 1 bahan tempa.</p>";
+        return;
+      }
+      const compat = checkItemCompatibility({ tag: c.weapon.tag, stat: c.weapon.stat, fused: false, enhancePlus: Math.floor((state.smithTiers.Reforger||0)/2) });
+      const resDesc = {
+        tanpa: "Tanpa Inti Elemen (Senjata Fisik/Neutral).",
+        netral: "Bahan netral terhadap Inti Elemen.",
+        selaras: "SELARAS (Attuned): Bahan selaras dengan Inti Elemen (+Bonus Sukses & Kualitas!).",
+        tegang: "TEGANG (Volatile): Bahan berlawanan elemen dengan Inti (Risiko naik, peluang Trait Langka +10%!)."
+      };
+
+      box.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-bold">Pratinjau Tempa: ${c.weapon.name} (${c.weapon.stat} • ${c.weapon.tag})</span>
+          <span class="font-mono font-bold text-[var(--primary)]">Sukses: ${c.ch}%</span>
+        </div>
+        <div class="w-full h-2 rounded bg-[var(--content)] overflow-hidden">
+          <div style="width:${c.ch}%" class="h-full bg-[var(--primary)]"></div>
+        </div>
+        <div class="p-1.5 rounded border ${compat.ok ? "border-[var(--primary)] bg-[var(--content)]" : "border-[var(--error)] bg-[var(--content)]"} flex items-center justify-between">
+          <span>Status Izin Pakai (${c.smithId.className}):</span>
+          <strong class="${compat.ok ? "text-[var(--primary)]" : "text-[var(--error)]"}">
+            ${compat.ok ? `COCOK DIPAKAI (${compat.matchedClass} T${compat.rank}: +${compat.bonusPct}% Mastery & Trigger Aktif)` : `HANYA JUAL/GALERI (Butuh ${compat.requiredHint} ≥1 agar Trigger Aktif)`}
+          </strong>
+        </div>
+        <div class="text-[var(--muted-foreground)]">${resDesc[c.res]}</div>
+        <div class="flex flex-wrap justify-between gap-2">
+          <span>Sinergi Trait: <strong>${c.traitName}</strong> (Trait Langka: <strong>${c.rarePct}%</strong>)</span>
+          <span>Bahan Utama: <strong>${c.mainMat.n}</strong> (<em>${c.mainMat.ht}</em>)</span>
+        </div>
+        ${c.coreEl ? `
+          <div class="pt-1">
+            <div class="flex justify-between text-[var(--muted-foreground)] mb-1">
+              <span>Distribusi Mode Inti Elemen:</span>
+              <span class="font-mono">Terkunci ${c.modePct[0]}% · Fleksibel ${c.modePct[1]}% · <strong class="text-[var(--primary)]">Fusi ${c.modePct[2]}%</strong></span>
+            </div>
+            <div class="w-full h-2.5 rounded overflow-hidden flex">
+              <div style="width:${c.modePct[0]}%" class="bg-amber-600" title="Terkunci"></div>
+              <div style="width:${c.modePct[1]}%" class="bg-teal-600" title="Fleksibel"></div>
+              <div style="width:${c.modePct[2]}%" class="bg-purple-600" title="Fusi"></div>
+            </div>
+          </div>
+        ` : ""}
+      `;
+    }
+
+    function doForge(forceFusionMode = false) {
+      const c = calcCurrentForge();
+      if (!c.valid) return;
+      state.day++;
+      const season = SEASONS[Math.floor(((state.day - 1) % 360) / 90)];
+      document.getElementById("hudDayReadout").textContent = `Hari ${state.day} • Musim ${season}`;
+
+      if (!forceFusionMode && Math.random() * 100 > c.ch) {
+        document.getElementById("latestForgeOutput").innerHTML = `
+          <div class="text-[var(--error)] font-bold">Tempaan Gagal! Sebagian bahan terselamatkan oleh Pengikat & Sub-Stat CON Material Conservation.</div>
+        `;
+        return;
+      }
+
+      const t = state.smithTiers;
+      const reforgerPolish = (t.Reforger || 0) * 3.5;
+      const qScore = (forceFusionMode ? 78 : Math.random() * 70)
+        + Math.min(45, state.lv * 0.4) + c.avgQ * 4 + (c.res === "selaras" ? 6 : 0)
+        + c.toolsBonus + (c.smithId.used * 2) + reforgerPolish - (c.isIdle ? 8 : 0);
+      const ti = qScore < 30 ? 0 : qScore < 55 ? 1 : qScore < 72 ? 2 : qScore < 85 ? 3 : 4;
+      const qMult = TIER_MULTS[ti];
+
+      let tName = c.traitName;
+      let tBonus = { ...c.traitBonus };
+      let isRare = false;
+      if (Math.random() * 100 < c.rarePct + (ti >= 3 ? 8 : 0)) {
+        isRare = true;
+        const rPick = RARES[Math.floor(Math.random() * RARES.length)];
+        tName = rPick.name;
+        tBonus = { ...rPick.bonus };
+      }
+
+      let mode = -1;
+      if (c.coreEl) {
+        if (forceFusionMode) {
+          mode = 2;
+        } else {
+          const w = c.mw.slice();
+          w[2] += ti === 3 ? 10 : ti === 4 ? 20 : 0;
+          let r = Math.random() * w.reduce((a, b) => a + b, 0);
+          mode = 0;
+          while (r > w[mode] && mode < 2) { r -= w[mode]; mode++; }
+        }
+      }
+
+      const eb = c.coreEl ? ({ kecil: 5, sedang: 10, besar: 15 }[c.coreSize] || 10) * (mode === 0 ? 1.3 : 1.0) : 0;
+      const wsmMult = c.weapon.tag === "Dekat" ? 1 + (t.Weaponsmith || 0) * 0.02 : 1.0;
+      const rngMult = c.weapon.tag === "Jauh" ? 1 + (t.Rangesmith || 0) * 0.025 : 1.0;
+      const armMult = 1 + (t.Armorer || 0) * 0.03;
+      const runMult = 1 + (t.Runesmith || 0) * 0.025;
+      const enhancePlus = Math.floor((t.Reforger || 0) / 2);
+
+      const budget = {
+        damage: +(c.weapon.budget.damage * qMult * wsmMult * (1 + eb / 100) * (1 + enhancePlus * 0.04)).toFixed(1),
+        speed: +(c.weapon.budget.speed * qMult * rngMult).toFixed(1),
+        accuracy: +(c.weapon.budget.accuracy * qMult * rngMult).toFixed(1),
+        defense: +(c.weapon.budget.defense * qMult * armMult + (t.Armorer || 0) * 1.5).toFixed(1),
+        trigger: +(c.weapon.budget.trigger * qMult * wsmMult * runMult * (1 + c.totalCp * 0.005)).toFixed(1)
+      };
+
+      const item = {
+        uid: "G-" + Date.now(),
+        name: `${c.weapon.name}${enhancePlus > 0 ? " +" + enhancePlus : ""} “${tName}”`,
+        forgedBy: c.smithId.className,
+        baseName: c.weapon.name,
+        isArmor: Boolean(c.weapon.isArmor),
+        slot: c.weapon.slot || null,
+        acPct: c.weapon.acPct || 0,
+        armorClass: c.weapon.armorClass || null,
+        stat: c.weapon.stat,
+        tier: Math.max(c.weapon.tier, getTier(state.lv)),
+        tag: c.weapon.tag,
+        trigger: c.weapon.trigger,
+        enhancePlus,
+        ti,
+        qualityName: TIER_NAMES[ti],
+        isRare,
+        traitName: tName,
+        traitBonus: tBonus,
+        coreEl: c.coreEl,
+        elementWd: c.coreEl ? EL_TO_WD[c.coreEl] : "Neutral",
+        coreSize: c.coreSize,
+        mode,
+        modeName: mode >= 0 ? MODE_NAMES[mode] : "Tanpa Inti",
+        fused: false,
+        hybrid: null,
+        mainMat: c.mainMat,
+        budget,
+        msg: ""
+      };
+
+      state.gallery.unshift(item);
+      state.equippedIdx = 0;
+      renderLatestForge(item);
+      renderGallery();
+      runEquippedSimulation();
+    }
+
+    function renderLatestForge(g) {
+      const compat = checkItemCompatibility(g);
+      document.getElementById("latestForgeOutput").innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">${g.qualityName} (×${TIER_MULTS[g.ti]})</span>
+            <strong class="text-sm ml-1">${g.name}</strong>
+            <span class="text-[var(--muted-foreground)] ml-1">[Ditempa oleh <b>${g.forgedBy}</b> • ${g.stat} • ${g.tag}]</span>
+          </div>
+          <span class="font-mono px-2 py-0.5 rounded ${compat.ok ? "bg-[var(--secondary)] text-[var(--primary)] font-bold" : "bg-[var(--error)] text-white"}">
+            ${compat.ok ? `Cocok Dipakai (${compat.matchedClass} T${compat.rank}: +${compat.bonusPct}%)` : `Tidak Cocok (-25% & Trigger Terkunci)`}
+          </span>
+        </div>
+        <div class="grid grid-cols-5 gap-2 mt-2 text-center">
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Damage Budget</div><div class="font-mono font-bold">${g.budget.damage}</div></div>
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Speed Budget</div><div class="font-mono font-bold">${g.budget.speed}%</div></div>
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Accuracy Budget</div><div class="font-mono font-bold">${g.budget.accuracy}%</div></div>
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Defense Budget</div><div class="font-mono font-bold">${g.budget.defense}</div></div>
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Base Trigger (${g.trigger})</div><div class="font-mono font-bold text-[var(--primary)]">${g.budget.trigger}</div></div>
+        </div>
+        ${g.isArmor ? `
+          <div class="mt-2 p-2 rounded bg-[var(--card)] border border-[var(--border)] space-y-1">
+            <div><strong>Base Armor Trigger (${g.slot} ${g.armorClass}):</strong> <span class="text-[var(--primary)] font-semibold">${g.trigger}</span></div>
+            <div><strong>+1 Secondary Trigger Armorer:</strong> ${compat.secondaryTrigger ? `<span class="text-[var(--primary)] font-bold">${compat.secondaryTrigger}</span>` : `<span class="text-[var(--muted-foreground)]">Terkunci (Butuh Armorer Tier ≥ ${ARMORER_SECONDARY_TRIGGERS[g.slot]?.req || 1})</span>`}</div>
+            <div><strong>+1 Ultimate Trigger Armorer Murni (5+0 Aegisborn):</strong> ${compat.ultimateTrigger ? `<span class="text-[var(--primary)] font-bold">${compat.ultimateTrigger}</span>` : `<span class="text-[var(--muted-foreground)]">Terkunci (Eksklusif Armorer Murni 5+0 / Aegisborn)</span>`}</div>
+          </div>
+        ` : ""}
+        <div class="mt-2 text-[var(--muted-foreground)] flex flex-wrap justify-between">
+          <span>Inti Bahan: <strong>${g.mainMat.n}</strong> (+${g.mainMat.sb} ${g.mainMat.ps})</span>
+          <span>Hidden Trait WD: <strong>${g.mainMat.ht}</strong> (${g.mainMat.hte})</span>
+        </div>
+        ${g.msg ? `<div class="mt-1.5 font-semibold text-[var(--primary)]">${g.msg}</div>` : ""}
+      `;
+    }
+
+    function doFuseGallery(idx) {
+      const g = state.gallery[idx];
+      const runeTier = state.smithTiers.Runesmith || 0;
+      if (runeTier < 1) {
+        g.msg = "Fusi Ditolak: Anda membutuhkan minimal Runesmith Tier 1 (contoh: ambil Runescribe, Spellblade, Hexblade, Arcarcher, atau Omnismith) untuk melakukan Fusi Inti Kedua!";
+        renderLatestForge(g);
+        renderGallery();
+        return;
+      }
+
+      const e2 = document.getElementById("fuseSel_" + idx).value;
+      const quenchBonus = state.stats.CON * 0.20 * 1.25 * 0.35;
+      const attuneBonus = state.stats.INT * 0.25 * 1.25 * 0.35;
+      const runeBonus = runeTier * 2.5;
+      const failChance = Math.max(4, +(25 - quenchBonus - attuneBonus - runeBonus).toFixed(1));
+
+      g.fused = true;
+      if (Math.random() * 100 < failChance) {
+        g.msg = `Fusi Gagal (Tegang, risiko ${failChance}%): Inti kedua hancur & slot Fusi tertutup.`;
+      } else if (e2 === g.coreEl) {
+        const sizes = ["kecil", "sedang", "besar", "agung"];
+        const k = Math.max(0, sizes.indexOf(g.coreSize));
+        g.coreSize = sizes[Math.min(sizes.length - 1, k + 1)];
+        g.budget.damage = +(g.budget.damage * 1.15).toFixed(1);
+        g.budget.trigger = +(g.budget.trigger * 1.15).toFixed(1);
+        g.msg = `Fusi Resonansi Murni Berhasil! Inti ${g.coreEl} naik ke tingkat ${g.coreSize.toUpperCase()} (+15% Damage & Trigger)!`;
+      } else {
+        const key = [g.coreEl, e2].sort().join("+");
+        const hyb = HYBRIDS[key] || {
+          name: `Hibrida ${g.coreEl}+${e2}`,
+          elements_wd: [EL_TO_WD[g.coreEl], EL_TO_WD[e2]],
+          desc: "Aliran dua elemen (+15% Skill Damage & +12% Trigger)",
+          combat_bonus: { skill_dmg_pct: 15, trigger_power_pct: 12 }
+        };
+        g.hybrid = hyb;
+        g.budget.damage = +(g.budget.damage * 1.12).toFixed(1);
+        g.budget.trigger = +(g.budget.trigger * 1.20).toFixed(1);
+        g.msg = `FUSI HIBRIDA BERHASIL (${g.coreEl} + ${e2}) -> ${hyb.name}: ${hyb.desc}`;
+      }
+
+      state.equippedIdx = idx;
+      renderLatestForge(g);
+      renderGallery();
+      runEquippedSimulation();
+    }
+
+    function equipFromGallery(idx) {
+      state.equippedIdx = idx;
+      renderLatestForge(state.gallery[idx]);
+      renderGallery();
+      runEquippedSimulation();
+    }
+
+    function renderGallery() {
+      const box = document.getElementById("galleryList");
+      if (!state.gallery.length) {
+        box.innerHTML = "<div class='text-[var(--muted-foreground)]'>Belum ada senjata di galeri.</div>";
+        return;
+      }
+      const els = ["api", "es", "petir", "tanah", "cahaya", "gelap"];
+      box.innerHTML = state.gallery.map((g, i) => {
+        const compat = checkItemCompatibility(g);
+        return `
+          <div class="p-2.5 rounded border ${state.equippedIdx === i ? "border-[var(--primary)] bg-[var(--secondary)]" : "border-[var(--card-border)] bg-[var(--content)]"} space-y-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <strong>${g.name}</strong>
+                <span class="text-[var(--muted-foreground)] ml-1">(${g.qualityName} · ${g.stat} · ${g.tag} · ${compat.ok ? `Cocok: ${compat.matchedClass} +${compat.bonusPct}%` : "Tidak Cocok: -25%"} ${g.hybrid ? " · Hibrida: " + g.hybrid.name : ""})</span>
+              </div>
+              <button onclick="equipFromGallery(${i})" class="px-2 py-0.5 rounded ${state.equippedIdx === i ? "bg-[var(--primary)] text-[var(--primary-foreground)] font-bold" : "bg-[var(--card)] border border-[var(--border)]"}">
+                ${state.equippedIdx === i ? "Terpasang di Skill Engine" : "Pasang & Uji"}
+              </button>
+            </div>
+            ${g.mode === 2 && !g.fused ? `
+              <div class="flex items-center gap-2 pt-1">
+                <span class="text-[var(--primary)] font-semibold">Slot Fusi Terbuka (Inti 1: ${g.coreEl}):</span>
+                <select id="fuseSel_${i}" class="p-1 rounded bg-[var(--card)] border border-[var(--border)]">
+                  ${els.map(e => {
+                    const k = [g.coreEl, e].sort().join("+");
+                    const hName = e === g.coreEl ? "Naik Tingkat Inti (+15%)" : (HYBRIDS[k] ? HYBRIDS[k].name : "Hibrida " + k);
+                    return `<option value="${e}" ${e !== g.coreEl ? "selected" : ""}>+ Inti ${e} -> ${hName}</option>`;
+                  }).join("")}
+                </select>
+                <button onclick="doFuseGallery(${i})" class="px-3 py-1 rounded bg-purple-600 text-white font-bold hover:opacity-90">Fusi Inti Kedua</button>
+              </div>
+            ` : ""}
+            ${g.msg ? `<div class="text-[11px] font-medium text-[var(--primary)]">${g.msg}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function calcUncappedEnhancement(plusN) {
+      const n = Math.max(0, Math.floor(plusN || 0));
+      let pct = 0;
+      if (n > 0) pct += Math.min(5, n) * 4;
+      if (n > 5) pct += Math.min(5, n - 5) * 7;
+      if (n > 10) pct += Math.min(5, n - 10) * 12;
+      if (n > 15) pct += 45 * Math.log(1 + (n - 15) * 0.5);
+      return { n, bonusPct: +pct.toFixed(1), mult: +(1 + pct / 100).toFixed(3), phase: n > 15 ? `Transcendent (+${n})` : n >= 11 ? `Overforge (+${n})` : `Tempa (+${n})` };
+    }
+
+    function evalApprenticeSeed(seedStr) {
+      if (!seedStr) return null;
+      const presets = {
+        "APR-7F3A-Kael": { seed: "APR-7F3A-Kael", bg: "Pengembara", smithClass: "Runelord (5+0)", skill: 85, loyalty: 100, assistPct: 44.8, aura: "+15% Elemental & Trigger Dmg", branchOk: true },
+        "APR-99B1-Lyra": { seed: "APR-99B1-Lyra", bg: "Prajurit", smithClass: "Skirmisher (2+1)", skill: 62, loyalty: 65, assistPct: 36.7, aura: "+10% Atk Speed & Accuracy", branchOk: false },
+        "APR-44C8-Garrick": { seed: "APR-44C8-Garrick", bg: "Pandai Besi", smithClass: "Aegisborn (5+0)", skill: 92, loyalty: 95, assistPct: 47.2, aura: "+12% Mitigate & Perisai Darurat", branchOk: true }
+      };
+      return presets[seedStr] || presets["APR-7F3A-Kael"];
+    }
+
+    function runEquippedSimulation() {
+      const box = document.getElementById("equippedSimBox");
+      const g = state.gallery[state.equippedIdx];
+      if (!g) {
+        box.innerHTML = "<div class='text-[var(--muted-foreground)]'>Tempa senjata terlebih dahulu untuk menguji sinkronisasinya dengan Skill Engine.</div>";
+        return;
+      }
+
+      const compat = checkItemCompatibility(g);
+      const id = resolveSmithIdentity();
+      const plusInput = +(document.getElementById("testEnhancePlus")?.value || g.enhancePlus || 0);
+      const enh = calcUncappedEnhancement(plusInput);
+      const appSeed = document.getElementById("testApprenticeSeed")?.value || "";
+      const app = evalApprenticeSeed(appSeed);
+
+      const role = document.getElementById("testEnemyRole").value;
+      const type = document.getElementById("testEnemyType").value;
+      const weak = document.getElementById("testEnemyWeak").value;
+      const tier = getTier(state.lv);
+      const zMult = [1.0, 1.25, 1.5, 1.75, 2.0][tier - 1];
+
+      const roleMap = {
+        Brute: { hp: 0.90, dmg: 1.25, spd: 0.9, acc: 80, dodge: 3, armor: 10 },
+        Skirmisher: { hp: 0.85, dmg: 1.10, spd: 1.3, acc: 85, dodge: 15, armor: 0 },
+        Caster: { hp: 0.80, dmg: 1.30, spd: 1.0, acc: 90, dodge: 5, armor: 0 },
+        Tank: { hp: 1.40, dmg: 0.80, spd: 0.8, acc: 75, dodge: 0, armor: 25 },
+        Support: { hp: 1.10, dmg: 0.90, spd: 1.0, acc: 85, dodge: 10, armor: 10 }
+      }[role];
+      const typeMap = {
+        "Reguler": { hp: 1.0, dmg: 1.0, dodge: 0, armor: 0 },
+        "Reguler Khusus": { hp: 1.5, dmg: 1.15, dodge: 2, armor: 3 },
+        "Mini Boss": { hp: 2.5, dmg: 1.30, dodge: 3, armor: 5 },
+        "Boss": { hp: 5.0, dmg: 1.50, dodge: 5, armor: 10 }
+      }[type];
+
+      const mHp = Math.round((15 + 10 * state.lv) * roleMap.hp * typeMap.hp);
+      const mDmg = +(((1.5 + 0.4 * state.lv) * zMult) * roleMap.dmg * typeMap.dmg).toFixed(1);
+
+      const st = { ...state.stats };
+      st[g.mainMat.ps] = (st[g.mainMat.ps] || 10) + g.mainMat.sb;
+
+      const disc = DISCIPLINE_ACTIVES[g.stat];
+      const unlockedSkills = disc.skills.filter(sk => st[g.stat] >= sk.req);
+
+      const rarityBonusMap = { Common: 0, Uncommon: 10, Rare: 22, Epic: 36, Legendary: 52, Unique: 75 };
+      const rBonus = rarityBonusMap[g.mainMat.r] || 22;
+      const totalBudget = 100 + 20 * (g.tier - 1) + rBonus;
+      const wDmg = ((totalBudget * (g.budget.damage / 100)) / 4) * enh.mult;
+      const rawMight = st.STR * 0.5 * 1.25 + (g.stat === "CON" ? st.CON * 0.15 : 0);
+      const trigEff = compat.ok ? (totalBudget * (g.budget.trigger / 100)) * 0.8 * (1 + 0.015 * st[g.stat]) * (1 + (st.INT * 0.3) / 100) * enh.mult : 0;
+      const baseHit = (wDmg + rawMight + trigEff / (g.stat === "CHA" ? 5 : 4)) * (1 + compat.bonusPct / 100);
+
+      const perkDmgPct = (id.activeT3 ? (id.activeT3.dmgPct || 0) * id.activeT3.mult : 0) + (id.activeT5 ? (id.activeT5.dmgPct || 0) * id.activeT5.mult : 0);
+      const perkHpPct = (id.activeT3 ? (id.activeT3.hpPct || 0) * id.activeT3.mult : 0) + (id.activeT5 ? (id.activeT5.hpPct || 0) * id.activeT5.mult : 0);
+      const perkDefPct = (id.activeT3 ? (id.activeT3.defPct || 0) * id.activeT3.mult : 0) + (id.activeT5 ? (id.activeT5.defPct || 0) * id.activeT5.mult : 0);
+
+      let elemMatched = g.elementWd === weak || Boolean(id.activeT5?.autoWeak);
+      if (g.hybrid) {
+        if (g.hybrid.combat_bonus?.auto_match_weakness || g.hybrid.elements_wd.includes(weak)) {
+          elemMatched = true;
+        }
+      }
+      const elemMult = elemMatched ? (1.25 + (st.INT * 0.45) / 100) : 1.0;
+
+      let rotDps = 0;
+      for (const sk of unlockedSkills.slice(0, 4)) {
+        rotDps += (baseHit * sk.mult) / sk.cd;
+      }
+
+      const appDpsBonus = app ? (baseHit * (app.assistPct / 100) * (1 + st.CHA * 0.003)) / 3.0 : 0;
+      const atkSpd = 1.0 * (1 + (g.budget.speed + st.DEX * 0.2) / 100);
+      const hybBonusMult = 1 + ((g.hybrid?.combat_bonus?.skill_dmg_pct || 0) + (g.traitBonus?.skill_dmg_pct || 0) + perkDmgPct) / 100;
+      const dps = +((((baseHit * atkSpd) + rotDps + appDpsBonus) * elemMult * hybBonusMult)).toFixed(1);
+
+      const playerHp = Math.round((20 + st.CON * 5 * 1.25 + 5 * tier) * (1 + perkHpPct / 100));
+      const flatMit = Math.min(mDmg * 0.5, st.CON * 0.5 * 1.25);
+      const dtps = Math.max(1, +((mDmg - flatMit) * roleMap.spd * 0.55 * (1 - Math.min(0.45, (perkDefPct + (g.budget.defense / 1.25)) / 100))).toFixed(2));
+      const ttd = +(playerHp / dtps).toFixed(1);
+      const kills = +((dps * ttd) / mHp).toFixed(2);
+
+      const activePerksLabel = [
+        id.activeT3 ? `T3: ${id.activeT3.name}${id.activeT3.hasAffinity ? "★" : ""}` : null,
+        id.activeT5 ? `T5: ${id.activeT5.name}${id.activeT5.hasAffinity ? "★" : ""}` : null
+      ].filter(Boolean).join(" • ") || "Tanpa Perk (Tier < 3)";
+
+      box.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
+            <div class="text-[var(--muted-foreground)]">Class 1-Kata & Perk Aktif</div>
+            <div class="font-bold text-sm text-[var(--primary)]">${id.className}</div>
+            <div class="text-[10px] font-semibold truncate">${activePerksLabel}</div>
+          </div>
+          <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
+            <div class="text-[var(--muted-foreground)]">Enhance +N Tanpa Batas (CD-4.02)</div>
+            <div class="font-bold">${enh.phase} (+${enh.bonusPct}% Daya)</div>
+            <div class="text-[11px] ${compat.ok ? "text-[var(--primary)]" : "text-[var(--error)]"}">
+              Trigger ${g.trigger}: ${compat.ok ? `AKTIF (+${compat.bonusPct}% Mastery)` : "TERKUNCI (-25%)"}
+            </div>
+          </div>
+          <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
+            <div class="text-[var(--muted-foreground)]">Companion Murid AI Seed (CD-6.02)</div>
+            <div class="font-bold">${app ? `${app.seed} (${app.smithClass})` : "Tanpa Murid Pendamping"}</div>
+            <div class="text-[11px] text-[var(--primary)]">
+              ${app ? `Assist ${app.assistPct}%/3s · ${app.aura} · Cabang: ${app.branchOk ? "SIAP" : "Belum"}` : "Pilih seed murid di atas"}
+            </div>
+          </div>
+          <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
+            <div class="text-[var(--muted-foreground)]">Performa vs ${type} Lv${state.lv}</div>
+            <div class="font-bold font-mono text-sm text-[var(--primary)]">${dps} DPS · ${kills} Kill/HP</div>
+            <div class="text-[11px] font-mono">HP ${playerHp} vs Musuh ${mHp} HP (${elemMatched ? `Weak ×${elemMult.toFixed(2)}` : "Netral"})</div>
+          </div>
+        </div>
+        <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)] flex flex-wrap items-center justify-between gap-2">
+          <span><strong>Rotasi Skill Aktif (${g.stat} — ${disc.name}):</strong> ${unlockedSkills.length ? unlockedSkills.map(s => `<span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] mr-1">${s.name} (${s.role})</span>`).join("") : "Naikkan stat " + g.stat + " ke ≥30 untuk membuka Skill Aktif"}</span>
+        </div>
+      `;
+    }
+
+    function loadPreset(lv, tiersObj, wId, coreEl) {
+      state.lv = lv;
+      state.smithTiers = { ...tiersObj };
+      document.getElementById("lvSlider").value = lv;
+      document.getElementById("lvReadout").textContent = lv;
+      document.getElementById("weaponSel").value = wId;
+      document.getElementById("coreElemSel").value = coreEl;
+
+      if (lv === 30) state.stats = { STR: 30, DEX: 12, CON: 18, INT: 5, WIS: 3, CHA: 3 };
+      else if (lv === 90) state.stats = { STR: 70, DEX: 20, CON: 45, INT: 35, WIS: 15, CHA: 6 };
+      else state.stats = { STR: 35, DEX: 75, CON: 60, INT: 110, WIS: 21, CHA: 10 };
+
+      renderSmithAllocator();
+      renderMiniStatSliders();
+      rebuildMaterialSlots();
+      doForge(true);
+    }
+
+    initWeaponSelect();
+    renderSmithAllocator();
+    renderMiniStatSliders();
+    rebuildMaterialSlots();
+    doForge(true);
+  </script>
+</body>
+</html>

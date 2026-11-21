@@ -1,0 +1,463 @@
+{
+  "version": "1.0.0",
+  "master_cd_version": "v3.2",
+  "description": "CD-1.02b (60 Sub-Stats), CD-2.01 (SWTOR Discipline & Utility Path + Cross-Stat Macro Loadout, 150 Nodes), and CD-3 (5 Smith Types & Perks Synergy)",
+  "stat_caps_by_tier": [30, 60, 90, 120, 150],
+  "focus_substat_multiplier": 1.25,
+  "max_focus_per_stat": 2,
+  "macro_capacity_brackets": [
+    { "min_effective_int": 1, "max_effective_int": 29, "slots": 3 },
+    { "min_effective_int": 30, "max_effective_int": 74, "slots": 4 },
+    { "min_effective_int": 75, "max_effective_int": 119, "slots": 5 },
+    { "min_effective_int": 120, "max_effective_int": 999, "slots": 6 }
+  ],
+  "smith_types": {
+    "Weaponsmith": {
+      "id": "Weaponsmith",
+      "primary_bonus_per_rank_pct": 6,
+      "secondary_bonus_per_rank_pct": 3,
+      "rank_prefixes": ["Raw", "Tempered", "Honed", "Grand", "Paragon"],
+      "skill_synergy": { "melee_active_dmg_pct_per_rank": 3, "weapon_trigger_power_pct_per_rank": 4 }
+    },
+    "Armorer": {
+      "id": "Armorer",
+      "primary_bonus_per_rank_pct": 6,
+      "secondary_bonus_per_rank_pct": 3,
+      "rank_prefixes": ["Raw", "Tempered", "Honed", "Grand", "Paragon"],
+      "skill_synergy": { "defensive_active_power_pct_per_rank": 4, "mitigate_bonus_pct_per_rank": 3 }
+    },
+    "Reforger": {
+      "id": "Reforger",
+      "primary_bonus_per_rank_pct": 6,
+      "secondary_bonus_per_rank_pct": 3,
+      "rank_prefixes": ["Raw", "Tempered", "Honed", "Grand", "Paragon"],
+      "skill_synergy": { "cooldown_recovery_pct_per_rank": 2.5, "enhance_damage_scale_pct_per_rank": 3 }
+    },
+    "Runesmith": {
+      "id": "Runesmith",
+      "primary_bonus_per_rank_pct": 6,
+      "secondary_bonus_per_rank_pct": 3,
+      "rank_prefixes": ["Raw", "Tempered", "Honed", "Grand", "Paragon"],
+      "skill_synergy": { "elemental_active_dmg_pct_per_rank": 4, "cross_stat_mod_bonus_pct_per_rank": 4 }
+    },
+    "Rangesmith": {
+      "id": "Rangesmith",
+      "primary_bonus_per_rank_pct": 6,
+      "secondary_bonus_per_rank_pct": 3,
+      "rank_prefixes": ["Raw", "Tempered", "Honed", "Grand", "Paragon"],
+      "skill_synergy": { "ranged_active_dmg_pct_per_rank": 4, "ranged_accuracy_dodge_pct_per_rank": 2 }
+    }
+  },
+  "sub_stats": {
+    "STR": [
+      { "id": "str_raw_might", "index": 1, "name": "Raw Might", "category": "battle", "unit": "flat_dmg", "rate_per_point": 0.5, "desc": "Bonus damage fisik dasar (+0.5 per STR)" },
+      { "id": "str_heavy_impact", "index": 2, "name": "Heavy Impact", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Daya dobrak / pengurang efisiensi blok lawan" },
+      { "id": "str_armor_crush", "index": 3, "name": "Armor Crush", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Penetrasi / pengabaian Armor lawan" },
+      { "id": "str_cleave_force", "index": 4, "name": "Cleave Force", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Damage percikan / area serangan berat" },
+      { "id": "str_weapon_weight", "index": 5, "name": "Weapon Weight", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Reduksi penalti ayunan senjata berat" },
+      { "id": "str_brawn_guard", "index": 6, "name": "Brawn Guard", "category": "battle", "unit": "pct", "rate_per_point": 0.1, "desc": "Ketahanan fisik dasar dari otot" },
+      { "id": "str_hammer_strike", "index": 7, "name": "Hammer Strike", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Efisiensi pukulan tempa dasar" },
+      { "id": "str_enhance_power", "index": 8, "name": "Enhance Power (+N)", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Bonus peluang sukses penguatan +N" },
+      { "id": "str_alloy_shaping", "index": 9, "name": "Alloy Shaping", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Efisiensi tempa logam keras tier tinggi" },
+      { "id": "str_carry_load", "index": 10, "name": "Carry Load", "category": "profession", "unit": "pct", "rate_per_point": 0.3, "desc": "Kapasitas angkut bijih & perlengkapan" }
+    ],
+    "DEX": [
+      { "id": "dex_accuracy", "index": 1, "name": "Accuracy", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "hard_cap": 20, "desc": "Bonus peluang serangan mengenai sasaran (cap +20%)" },
+      { "id": "dex_attack_speed", "index": 2, "name": "Attack Speed", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Bonus frekuensi serangan per detik" },
+      { "id": "dex_evasion", "index": 3, "name": "Evasion (Dodge)", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "hard_cap": 20, "desc": "Peluang menghindar serangan (cap +20%)" },
+      { "id": "dex_parry_reflex", "index": 4, "name": "Parry Reflex", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "hard_cap": 20, "desc": "Peluang menangkis serangan jarak dekat (cap +20%)" },
+      { "id": "dex_armor_mobility", "index": 5, "name": "Armor Mobility (AC)", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Efisiensi AC pada zirah ringan/sedang" },
+      { "id": "dex_ranged_draw", "index": 6, "name": "Ranged Draw", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Stabilitas & damage senjata bertag Jauh" },
+      { "id": "dex_forge_speed", "index": 7, "name": "Forge Speed", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Kecepatan penyelesaian tempa" },
+      { "id": "dex_fine_engraving", "index": 8, "name": "Fine Engraving", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Kualitas presisi bilah & akurasi tempa" },
+      { "id": "dex_mechanism_craft", "index": 9, "name": "Mechanism Craft", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Kualitas rakitan pemicu & senjata Rangesmith" },
+      { "id": "dex_quick_salvage", "index": 10, "name": "Quick Salvage", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Efisiensi daur ulang peralatan" }
+    ],
+    "CON": [
+      { "id": "con_max_vitality", "index": 1, "name": "Max Vitality (HP)", "category": "battle", "unit": "flat_hp", "rate_per_point": 5.0, "desc": "Bonus HP maksimum (+5 per CON)" },
+      { "id": "con_mitigate", "index": 2, "name": "Mitigate", "category": "battle", "unit": "flat_mitigate", "rate_per_point": 0.5, "desc": "Pengurang damage mentah (+1 per 2 CON, cap 50% mentah)" },
+      { "id": "con_thick_hide", "index": 3, "name": "Thick Hide (Armor)", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Pengali pertahanan zirah berat & ketahanan fisik" },
+      { "id": "con_battle_stamina", "index": 4, "name": "Battle Stamina", "category": "battle", "unit": "flat_stamina", "rate_per_point": 5.0, "desc": "Kapasitas stamina bertarung (+5 per CON)" },
+      { "id": "con_poise", "index": 5, "name": "Poise (Tenacity)", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Ketahanan terhadap stagger & interupsi" },
+      { "id": "con_curse_resist", "index": 6, "name": "Curse & Blight Resist", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Ketahanan terhadap kutukan Gate & racun" },
+      { "id": "con_forge_stamina", "index": 7, "name": "Forge Stamina", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Daya tahan sesi idle Smith" },
+      { "id": "con_material_conservation", "index": 8, "name": "Material Conservation", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Peluang hemat bahan dasar saat menempa" },
+      { "id": "con_heat_tolerance", "index": 9, "name": "Heat Tolerance", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Stabilitas suhu dapur tempa ekstrem" },
+      { "id": "con_quench_stability", "index": 10, "name": "Quench Stability", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Pencegahan retak saat pendinginan/Reforger" }
+    ],
+    "INT": [
+      { "id": "int_elemental_potency", "index": 1, "name": "Elemental Potency", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus damage 6 elemen utama" },
+      { "id": "int_weakness_exploit", "index": 2, "name": "Weakness Exploit", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Tambahan bonus saat mengenai elemen weak musuh (di atas +25% dasar)" },
+      { "id": "int_trigger_mastery", "index": 3, "name": "Trigger Mastery", "category": "battle", "unit": "pct", "rate_per_point": 0.3, "desc": "Pengali efektivitas 36 Weapon Trigger" },
+      { "id": "int_elemental_barrier", "index": 4, "name": "Elemental Barrier", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Resistensi terhadap serangan berelemen" },
+      { "id": "int_arcane_accuracy", "index": 5, "name": "Spell/Arcane Accuracy", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Presisi serangan energi & skill aktif berelemen" },
+      { "id": "int_macro_capacity", "index": 6, "name": "Macro Capacity", "category": "battle", "unit": "slot_score", "rate_per_point": 1.0, "desc": "Skor kapasitas slot Active Macro Bar (3 s.d. 6 slot)" },
+      { "id": "int_smith_tools", "index": 7, "name": "Smith's Tools Mastery", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus peluang rarity tinggi saat menempa" },
+      { "id": "int_rune_slotting", "index": 8, "name": "Rune Slotting", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Efektivitas & resonansi pemasangan Rune" },
+      { "id": "int_safe_extraction", "index": 9, "name": "Safe Extraction", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Pengurang peluang retak cabut Rune" },
+      { "id": "int_attunement_craft", "index": 10, "name": "Attunement Craft", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Keselarasan elemen-bahan (WD-4.06)" }
+    ],
+    "WIS": [
+      { "id": "wis_crit_chance", "index": 1, "name": "Critical Chance", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "hard_cap": 20, "desc": "Peluang serangan kritis (cap +20%)" },
+      { "id": "wis_crit_severity", "index": 2, "name": "Critical Severity", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Tambahan damage serangan kritis (di atas x2.0 dasar)" },
+      { "id": "wis_enemy_sense", "index": 3, "name": "Enemy Sense", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Pengabaian dodge lawan & deteksi titik lemah" },
+      { "id": "wis_foresight", "index": 4, "name": "Foresight", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Reduksi peluang terkena serangan kritis lawan" },
+      { "id": "wis_tactical_rhythm", "index": 5, "name": "Tactical Rhythm", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Pengurang konsumsi stamina & percepatan cooldown skill" },
+      { "id": "wis_counter_window", "index": 6, "name": "Counter Window", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Bonus damage serangan balasan setelah dodge/parry" },
+      { "id": "wis_rare_drop", "index": 7, "name": "Rare Drop Hunting", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus peluang perolehan material langka" },
+      { "id": "wis_market_appraisal", "index": 8, "name": "Market Appraisal", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Ketepatan membaca tren permintaan pasar WD" },
+      { "id": "wis_trophy_curation", "index": 9, "name": "Trophy Curation", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Bonus prestise Galeri Trofi Signature (WD-5.10)" },
+      { "id": "wis_material_purity", "index": 10, "name": "Material Purity Sense", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Deteksi kemurnian bijih & potensi Resonance" }
+    ],
+    "CHA": [
+      { "id": "cha_intimidate", "index": 1, "name": "Intimidate (Dread)", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Debuff pengurang damage & akurasi musuh" },
+      { "id": "cha_break_morale", "index": 2, "name": "Break Morale", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Debuff pengurang pertahanan/armor musuh" },
+      { "id": "cha_rally_ally", "index": 3, "name": "Rally Ally", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Buff damage & kecepatan untuk diri/companion murid" },
+      { "id": "cha_protective_command", "index": 4, "name": "Protective Command", "category": "battle", "unit": "pct", "rate_per_point": 0.15, "desc": "Buff reduksi damage untuk diri/companion murid" },
+      { "id": "cha_battlefield_presence", "index": 5, "name": "Battlefield Presence", "category": "battle", "unit": "pct", "rate_per_point": 0.2, "desc": "Kendali ritme tempur & durasi efek buff/debuff" },
+      { "id": "cha_conscience_align", "index": 6, "name": "Conscience Alignment", "category": "battle", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus damage dari keselarasan bar moral Conscience senjata" },
+      { "id": "cha_trade_bargaining", "index": 7, "name": "Trade Bargaining", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus harga jual & diskon beli bahan" },
+      { "id": "cha_shop_reputation", "index": 8, "name": "Shop Reputation", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Laju kenaikan Reputasi Toko" },
+      { "id": "cha_apprentice_lead", "index": 9, "name": "Apprentice Leadership", "category": "profession", "unit": "pct", "rate_per_point": 0.25, "desc": "Bonus laju belajar & stabilitas loyalitas 5 murid" },
+      { "id": "cha_faction_diplomacy", "index": 10, "name": "Faction Diplomacy", "category": "profession", "unit": "pct", "rate_per_point": 0.2, "desc": "Pengaruh negosiasi kontrak & relasi faksi WD" }
+    ]
+  },
+  "disciplines": {
+    "STR": {
+      "discipline_name": "Juggernaut Forgebreaker",
+      "theme": "Heavy Physical Burst, Armor Penetration & Cleave",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "str_t1_p", "stat_req": 10, "name": "Iron Grip", "substat_link": "str_raw_might", "effect": { "dmg_pct": 5, "armor_pen_pct": 3 } },
+          "utility_choices": [
+            { "id": "str_t1_u1", "stat_req": 20, "name": "Sundering Edge", "branch": "Offense", "substat_link": "str_armor_crush", "mod_effect": { "armor_pen_pct": 10, "skill_dmg_pct": 8 } },
+            { "id": "str_t1_u2", "stat_req": 20, "name": "Braced Stance", "branch": "Defense", "substat_link": "str_brawn_guard", "mod_effect": { "dmg_reduction_pct": 6, "poise_pct": 10 } },
+            { "id": "str_t1_u3", "stat_req": 20, "name": "Tempered Momentum", "branch": "Tactical", "substat_link": "str_hammer_strike", "mod_effect": { "cooldown_reduction_sec": 1, "enhance_bonus_pct": 5 } }
+          ],
+          "active_skill": { "id": "str_t1_a", "stat_req": 30, "name": "Crushing Blow", "role": "Builder", "cooldown_sec": 5, "base_multiplier": 1.35, "element": "Neutral", "grants_proc": "sundered_armor", "desc": "Serangan pembuka berat yang meretaskan pertahanan musuh." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "str_t2_p", "stat_req": 40, "name": "Heavy Momentum", "substat_link": "str_heavy_impact", "effect": { "dmg_pct": 6, "ignore_block_pct": 8 } },
+          "utility_choices": [
+            { "id": "str_t2_u1", "stat_req": 50, "name": "Bloodied Cleave", "branch": "Offense", "substat_link": "str_cleave_force", "mod_effect": { "bleed_dmg_pct": 12, "skill_dmg_pct": 10 } },
+            { "id": "str_t2_u2", "stat_req": 50, "name": "Unstoppable Mass", "branch": "Defense", "substat_link": "str_weapon_weight", "mod_effect": { "dmg_reduction_pct": 8, "heal_on_cast_pct": 3 } },
+            { "id": "str_t2_u3", "stat_req": 50, "name": "Anvil Echo", "branch": "Tactical", "substat_link": "str_enhance_power", "mod_effect": { "trigger_power_pct": 15, "stamina_refund": 5 } }
+          ],
+          "active_skill": { "id": "str_t2_a", "stat_req": 60, "name": "Titan's Roar", "role": "Defensive/Interrupt", "cooldown_sec": 12, "base_multiplier": 1.15, "element": "Neutral", "self_buff": { "dmg_reduction_pct": 15, "duration_sec": 4 }, "desc": "Hentakan gelombang kejut yang meredam serangan lawan." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "str_t3_p", "stat_req": 70, "name": "Shattering Force", "substat_link": "str_armor_crush", "effect": { "dmg_pct": 8, "armor_pen_pct": 6 } },
+          "utility_choices": [
+            { "id": "str_t3_u1", "stat_req": 80, "name": "Impaling Follow-up", "branch": "Offense", "substat_link": "str_raw_might", "mod_effect": { "proc_bonus_dmg_pct": 20, "crit_dmg_pct": 15 } },
+            { "id": "str_t3_u2", "stat_req": 80, "name": "Steel Sinew", "branch": "Defense", "substat_link": "str_brawn_guard", "mod_effect": { "armor_bonus_pct": 10, "dmg_reduction_pct": 6 } },
+            { "id": "str_t3_u3", "stat_req": 80, "name": "Master Alloy Weight", "branch": "Tactical", "substat_link": "str_alloy_shaping", "mod_effect": { "weapon_base_dmg_pct": 12 } }
+          ],
+          "active_skill": { "id": "str_t3_a", "stat_req": 90, "name": "Sundering Smash", "role": "Core Combo", "cooldown_sec": 8, "base_multiplier": 1.75, "element": "Neutral", "consumes_proc": "sundered_armor", "proc_multiplier_bonus": 0.45, "desc": "Menghantam titik retak lawan; damage melonjak bila target terkena Sundered Armor." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "str_t4_p", "stat_req": 100, "name": "Colossus Might", "substat_link": "str_cleave_force", "effect": { "dmg_pct": 10, "cleave_pct": 12 } },
+          "utility_choices": [
+            { "id": "str_t4_u1", "stat_req": 110, "name": "Executioner's Arc", "branch": "Offense", "substat_link": "str_heavy_impact", "mod_effect": { "skill_dmg_pct": 18, "armor_pen_pct": 10 } },
+            { "id": "str_t4_u2", "stat_req": 110, "name": "Vanguard Plate", "branch": "Defense", "substat_link": "str_brawn_guard", "mod_effect": { "dmg_reduction_pct": 10, "max_hp_pct": 8 } },
+            { "id": "str_t4_u3", "stat_req": 110, "name": "Overburdened Strike", "branch": "Tactical", "substat_link": "str_carry_load", "mod_effect": { "skill_dmg_pct": 14, "trigger_power_pct": 12 } }
+          ],
+          "active_skill": { "id": "str_t4_a", "stat_req": 120, "name": "Earthshaker Quake", "role": "High-Impact/Execute", "cooldown_sec": 15, "base_multiplier": 2.2, "element": "Earth", "grants_proc": "sundered_armor", "desc": "Membelah tanah dengan ayunan penuh, memberikan damage Earth/Fisik masif." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "str_t5_p", "stat_req": 130, "name": "Paragon Warlord", "substat_link": "str_raw_might", "effect": { "dmg_pct": 12, "armor_pen_pct": 10 } },
+          "utility_choices": [
+            { "id": "str_t5_u1", "stat_req": 140, "name": "Worldbreaker Wrath", "branch": "Offense", "substat_link": "str_raw_might", "mod_effect": { "skill_dmg_pct": 25, "crit_chance_pct": 5 } },
+            { "id": "str_t5_u2", "stat_req": 140, "name": "Immortal Titan", "branch": "Defense", "substat_link": "str_brawn_guard", "mod_effect": { "dmg_reduction_pct": 12, "heal_on_cast_pct": 5 } },
+            { "id": "str_t5_u3", "stat_req": 140, "name": "Godforge Impact", "branch": "Tactical", "substat_link": "str_enhance_power", "mod_effect": { "skill_dmg_pct": 18, "cooldown_reduction_sec": 2 } }
+          ],
+          "active_skill": { "id": "str_t5_a", "stat_req": 150, "name": "Cataclysmic Anvil Fall", "role": "Apex Capstone", "cooldown_sec": 22, "base_multiplier": 3.0, "element": "Neutral", "consumes_proc": "sundered_armor", "proc_multiplier_bonus": 0.75, "desc": "Jurus pamungkas STR: menghancurkan pertahanan dan memberikan serangan puncak." }
+        }
+      ]
+    },
+    "DEX": {
+      "discipline_name": "Phantom Bladeweaver",
+      "theme": "High Tempo Flurry, Evasion, Parry & Ranged Precision",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "dex_t1_p", "stat_req": 10, "name": "Fleet Footwork", "substat_link": "dex_evasion", "effect": { "parry_pct": 4, "dodge_pct": 4 } },
+          "utility_choices": [
+            { "id": "dex_t1_u1", "stat_req": 20, "name": "Razor Tempo", "branch": "Offense", "substat_link": "dex_attack_speed", "mod_effect": { "attack_speed_pct": 10, "skill_dmg_pct": 8 } },
+            { "id": "dex_t1_u2", "stat_req": 20, "name": "Deflecting Guard", "branch": "Defense", "substat_link": "dex_parry_reflex", "mod_effect": { "parry_pct": 8, "dmg_reduction_pct": 4 } },
+            { "id": "dex_t1_u3", "stat_req": 20, "name": "Precision Fletching", "branch": "Tactical", "substat_link": "dex_ranged_draw", "mod_effect": { "accuracy_pct": 10, "ranged_dmg_pct": 10 } }
+          ],
+          "active_skill": { "id": "dex_t1_a", "stat_req": 30, "name": "Viper Lunge", "role": "Builder", "cooldown_sec": 4, "base_multiplier": 1.25, "element": "Neutral", "grants_proc": "flow_state", "desc": "Tusukan kilat yang membuka celah dan mengaktifkan Flow State." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "dex_t2_p", "stat_req": 40, "name": "Quicksilver Reflex", "substat_link": "dex_attack_speed", "effect": { "attack_speed_pct": 6, "accuracy_pct": 5 } },
+          "utility_choices": [
+            { "id": "dex_t2_u1", "stat_req": 50, "name": "Lacerating Flurry", "branch": "Offense", "substat_link": "dex_accuracy", "mod_effect": { "bleed_dmg_pct": 12, "skill_dmg_pct": 10 } },
+            { "id": "dex_t2_u2", "stat_req": 50, "name": "Mirage Step", "branch": "Defense", "substat_link": "dex_evasion", "mod_effect": { "dodge_pct": 8, "dmg_reduction_pct": 5 } },
+            { "id": "dex_t2_u3", "stat_req": 50, "name": "Clockwork Trigger", "branch": "Tactical", "substat_link": "dex_mechanism_craft", "mod_effect": { "cooldown_reduction_sec": 1, "trigger_power_pct": 12 } }
+          ],
+          "active_skill": { "id": "dex_t2_a", "stat_req": 60, "name": "Riposte Veil", "role": "Defensive/Interrupt", "cooldown_sec": 10, "base_multiplier": 1.2, "element": "Neutral", "self_buff": { "parry_pct": 10, "dodge_pct": 10, "duration_sec": 4 }, "desc": "Meningkatkan parry dan dodge drastis sambil menyerang balik." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "dex_t3_p", "stat_req": 70, "name": "Lethal Cadence", "substat_link": "dex_accuracy", "effect": { "dmg_pct": 7, "attack_speed_pct": 6 } },
+          "utility_choices": [
+            { "id": "dex_t3_u1", "stat_req": 80, "name": "Twin Fang Synergy", "branch": "Offense", "substat_link": "dex_attack_speed", "mod_effect": { "proc_bonus_dmg_pct": 22, "attack_speed_pct": 8 } },
+            { "id": "dex_t3_u2", "stat_req": 80, "name": "Agile Carapace", "branch": "Defense", "substat_link": "dex_armor_mobility", "mod_effect": { "dmg_reduction_pct": 8, "dodge_pct": 5 } },
+            { "id": "dex_t3_u3", "stat_req": 80, "name": "Engraved Sight", "branch": "Tactical", "substat_link": "dex_fine_engraving", "mod_effect": { "accuracy_pct": 12, "crit_chance_pct": 5 } }
+          ],
+          "active_skill": { "id": "dex_t3_a", "stat_req": 90, "name": "Cyclone Slash", "role": "Core Combo", "cooldown_sec": 7, "base_multiplier": 1.65, "element": "Neutral", "consumes_proc": "flow_state", "proc_multiplier_bonus": 0.45, "desc": "Rentetan tebasan beruntun yang mengonsumsi Flow State untuk burst cepat." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "dex_t4_p", "stat_req": 100, "name": "Windrunner Precision", "substat_link": "dex_ranged_draw", "effect": { "dmg_pct": 9, "accuracy_pct": 8 } },
+          "utility_choices": [
+            { "id": "dex_t4_u1", "stat_req": 110, "name": "Heartseeker Volley", "branch": "Offense", "substat_link": "dex_ranged_draw", "mod_effect": { "skill_dmg_pct": 18, "armor_pen_pct": 8 } },
+            { "id": "dex_t4_u2", "stat_req": 110, "name": "Untouchable Gale", "branch": "Defense", "substat_link": "dex_evasion", "mod_effect": { "dodge_pct": 10, "heal_on_cast_pct": 3 } },
+            { "id": "dex_t4_u3", "stat_req": 110, "name": "Rapid Salvage Loop", "branch": "Tactical", "substat_link": "dex_quick_salvage", "mod_effect": { "cooldown_reduction_sec": 1.5, "stamina_refund": 8 } }
+          ],
+          "active_skill": { "id": "dex_t4_a", "stat_req": 120, "name": "Lightning Barrage", "role": "High-Impact/Execute", "cooldown_sec": 14, "base_multiplier": 2.1, "element": "Lightning", "grants_proc": "flow_state", "desc": "Hujan serangan berkecepatan kilat bermuatan Lightning." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "dex_t5_p", "stat_req": 130, "name": "Grandmaster Reflex", "substat_link": "dex_attack_speed", "effect": { "dmg_pct": 10, "attack_speed_pct": 10 } },
+          "utility_choices": [
+            { "id": "dex_t5_u1", "stat_req": 140, "name": "Thousand Cuts", "branch": "Offense", "substat_link": "dex_attack_speed", "mod_effect": { "skill_dmg_pct": 24, "attack_speed_pct": 10 } },
+            { "id": "dex_t5_u2", "stat_req": 140, "name": "Ghostly Ward", "branch": "Defense", "substat_link": "dex_parry_reflex", "mod_effect": { "dmg_reduction_pct": 10, "parry_pct": 8 } },
+            { "id": "dex_t5_u3", "stat_req": 140, "name": "Hyperion String", "branch": "Tactical", "substat_link": "dex_forge_speed", "mod_effect": { "cooldown_reduction_sec": 2, "skill_dmg_pct": 15 } }
+          ],
+          "active_skill": { "id": "dex_t5_a", "stat_req": 150, "name": "Phantom Horizon Dance", "role": "Apex Capstone", "cooldown_sec": 20, "base_multiplier": 2.85, "element": "Neutral", "consumes_proc": "flow_state", "proc_multiplier_bonus": 0.75, "desc": "Jurus pamungkas DEX: serangan bayangan beruntun yang tak terhindarkan." }
+        }
+      ]
+    },
+    "CON": {
+      "discipline_name": "Immortal Bastion",
+      "theme": "Maximum Vitality, Raw Damage Mitigation, Thorns & Counter-Slam",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "con_t1_p", "stat_req": 10, "name": "Tempered Flesh", "substat_link": "con_max_vitality", "effect": { "max_hp_pct": 8, "dmg_reduction_pct": 4 } },
+          "utility_choices": [
+            { "id": "con_t1_u1", "stat_req": 20, "name": "Spiked Pauldrons", "branch": "Offense", "substat_link": "con_thick_hide", "mod_effect": { "skill_dmg_pct": 12, "thorns_dmg_pct": 10 } },
+            { "id": "con_t1_u2", "stat_req": 20, "name": "Granite Skin", "branch": "Defense", "substat_link": "con_mitigate", "mod_effect": { "dmg_reduction_pct": 8, "flat_mitigate": 4 } },
+            { "id": "con_t1_u3", "stat_req": 20, "name": "Deep Bellows", "branch": "Tactical", "substat_link": "con_battle_stamina", "mod_effect": { "stamina_refund": 10, "cooldown_reduction_sec": 1 } }
+          ],
+          "active_skill": { "id": "con_t1_a", "stat_req": 30, "name": "Shield Bash", "role": "Builder", "cooldown_sec": 5, "base_multiplier": 1.25, "element": "Neutral", "grants_proc": "iron_bulwark", "desc": "Hantaman perisai/zirah yang memicu efek pertahanan Iron Bulwark." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "con_t2_p", "stat_req": 40, "name": "Furnace Heart", "substat_link": "con_mitigate", "effect": { "max_hp_pct": 10, "dmg_reduction_pct": 5 } },
+          "utility_choices": [
+            { "id": "con_t2_u1", "stat_req": 50, "name": "Molten Retaliation", "branch": "Offense", "substat_link": "con_heat_tolerance", "mod_effect": { "skill_dmg_pct": 14, "element_override": "Fire" } },
+            { "id": "con_t2_u2", "stat_req": 50, "name": "Unbreakable Poise", "branch": "Defense", "substat_link": "con_poise", "mod_effect": { "dmg_reduction_pct": 10, "heal_on_cast_pct": 4 } },
+            { "id": "con_t2_u3", "stat_req": 50, "name": "Slag Recycling", "branch": "Tactical", "substat_link": "con_material_conservation", "mod_effect": { "trigger_power_pct": 14, "max_hp_pct": 6 } }
+          ],
+          "active_skill": { "id": "con_t2_a", "stat_req": 60, "name": "Ironclad Fortress", "role": "Defensive/Interrupt", "cooldown_sec": 12, "base_multiplier": 1.1, "element": "Earth", "self_buff": { "dmg_reduction_pct": 22, "duration_sec": 5 }, "desc": "Mengunci kuda-kuda baja, meredam damage besar selama 5 detik." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "con_t3_p", "stat_req": 70, "name": "Unyielding Marrow", "substat_link": "con_thick_hide", "effect": { "dmg_reduction_pct": 7, "dmg_pct": 6 } },
+          "utility_choices": [
+            { "id": "con_t3_u1", "stat_req": 80, "name": "Crushing Counterweight", "branch": "Offense", "substat_link": "con_max_vitality", "mod_effect": { "proc_bonus_dmg_pct": 25, "skill_dmg_pct": 10 } },
+            { "id": "con_t3_u2", "stat_req": 80, "name": "Purifying Quench", "branch": "Defense", "substat_link": "con_curse_resist", "mod_effect": { "dmg_reduction_pct": 9, "heal_on_cast_pct": 5 } },
+            { "id": "con_t3_u3", "stat_req": 80, "name": "Thermal Quench Core", "branch": "Tactical", "substat_link": "con_quench_stability", "mod_effect": { "cooldown_reduction_sec": 1.5, "armor_bonus_pct": 10 } }
+          ],
+          "active_skill": { "id": "con_t3_a", "stat_req": 90, "name": "Bulwark Slam", "role": "Core Combo", "cooldown_sec": 8, "base_multiplier": 1.7, "element": "Earth", "consumes_proc": "iron_bulwark", "proc_multiplier_bonus": 0.5, "desc": "Melepaskan tumpukan Iron Bulwark menjadi gelombang hantaman balasan." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "con_t4_p", "stat_req": 100, "name": "Mountain Endurance", "substat_link": "con_battle_stamina", "effect": { "max_hp_pct": 12, "dmg_reduction_pct": 8 } },
+          "utility_choices": [
+            { "id": "con_t4_u1", "stat_req": 110, "name": "Seismic Payback", "branch": "Offense", "substat_link": "con_thick_hide", "mod_effect": { "skill_dmg_pct": 20, "armor_pen_pct": 8 } },
+            { "id": "con_t4_u2", "stat_req": 110, "name": "Adamantine Ward", "branch": "Defense", "substat_link": "con_mitigate", "mod_effect": { "dmg_reduction_pct": 12, "flat_mitigate": 8 } },
+            { "id": "con_t4_u3", "stat_req": 110, "name": "Everlasting Crucible", "branch": "Tactical", "substat_link": "con_forge_stamina", "mod_effect": { "heal_on_cast_pct": 6, "stamina_refund": 12 } }
+          ],
+          "active_skill": { "id": "con_t4_a", "stat_req": 120, "name": "Juggernaut Avalanche", "role": "High-Impact/Execute", "cooldown_sec": 15, "base_multiplier": 2.15, "element": "Earth", "grants_proc": "iron_bulwark", "desc": "Terjangan benteng hidup yang menghancurkan barisan lawan." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "con_t5_p", "stat_req": 130, "name": "Eternal Citadel", "substat_link": "con_mitigate", "effect": { "max_hp_pct": 15, "dmg_reduction_pct": 10 } },
+          "utility_choices": [
+            { "id": "con_t5_u1", "stat_req": 140, "name": "Titanslayer Rebound", "branch": "Offense", "substat_link": "con_max_vitality", "mod_effect": { "skill_dmg_pct": 26, "proc_bonus_dmg_pct": 15 } },
+            { "id": "con_t5_u2", "stat_req": 140, "name": "Undying Forgeguard", "branch": "Defense", "substat_link": "con_mitigate", "mod_effect": { "dmg_reduction_pct": 15, "heal_on_cast_pct": 8 } },
+            { "id": "con_t5_u3", "stat_req": 140, "name": "Heart of the Mountain", "branch": "Tactical", "substat_link": "con_heat_tolerance", "mod_effect": { "max_hp_pct": 15, "cooldown_reduction_sec": 2 } }
+          ],
+          "active_skill": { "id": "con_t5_a", "stat_req": 150, "name": "Aegis of the World-Forge", "role": "Apex Capstone", "cooldown_sec": 22, "base_multiplier": 2.75, "element": "Earth", "consumes_proc": "iron_bulwark", "proc_multiplier_bonus": 0.8, "self_buff": { "dmg_reduction_pct": 25, "duration_sec": 6 }, "desc": "Jurus pamungkas CON: ledakan pertahanan bumi sekaligus perisai mutlak." }
+        }
+      ]
+    },
+    "INT": {
+      "discipline_name": "Arcane Runelord",
+      "theme": "6-Element Mastery, Weakness Exploit, Weapon Trigger Overdrive & Macro Automation",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "int_t1_p", "stat_req": 10, "name": "Runic Attunement", "substat_link": "int_elemental_potency", "effect": { "elemental_dmg_pct": 6, "trigger_power_pct": 5 } },
+          "utility_choices": [
+            { "id": "int_t1_u1", "stat_req": 20, "name": "Adaptive Element", "branch": "Offense", "substat_link": "int_weakness_exploit", "mod_effect": { "auto_match_weakness": true, "skill_dmg_pct": 10 } },
+            { "id": "int_t1_u2", "stat_req": 20, "name": "Prismatic Ward", "branch": "Defense", "substat_link": "int_elemental_barrier", "mod_effect": { "elemental_resist_pct": 10, "dmg_reduction_pct": 5 } },
+            { "id": "int_t1_u3", "stat_req": 20, "name": "Trigger Overclock", "branch": "Tactical", "substat_link": "int_trigger_mastery", "mod_effect": { "trigger_power_pct": 18 } }
+          ],
+          "active_skill": { "id": "int_t1_a", "stat_req": 30, "name": "Arcane Pulse", "role": "Builder", "cooldown_sec": 4, "base_multiplier": 1.35, "element": "Fire", "grants_proc": "runic_charge", "desc": "Tempaan energi elemen yang menanamkan Runic Charge pada target." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "int_t2_p", "stat_req": 40, "name": "Elementary Precision", "substat_link": "int_weakness_exploit", "effect": { "weakness_bonus_pct": 8, "accuracy_pct": 5 } },
+          "utility_choices": [
+            { "id": "int_t2_u1", "stat_req": 50, "name": "Cryo-Pyro Infusion", "branch": "Offense", "substat_link": "int_elemental_potency", "mod_effect": { "skill_dmg_pct": 15, "element_override": "Ice" } },
+            { "id": "int_t2_u2", "stat_req": 50, "name": "Rune Aegis", "branch": "Defense", "substat_link": "int_elemental_barrier", "mod_effect": { "dmg_reduction_pct": 8, "elemental_resist_pct": 12 } },
+            { "id": "int_t2_u3", "stat_req": 50, "name": "Macro Subroutine", "branch": "Tactical", "substat_link": "int_macro_capacity", "mod_effect": { "cooldown_reduction_sec": 1.5, "accuracy_pct": 8 } }
+          ],
+          "active_skill": { "id": "int_t2_a", "stat_req": 60, "name": "Nullifying Glyph", "role": "Defensive/Interrupt", "cooldown_sec": 11, "base_multiplier": 1.25, "element": "Light", "self_buff": { "elemental_resist_pct": 20, "dmg_reduction_pct": 12, "duration_sec": 4 }, "desc": "Mengaktifkan segel pelindung elemen sambil membakar serangan lawan." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "int_t3_p", "stat_req": 70, "name": "Harmonic Trigger", "substat_link": "int_trigger_mastery", "effect": { "trigger_power_pct": 12, "elemental_dmg_pct": 8 } },
+          "utility_choices": [
+            { "id": "int_t3_u1", "stat_req": 80, "name": "Explosive Detonation", "branch": "Offense", "substat_link": "int_weakness_exploit", "mod_effect": { "proc_bonus_dmg_pct": 25, "skill_dmg_pct": 10 } },
+            { "id": "int_t3_u2", "stat_req": 80, "name": "Safe Sovereign Rune", "branch": "Defense", "substat_link": "int_safe_extraction", "mod_effect": { "dmg_reduction_pct": 8, "heal_on_cast_pct": 4 } },
+            { "id": "int_t3_u3", "stat_req": 80, "name": "Attuned Resonance", "branch": "Tactical", "substat_link": "int_attunement_craft", "mod_effect": { "auto_match_weakness": true, "trigger_power_pct": 15 } }
+          ],
+          "active_skill": { "id": "int_t3_a", "stat_req": 90, "name": "Runic Shockwave", "role": "Core Combo", "cooldown_sec": 8, "base_multiplier": 1.85, "element": "Lightning", "consumes_proc": "runic_charge", "proc_multiplier_bonus": 0.5, "desc": "Meledakkan Runic Charge dengan gelombang kejut rune berelemen." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "int_t4_p", "stat_req": 100, "name": "Archmage Smithing", "substat_link": "int_rune_slotting", "effect": { "elemental_dmg_pct": 10, "weakness_bonus_pct": 10 } },
+          "utility_choices": [
+            { "id": "int_t4_u1", "stat_req": 110, "name": "Void-Light Convergence", "branch": "Offense", "substat_link": "int_elemental_potency", "mod_effect": { "skill_dmg_pct": 20, "element_override": "Dark" } },
+            { "id": "int_t4_u2", "stat_req": 110, "name": "Arcane Absorption", "branch": "Defense", "substat_link": "int_elemental_barrier", "mod_effect": { "dmg_reduction_pct": 10, "stamina_refund": 10 } },
+            { "id": "int_t4_u3", "stat_req": 110, "name": "Master Tool Calibration", "branch": "Tactical", "substat_link": "int_smith_tools", "mod_effect": { "trigger_power_pct": 20, "cooldown_reduction_sec": 1.5 } }
+          ],
+          "active_skill": { "id": "int_t4_a", "stat_req": 120, "name": " Astral Singularity", "role": "High-Impact/Execute", "cooldown_sec": 15, "base_multiplier": 2.3, "element": "Dark", "grants_proc": "runic_charge", "desc": "Menciptakan pusaran gravitasi arcane yang meluluhlantakkan target." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "int_t5_p", "stat_req": 130, "name": "Omniscient Runesmith", "substat_link": "int_trigger_mastery", "effect": { "elemental_dmg_pct": 14, "trigger_power_pct": 15 } },
+          "utility_choices": [
+            { "id": "int_t5_u1", "stat_req": 140, "name": "Sixfold Cataclysm", "branch": "Offense", "substat_link": "int_weakness_exploit", "mod_effect": { "auto_match_weakness": true, "skill_dmg_pct": 25 } },
+            { "id": "int_t5_u2", "stat_req": 140, "name": "Sanctuary Matrix", "branch": "Defense", "substat_link": "int_elemental_barrier", "mod_effect": { "dmg_reduction_pct": 12, "heal_on_cast_pct": 6 } },
+            { "id": "int_t5_u3", "stat_req": 140, "name": "Infinite Macro Loop", "branch": "Tactical", "substat_link": "int_macro_capacity", "mod_effect": { "cooldown_reduction_sec": 2.5, "trigger_power_pct": 18 } }
+          ],
+          "active_skill": { "id": "int_t5_a", "stat_req": 150, "name": "Grand Runic Supernova", "role": "Apex Capstone", "cooldown_sec": 21, "base_multiplier": 3.1, "element": "Adaptive", "consumes_proc": "runic_charge", "proc_multiplier_bonus": 0.8, "desc": "Jurus pamungkas INT: ledakan 6 elemen yang otomatis membidik kelemahan (weak) musuh." }
+        }
+      ]
+    },
+    "WIS": {
+      "discipline_name": "Seeker Inquisitor",
+      "theme": "Critical Strikes, Weakness Detection, Counter-Attacks & Tactical Foresight",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "wis_t1_p", "stat_req": 10, "name": "Eagle Eye", "substat_link": "wis_crit_chance", "effect": { "crit_chance_pct": 4, "crit_dmg_pct": 10 } },
+          "utility_choices": [
+            { "id": "wis_t1_u1", "stat_req": 20, "name": "Vital Puncturing", "branch": "Offense", "substat_link": "wis_crit_severity", "mod_effect": { "crit_dmg_pct": 20, "skill_dmg_pct": 8 } },
+            { "id": "wis_t1_u2", "stat_req": 20, "name": "Sixth Sense", "branch": "Defense", "substat_link": "wis_foresight", "mod_effect": { "dodge_pct": 6, "dmg_reduction_pct": 5 } },
+            { "id": "wis_t1_u3", "stat_req": 20, "name": "Hunter's Harvest", "branch": "Tactical", "substat_link": "wis_rare_drop", "mod_effect": { "rare_drop_pct": 15, "accuracy_pct": 8 } }
+          ],
+          "active_skill": { "id": "wis_t1_a", "stat_req": 30, "name": "Tracker's Mark", "role": "Builder", "cooldown_sec": 5, "base_multiplier": 1.3, "element": "Neutral", "grants_proc": "prey_marked", "desc": "Menandai titik vital mangsa, meningkatkan peluang kritikal serangan berikutnya." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "wis_t2_p", "stat_req": 40, "name": "Combat Intuition", "substat_link": "wis_enemy_sense", "effect": { "accuracy_pct": 8, "crit_chance_pct": 4 } },
+          "utility_choices": [
+            { "id": "wis_t2_u1", "stat_req": 50, "name": "Merciless Spearhead", "branch": "Offense", "substat_link": "wis_crit_severity", "mod_effect": { "crit_chance_pct": 6, "skill_dmg_pct": 12 } },
+            { "id": "wis_t2_u2", "stat_req": 50, "name": "Counter Stance", "branch": "Defense", "substat_link": "wis_counter_window", "mod_effect": { "parry_pct": 6, "heal_on_cast_pct": 4 } },
+            { "id": "wis_t2_u3", "stat_req": 50, "name": "Measured Breathing", "branch": "Tactical", "substat_link": "wis_tactical_rhythm", "mod_effect": { "cooldown_reduction_sec": 1.5, "stamina_refund": 8 } }
+          ],
+          "active_skill": { "id": "wis_t2_a", "stat_req": 60, "name": "Foresight Parry", "role": "Defensive/Interrupt", "cooldown_sec": 11, "base_multiplier": 1.25, "element": "Light", "self_buff": { "dodge_pct": 10, "crit_chance_pct": 8, "duration_sec": 4 }, "desc": "Membaca gerakan lawan untuk menghindar sekaligus membuka serangan balik kritis." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "wis_t3_p", "stat_req": 70, "name": "Anatomy Mastery", "substat_link": "wis_crit_severity", "effect": { "crit_dmg_pct": 18, "dmg_pct": 6 } },
+          "utility_choices": [
+            { "id": "wis_t3_u1", "stat_req": 80, "name": "Predator's Verdict", "branch": "Offense", "substat_link": "wis_enemy_sense", "mod_effect": { "proc_bonus_dmg_pct": 25, "crit_dmg_pct": 15 } },
+            { "id": "wis_t3_u2", "stat_req": 80, "name": "Serene Focus", "branch": "Defense", "substat_link": "wis_foresight", "mod_effect": { "dmg_reduction_pct": 8, "dodge_pct": 5 } },
+            { "id": "wis_t3_u3", "stat_req": 80, "name": "Appraiser's Eye", "branch": "Tactical", "substat_link": "wis_material_purity", "mod_effect": { "armor_pen_pct": 12, "rare_drop_pct": 10 } }
+          ],
+          "active_skill": { "id": "wis_t3_a", "stat_req": 90, "name": "Heartpiercer Thrust", "role": "Core Combo", "cooldown_sec": 8, "base_multiplier": 1.8, "element": "Neutral", "consumes_proc": "prey_marked", "proc_multiplier_bonus": 0.5, "desc": "Tusukan presisi tinggi yang menghujam tanda Prey Marked untuk damage kritikal besar." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "wis_t4_p", "stat_req": 100, "name": "Unerring Sight", "substat_link": "wis_counter_window", "effect": { "crit_chance_pct": 6, "crit_dmg_pct": 20 } },
+          "utility_choices": [
+            { "id": "wis_t4_u1", "stat_req": 110, "name": "Sundering Insight", "branch": "Offense", "substat_link": "wis_crit_severity", "mod_effect": { "skill_dmg_pct": 18, "crit_dmg_pct": 20 } },
+            { "id": "wis_t4_u2", "stat_req": 110, "name": "Preemptive Ward", "branch": "Defense", "substat_link": "wis_foresight", "mod_effect": { "dmg_reduction_pct": 10, "heal_on_cast_pct": 5 } },
+            { "id": "wis_t4_u3", "stat_req": 110, "name": "Trophy Hunter Instinct", "branch": "Tactical", "substat_link": "wis_trophy_curation", "mod_effect": { "skill_dmg_pct": 14, "trigger_power_pct": 14 } }
+          ],
+          "active_skill": { "id": "wis_t4_a", "stat_req": 120, "name": "Skyfall Javelin", "role": "High-Impact/Execute", "cooldown_sec": 15, "base_multiplier": 2.25, "element": "Light", "grants_proc": "prey_marked", "desc": "Hujaman tombak cahaya dari titik buta yang tak dapat dihindari lawan." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "wis_t5_p", "stat_req": 130, "name": "Oracle of Battle", "substat_link": "wis_crit_chance", "effect": { "crit_chance_pct": 6, "crit_dmg_pct": 25, "dmg_pct": 8 } },
+          "utility_choices": [
+            { "id": "wis_t5_u1", "stat_req": 140, "name": "Inevitable Doom", "branch": "Offense", "substat_link": "wis_crit_severity", "mod_effect": { "skill_dmg_pct": 24, "crit_chance_pct": 8 } },
+            { "id": "wis_t5_u2", "stat_req": 140, "name": "Transcendent Calm", "branch": "Defense", "substat_link": "wis_tactical_rhythm", "mod_effect": { "dmg_reduction_pct": 12, "cooldown_reduction_sec": 2 } },
+            { "id": "wis_t5_u3", "stat_req": 140, "name": "Grand Curator's Judgment", "branch": "Tactical", "substat_link": "wis_market_appraisal", "mod_effect": { "skill_dmg_pct": 18, "armor_pen_pct": 15 } }
+          ],
+          "active_skill": { "id": "wis_t5_a", "stat_req": 150, "name": "Judgment of the All-Seeing", "role": "Apex Capstone", "cooldown_sec": 21, "base_multiplier": 2.95, "element": "Light", "consumes_proc": "prey_marked", "proc_multiplier_bonus": 0.8, "desc": "Jurus pamungkas WIS: eksekusi titik lemah mutlak dengan pengali kritikal puncak." }
+        }
+      ]
+    },
+    "CHA": {
+      "discipline_name": "Sovereign Marshal",
+      "theme": "Enemy Debuffs (Dread/Morale Break), Companion Rally & Conscience Alignment",
+      "tiers": [
+        {
+          "tier": 1,
+          "core_passive": { "id": "cha_t1_p", "stat_req": 10, "name": "Commanding Voice", "substat_link": "cha_intimidate", "effect": { "enemy_dmg_debuff_pct": 4, "dmg_pct": 5 } },
+          "utility_choices": [
+            { "id": "cha_t1_u1", "stat_req": 20, "name": "Scathing Mockery", "branch": "Offense", "substat_link": "cha_break_morale", "mod_effect": { "armor_pen_pct": 10, "skill_dmg_pct": 9 } },
+            { "id": "cha_t1_u2", "stat_req": 20, "name": "Dread Presence", "branch": "Defense", "substat_link": "cha_intimidate", "mod_effect": { "dmg_reduction_pct": 7, "enemy_acc_debuff_pct": 5 } },
+            { "id": "cha_t1_u3", "stat_req": 20, "name": "Mentor's Call", "branch": "Tactical", "substat_link": "cha_apprentice_lead", "mod_effect": { "ally_dmg_pct": 12, "cooldown_reduction_sec": 1 } }
+          ],
+          "active_skill": { "id": "cha_t1_a", "stat_req": 30, "name": "Noble Challenge", "role": "Builder", "cooldown_sec": 5, "base_multiplier": 1.3, "element": "Neutral", "grants_proc": "shaken_morale", "desc": "Tantangan berwibawa yang mengguncang mental lawan (Shaken Morale)." }
+        },
+        {
+          "tier": 2,
+          "core_passive": { "id": "cha_t2_p", "stat_req": 40, "name": "Banner of the Guild", "substat_link": "cha_rally_ally", "effect": { "dmg_pct": 7, "dmg_reduction_pct": 4 } },
+          "utility_choices": [
+            { "id": "cha_t2_u1", "stat_req": 50, "name": "Conscience Blade", "branch": "Offense", "substat_link": "cha_conscience_align", "mod_effect": { "skill_dmg_pct": 15, "element_override": "Light" } },
+            { "id": "cha_t2_u2", "stat_req": 50, "name": "Protective Decree", "branch": "Defense", "substat_link": "cha_protective_command", "mod_effect": { "dmg_reduction_pct": 9, "heal_on_cast_pct": 4 } },
+            { "id": "cha_t2_u3", "stat_req": 50, "name": "Merchant's Leverage", "branch": "Tactical", "substat_link": "cha_trade_bargaining", "mod_effect": { "trigger_power_pct": 15, "stamina_refund": 8 } }
+          ],
+          "active_skill": { "id": "cha_t2_a", "stat_req": 60, "name": "Sovereign Aegis", "role": "Defensive/Interrupt", "cooldown_sec": 11, "base_multiplier": 1.2, "element": "Light", "self_buff": { "dmg_reduction_pct": 16, "dmg_pct": 10, "duration_sec": 5 }, "desc": "Mengobarkan semangat tempur yang meredam luka sekaligus menaikkan daya serang." }
+        },
+        {
+          "tier": 3,
+          "core_passive": { "id": "cha_t3_p", "stat_req": 70, "name": "Shattered Resolve", "substat_link": "cha_break_morale", "effect": { "armor_pen_pct": 10, "dmg_pct": 7 } },
+          "utility_choices": [
+            { "id": "cha_t3_u1", "stat_req": 80, "name": "Ruthless Coup", "branch": "Offense", "substat_link": "cha_break_morale", "mod_effect": { "proc_bonus_dmg_pct": 25, "skill_dmg_pct": 10 } },
+            { "id": "cha_t3_u2", "stat_req": 80, "name": "Unwavering Loyalty", "branch": "Defense", "substat_link": "cha_protective_command", "mod_effect": { "dmg_reduction_pct": 9, "heal_on_cast_pct": 5 } },
+            { "id": "cha_t3_u3", "stat_req": 80, "name": "Diplomatic Immunity", "branch": "Tactical", "substat_link": "cha_faction_diplomacy", "mod_effect": { "cooldown_reduction_sec": 1.5, "dodge_pct": 6 } }
+          ],
+          "active_skill": { "id": "cha_t3_a", "stat_req": 90, "name": "Rallying Strike", "role": "Core Combo", "cooldown_sec": 8, "base_multiplier": 1.75, "element": "Neutral", "consumes_proc": "shaken_morale", "proc_multiplier_bonus": 0.5, "desc": "Menghukum musuh yang terkena Shaken Morale dan memulihkan ritme tempur." }
+        },
+        {
+          "tier": 4,
+          "core_passive": { "id": "cha_t4_p", "stat_req": 100, "name": "Dominion Aura", "substat_link": "cha_battlefield_presence", "effect": { "dmg_pct": 10, "enemy_dmg_debuff_pct": 6 } },
+          "utility_choices": [
+            { "id": "cha_t4_u1", "stat_req": 110, "name": "Inquisitor's Brand", "branch": "Offense", "substat_link": "cha_conscience_align", "mod_effect": { "skill_dmg_pct": 20, "element_override": "Dark" } },
+            { "id": "cha_t4_u2", "stat_req": 110, "name": "Imperial Guard", "branch": "Defense", "substat_link": "cha_protective_command", "mod_effect": { "dmg_reduction_pct": 11, "parry_pct": 6 } },
+            { "id": "cha_t4_u3", "stat_req": 110, "name": "Renowned Masterwork", "branch": "Tactical", "substat_link": "cha_shop_reputation", "mod_effect": { "trigger_power_pct": 18, "skill_dmg_pct": 10 } }
+          ],
+          "active_skill": { "id": "cha_t4_a", "stat_req": 120, "name": "Dread Edict", "role": "High-Impact/Execute", "cooldown_sec": 15, "base_multiplier": 2.2, "element": "Dark", "grants_proc": "shaken_morale", "desc": "Titah penghakiman yang meruntuhkan nyali dan pertahanan lawan." }
+        },
+        {
+          "tier": 5,
+          "core_passive": { "id": "cha_t5_p", "stat_req": 130, "name": "Supreme Conscience", "substat_link": "cha_conscience_align", "effect": { "dmg_pct": 12, "dmg_reduction_pct": 8 } },
+          "utility_choices": [
+            { "id": "cha_t5_u1", "stat_req": 140, "name": "Vanguard of Legend", "branch": "Offense", "substat_link": "cha_rally_ally", "mod_effect": { "skill_dmg_pct": 25, "crit_chance_pct": 6 } },
+            { "id": "cha_t5_u2", "stat_req": 140, "name": "Sanctified Authority", "branch": "Defense", "substat_link": "cha_intimidate", "mod_effect": { "dmg_reduction_pct": 14, "heal_on_cast_pct": 6 } },
+            { "id": "cha_t5_u3", "stat_req": 140, "name": "Grandmaster Dynasty", "branch": "Tactical", "substat_link": "cha_apprentice_lead", "mod_effect": { "cooldown_reduction_sec": 2, "skill_dmg_pct": 16 } }
+          ],
+          "active_skill": { "id": "cha_t5_a", "stat_req": 150, "name": "Grand Ovation of the Forge-King", "role": "Apex Capstone", "cooldown_sec": 21, "base_multiplier": 2.9, "element": "Light", "consumes_proc": "shaken_morale", "proc_multiplier_bonus": 0.8, "self_buff": { "dmg_pct": 15, "dmg_reduction_pct": 15, "duration_sec": 6 }, "desc": "Jurus pamungkas CHA: puncak wibawa pandai besi yang melumpuhkan musuh dan memperkuat diri." }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battle-Smith RPG — Unified Beta Core Loop & Save-State Dashboard (Opsi A)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-4 m-0 text-xs">
+  <div class="max-w-7xl mx-auto space-y-4">
+    <!-- Top Header -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">TAHAP BETA v1.0 (OPSI A LOCKED)</span>
+          <h1 class="text-base font-bold">Battle-Smith RPG — Unified Core Game Loop & Idle Save-State Dashboard</h1>
+        </div>
+        <p class="text-[var(--muted-foreground)] mt-1">
+          Menyatukan 4 Engine Backend (`skill_engine` • `forge_engine` • `snd_engine` • `issue_engine`) • Offline Cap 8 Jam (`CD-7.01`) • 5 Murid Seed AI & Cabang Toko (`CD-6.02`) • Enhance `+N` Tanpa Batas (`CD-4.02`) • Sparse Save JSON (`< 15 KB`)
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="runIdleTick(4, 'Battle')" class="px-3 py-1.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold hover:opacity-90">+4 Jam Idle Battle</button>
+        <button onclick="runIdleTick(4, 'Smith')" class="px-3 py-1.5 rounded border border-[var(--primary)] text-[var(--primary)] font-bold hover:opacity-80">+4 Jam Idle Smith</button>
+        <button onclick="runIdleTick(8, 'Alternate')" class="px-3 py-1.5 rounded bg-[var(--secondary)] text-[var(--secondary-foreground)] font-bold hover:opacity-90">+8 Jam Offline Seimbang</button>
+        <button onclick="doLongRest(true)" class="px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--content)] font-medium hover:opacity-80">Long Rest (Bengkel)</button>
+        <button onclick="fastForwardNextTier()" class="px-3 py-1.5 rounded bg-amber-600 text-white font-bold hover:opacity-90">Simulasi Naik Tier -> Gate Boss</button>
+      </div>
+    </div>
+
+    <!-- Top Metrics Bar -->
+    <div id="topMetricsGrid" class="grid grid-cols-2 md:grid-cols-6 gap-2.5"></div>
+
+    <!-- Main 12-Col Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- LEFT 7 COLS: CHARACTER, DUAL XP BARS, GATE BOSS, & FORGE +N -->
+      <div class="lg:col-span-7 space-y-4">
+        <!-- 1. Dual XP Bars, Cross-Buff, & Gate Boss Progression -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">1. Dual XP Bar (`Battle` & `Smith`), Muatan Buff Silang (`CD-1.05`), & Arena Gate (`CD-1.07`)</span>
+            <span id="gateStatusBadge" class="font-mono px-2 py-0.5 rounded bg-[var(--secondary)] text-[var(--primary)] font-bold">Tier 1 (Cap Stat 30)</span>
+          </div>
+          <div id="xpBarsBox" class="space-y-2.5"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--card-border)]">
+            <div id="gateBossReadout" class="text-[var(--muted-foreground)]"></div>
+            <div class="flex items-center gap-2">
+              <select id="gateSmithPointSel" class="p-1.5 rounded bg-[var(--content)] border border-[var(--border)] font-medium">
+                <option value="Weaponsmith">+1 Poin Gate ke: Weaponsmith</option>
+                <option value="Armorer">+1 Poin Gate ke: Armorer</option>
+                <option value="Rangesmith">+1 Poin Gate ke: Rangesmith</option>
+                <option value="Runesmith">+1 Poin Gate ke: Runesmith</option>
+                <option value="Reforger">+1 Poin Gate ke: Reforger</option>
+              </select>
+              <button onclick="challengeGate(false)" class="px-3 py-1.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">Tantang Gate Boss</button>
+              <button onclick="simulateGateCurse()" class="px-2.5 py-1.5 rounded border border-[var(--error)] text-[var(--error)] font-medium">Uji Kalah Gate (Kutukan)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 6 Primary Stats, Smith Class 1-Kata, & Equipped Weapon (+N Tanpa Batas Seimbang) -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">2. Stat Karakter (`CD-1.01`), Smith Class 1-Kata (`CD-3.02b`), & Senjata `+N` Tanpa Batas (`CD-4.02`)</span>
+            <button onclick="autoSpendStats()" class="px-2.5 py-1 rounded bg-[var(--secondary)] text-[var(--primary)] font-bold">Auto-Alokasi Poin Stat</button>
+          </div>
+          <div id="statsAndWeaponBox" class="space-y-3"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--card-border)]">
+            <div class="flex items-center gap-2">
+              <span>Target Enhance `+N` (Tanpa Batas):</span>
+              <input id="plusNInput" type="number" min="0" max="999" value="15" class="w-16 p-1 rounded bg-[var(--content)] border border-[var(--border)] font-mono font-bold text-center" />
+              <select id="rarityInput" class="p-1 rounded bg-[var(--content)] border border-[var(--border)] font-medium">
+                <option value="Common">Common (+0 Budget)</option>
+                <option value="Uncommon">Uncommon (+10 Budget)</option>
+                <option value="Rare">Rare (+22 Budget)</option>
+                <option value="Epic" selected>Epic (+36 Budget)</option>
+                <option value="Legendary">Legendary (+52 Budget)</option>
+                <option value="Unique">Unique (+75 Budget • Resonance)</option>
+              </select>
+            </div>
+            <button onclick="forgeAndUpgradeWeapon()" class="px-3 py-1.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">Tempa & Enhance Senjata `+N`</button>
+          </div>
+        </div>
+
+        <!-- 3. Issue Moral Aktif (issue_engine.js) & Pasar Regional (snd_engine.js) -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">3. Isu Moral Naratif (`WD-4.12`) & Pasar Regional S&D (`WD-5.06`)</span>
+            <span id="conscienceBadge" class="font-mono px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)]">Conscience: 0 (Netral)</span>
+          </div>
+          <div id="moralIssueBox" class="p-3 rounded bg-[var(--content)] border border-[var(--card-border)]"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT 5 COLS: 5 APPRENTICES (SEED AI), BRANCH SHOPS, & SPARSE SAVE-STATE (<15 KB) -->
+      <div class="lg:col-span-5 space-y-4">
+        <!-- 4. Asrama 5 Murid Seed Prosedural AI & Cabang Toko -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">4. Asrama 5 Murid Seed AI & Cabang Toko (`CD-6.02` & `WD-3.10`)</span>
+            <span id="branchCountBadge" class="font-mono px-2 py-0.5 rounded bg-[var(--secondary)] text-[var(--primary)] font-bold">0 Cabang Aktif</span>
+          </div>
+          <div id="apprenticesListBox" class="space-y-2"></div>
+        </div>
+
+        <!-- 5. Sparse Save-State JSON Inspector (< 15 KB) & Log Peristiwa -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[var(--card-border)] pb-2">
+            <span class="font-bold text-sm">5. Sparse Save-State JSON (`< 15 KB`) & Log Dunia</span>
+            <span id="saveSizeBadge" class="font-mono px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">0.00 KB</span>
+          </div>
+          <div id="eventLogBox" class="p-2.5 rounded bg-[var(--content)] border border-[var(--card-border)] font-mono text-[11px] space-y-1 max-h-44 overflow-y-auto"></div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[var(--muted-foreground)]">Payload Sparse Save JSON (Siap LocalStorage / IndexedDB HP):</span>
+              <button onclick="resetBetaState()" class="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--content)] hover:opacity-80">Reset Lv1</button>
+            </div>
+            <textarea id="saveStateTextarea" readonly class="w-full h-36 p-2 rounded bg-[var(--content)] border border-[var(--card-border)] font-mono text-[10px]"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SEASONS = ["Spring", "Summer", "Autumn", "Winter"];
+    const SINGLE_CLASS_NAMES = {
+      Weaponsmith: ["Bladesmith", "Edgewright", "Warmonger", "Vanquisher", "Archblade"],
+      Armorer:     ["Platesmith", "Shieldwright", "Bulwark", "Juggernaut", "Aegisborn"],
+      Rangesmith:  ["Bowyer", "Fletcher", "Deadeye", "Ballistary", "Horizoner"],
+      Runesmith:   ["Runescribe", "Glyphwright", "Spellforger", "Arcanist", "Runelord"],
+      Reforger:    ["Tinkerer", "Temperer", "Transmuter", "Alchemizer", "Sovereign"]
+    };
+    const DUAL_CLASS_NAMES = {
+      "Weaponsmith+Armorer": "Vanguard", "Weaponsmith+Rangesmith": "Skirmisher", "Weaponsmith+Runesmith": "Spellblade", "Weaponsmith+Reforger": "Hellforger",
+      "Armorer+Weaponsmith": "Wardensmith", "Armorer+Rangesmith": "Sentinel", "Armorer+Runesmith": "Runeguard", "Armorer+Reforger": "Ironclad",
+      "Rangesmith+Weaponsmith": "Outrider", "Rangesmith+Armorer": "Bastionbow", "Rangesmith+Runesmith": "Arcarcher", "Rangesmith+Reforger": "Artificer",
+      "Runesmith+Weaponsmith": "Hexblade", "Runesmith+Armorer": "Aegisrune", "Runesmith+Rangesmith": "Starfletcher", "Runesmith+Reforger": "Thaumaturge",
+      "Reforger+Weaponsmith": "Reaver", "Reforger+Armorer": "Colossus", "Reforger+Rangesmith": "Machinist", "Reforger+Runesmith": "Chronosmith"
+    };
+    const RARITY_BUDGET = { Common: 0, Uncommon: 10, Rare: 22, Epic: 36, Legendary: 52, Unique: 75 };
+    const BRANCH_CITIES = ["Briarfall City", "Ashwind Steppe", "Hollowfrost Market", "Wyrmspine Forgecity", "Obsidian City"];
+
+    const ISSUE_POOL = [
+      { id: "ISS-01", theme: "Embargo Besi", text: "Utusan Briarfall meminta Anda menolak pesanan senjata klan Ashwind dengan imbalan subsidi bijih." },
+      { id: "ISS-02", theme: "Pengungsi Tambang", text: "Penambang Hollowfrost membawa kristal retak dan memohon harga tempa murah untuk mempertahankan desa." },
+      { id: "ISS-03", theme: "Pedang Terkutuk", text: "Seorang bangsawan menawarkan emas berlipat untuk menempa bilah dengan bahan terlarang Blackmere." },
+      { id: "ISS-04", theme: "Serikat Murid", text: "Para murid meminta waktu latihan mandiri menggunakan sisa baja berkualitas tinggi di bengkel." }
+    ];
+
+    let state = null;
+
+    function formatBr(br) {
+      let rem = Math.round(Math.abs(br));
+      const g = Math.floor(rem / 10000); rem %= 10000;
+      const s = Math.floor(rem / 100); const b = rem % 100;
+      const out = [];
+      if (g > 0) out.push(g + "g");
+      if (s > 0) out.push(s + "s");
+      if (b > 0 || !out.length) out.push(b + "br");
+      return (br < 0 ? "-" : "") + out.join(" ");
+    }
+
+    function getQuota(lv) { return Math.round(60 * Math.pow(lv, 1.1)); }
+    function getHourlyCap(lv) { return lv <= 10 ? 600 : lv <= 20 ? 900 : lv <= 30 ? 1200 : 1200 + 60 * (lv - 30); }
+
+    function generateApprenticeProfile(seed, currentSkill, trials) {
+      let h = 2166136261;
+      for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+      const rand = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; };
+      const bgs = ["Pandai Besi", "Pemburu", "Pedagang", "Prajurit", "Pelajar", "Pengembara"];
+      const classes = ["Weaponsmith", "Armorer", "Rangesmith", "Runesmith", "Reforger"];
+      const baseTalent = Math.floor(48 + rand() * 44);
+      const learnRate = Math.floor(50 + rand() * 45);
+      const baseLoyalty = Math.floor(58 + rand() * 32);
+      const bg = bgs[Math.floor(rand() * bgs.length)];
+      const pSmith = classes[Math.floor(rand() * classes.length)];
+      const rank = trials >= 2 ? 5 : trials === 1 ? 3 : 2;
+      const className = SINGLE_CLASS_NAMES[pSmith][rank - 1];
+      const talentCap = Math.min(100, baseTalent + trials * 15);
+      const effSkill = Math.min(talentCap, currentSkill);
+      const assistPct = +(15 + 0.35 * effSkill).toFixed(1);
+      const auras = {
+        Weaponsmith: "+10% Atk Speed & Acc",
+        Rangesmith: "+10% Atk Speed & Ranged Draw",
+        Armorer: "+12% Mitigate & Perisai Darurat",
+        Runesmith: "+15% Elemental & Trigger Dmg",
+        Reforger: "+15% Drop Bahan & Hemat Stamina"
+      };
+      return { seed, bg, pSmith, className, baseTalent, talentCap, learnRate, baseLoyalty, effSkill, assistPct, aura: auras[pSmith] };
+    }
+
+    function computeEnhancement(n, isUnique) {
+      const lv = Math.max(0, Math.floor(n || 0));
+      let pct = 0;
+      if (lv > 0) pct += Math.min(5, lv) * 4;
+      if (lv > 5) pct += Math.min(5, lv - 5) * 7;
+      if (lv > 10) pct += Math.min(5, lv - 10) * 12;
+      if (lv > 15) pct += 45 * Math.log(1 + (lv - 15) * 0.5);
+      const phase = isUnique
+        ? (lv > 15 ? `Transcendent Resonance (+${lv})` : `Resonance ${Math.min(5, Math.max(1, Math.ceil(lv / 3)))} (+${lv})`)
+        : (lv > 15 ? `Fase 4: Transcendent Infinite (+${lv})` : lv >= 11 ? `Fase 3: Overforge (+${lv})` : lv >= 6 ? `Fase 2: Tempa Panas (+${lv})` : `Fase 1: Stabil (+${lv})`);
+      return { plusLevel: lv, bonusPct: +pct.toFixed(1), mult: +(1 + pct / 100).toFixed(3), phase };
+    }
+
+    function resolvePlayerClassName(tiers) {
+      const entries = Object.entries(tiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      if (entries.length === 1) return SINGLE_CLASS_NAMES[entries[0][0]][Math.min(5, entries[0][1]) - 1];
+      if (entries.length === 2) return DUAL_CLASS_NAMES[`${entries[0][0]}+${entries[1][0]}`] || "Hybrid";
+      if (entries.length === 3) return "Polymath";
+      if (entries.length === 4) return "Synthesist";
+      if (entries.length >= 5) return "Omnismith";
+      return "Apprentice";
+    }
+
+    function resetBetaState() {
+      const seeds = ["APR-7F3A-Kael", "APR-99B1-Lyra", "APR-44C8-Garrick", "APR-12D9-Vesper", "APR-88E2-Thorne"];
+      state = {
+        version: "BETA-1.0-CDv3.2-WDv1.9",
+        saveSeed: "BETA-SAVE-2026",
+        calendar: { totalIdleHours: 0, day: 1, year: 1, season: "Spring" },
+        player: {
+          name: "Alden the Battle-Smith",
+          level: 1,
+          unlockedGateTier: 1,
+          stats: { STR: 4, DEX: 2, CON: 3, INT: 2, WIS: 1, CHA: 1 },
+          unspentStatPoints: 0,
+          smithTiers: { Weaponsmith: 1, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 },
+          xp: { battle: 0, smith: 0, crossBuffBattleToSmithPct: 0, crossBuffSmithToBattlePct: 0 },
+          stamina: { current: 115, max: 115 },
+          curses: { activeStacks: 0, highestGateTierCursed: 1 },
+          conscienceScore: 0,
+          bronze: 5000
+        },
+        equipment: {
+          weapon: { name: "Kapak Perang Permulaan +0", stat: "STR", tier: 1, rarity: "Common", enhancePlus: 0, trigger: "Twister", element: "Fire", hybridFusion: null }
+        },
+        apprentices: seeds.map((s, i) => {
+          const prof = generateApprenticeProfile(s, 30 + i * 5, 0);
+          return { seed: s, skill: prof.effSkill, loyalty: prof.baseLoyalty, passedTrials: 0, isCompanion: i === 0, branchCity: null };
+        }),
+        branches: [],
+        narrative: {
+          activeIssue: ISSUE_POOL[0],
+          resolvedCount: 0,
+          eventLogs: ["[Thn 1 Hari 1 • Lv1] Memulai Tahap Beta Unified Core Game Loop (CD v3.2 + WD v1.9)."]
+        },
+        sndMarketSparseDeltas: { "LOC-01::mat_iron_ore": { s: 0.92, d: 1.08 } }
+      };
+      renderDashboard();
+    }
+
+    function addLog(msg) {
+      state.narrative.eventLogs.unshift(`[Thn ${state.calendar.year} Hari ${state.calendar.day} • Lv${state.player.level}] ${msg}`);
+      if (state.narrative.eventLogs.length > 25) state.narrative.eventLogs.pop();
+    }
+
+    function autoSpendStats() {
+      const p = state.player;
+      const cap = p.unlockedGateTier * 30;
+      const totalAllowed = 13 + 2 * (p.level - 1);
+      const order = ["STR", "CON", "INT", "DEX", "WIS", "CHA"];
+      let curSum = Object.values(p.stats).reduce((a, b) => a + b, 0);
+      let rem = Math.max(0, totalAllowed - curSum);
+      while (rem > 0) {
+        let moved = false;
+        for (const s of order) {
+          if (rem <= 0) break;
+          if (p.stats[s] < cap) { p.stats[s]++; rem--; moved = true; }
+        }
+        if (!moved) break;
+      }
+      p.unspentStatPoints = rem;
+      p.stamina.max = 100 + 5 * p.stats.CON;
+      p.stamina.current = p.stamina.max;
+      renderDashboard();
+    }
+
+    function calcPlayerDps() {
+      const p = state.player;
+      const w = state.equipment.weapon;
+      const enh = computeEnhancement(w.enhancePlus, w.rarity === "Unique");
+      const totalBudget = 100 + 20 * (w.tier - 1) + (RARITY_BUDGET[w.rarity] || 0);
+      const baseWeaponDmg = ((totalBudget * 0.35) / 4) * enh.mult;
+      const trigDmg = ((totalBudget * 0.30) * 0.8 * (1 + 0.015 * p.stats.STR) * enh.mult) / 4;
+      const masteryPts = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
+      const comp = state.apprentices.find(a => a.isCompanion);
+      const compProf = comp ? generateApprenticeProfile(comp.seed, comp.skill, comp.passedTrials) : null;
+      const compMult = compProf ? 1 + (compProf.assistPct / 300) : 1.0;
+      return +((baseWeaponDmg + p.stats.STR * 0.625 + trigDmg) * (1 + masteryPts * 0.06) * compMult * 1.45).toFixed(1);
+    }
+
+    function runIdleTick(hours, mode) {
+      const p = state.player;
+      const effH = Math.min(8, hours);
+      const maxCurse = 13 * p.curses.highestGateTierCursed;
+      const curCurse = p.curses.activeStacks * 4 * p.curses.highestGateTierCursed;
+      if (mode !== "Smith" && curCurse >= maxCurse) {
+        addLog("PERINGATAN: Karakter lumpuh karena Kutukan Gate! Lakukan Long Rest terlebih dahulu.");
+        renderDashboard();
+        return;
+      }
+
+      const cap = getHourlyCap(p.level);
+      let bGain = 0, sGain = 0;
+      if (mode === "Alternate") {
+        bGain = Math.round(effH * 0.5 * cap * 1.22);
+        sGain = Math.round(effH * 0.5 * cap * 1.22);
+      } else if (mode === "Battle") {
+        bGain = Math.round(effH * cap * (1 + p.xp.crossBuffSmithToBattlePct / 100));
+        p.xp.crossBuffSmithToBattlePct = 0;
+      } else {
+        sGain = Math.round(effH * cap * (1 + p.xp.crossBuffBattleToSmithPct / 100));
+        p.xp.crossBuffBattleToSmithPct = 0;
+      }
+
+      p.xp.battle += bGain;
+      p.xp.smith += sGain;
+      p.stamina.current = Math.max(0, p.stamina.current - effH * 14);
+
+      const maxLv = p.unlockedGateTier * 30;
+      let lvUp = 0;
+      while (p.level < maxLv) {
+        const q = getQuota(p.level);
+        if (p.xp.battle >= q && p.xp.smith >= q) {
+          const nextCarry = Math.round(getQuota(p.level + 1) * 0.5);
+          p.xp.battle = Math.min(nextCarry, p.xp.battle - q);
+          p.xp.smith = Math.min(nextCarry, p.xp.smith - q);
+          p.level++;
+          lvUp++;
+        } else {
+          if (p.xp.battle > q) { p.xp.battle = q; p.xp.crossBuffBattleToSmithPct = Math.min(25, p.xp.crossBuffBattleToSmithPct + 8); }
+          if (p.xp.smith > q) { p.xp.smith = q; p.xp.crossBuffSmithToBattlePct = Math.min(25, p.xp.crossBuffSmithToBattlePct + 8); }
+          break;
+        }
+      }
+
+      // Latih murid
+      for (const a of state.apprentices) {
+        const prof = generateApprenticeProfile(a.seed, a.skill, a.passedTrials);
+        a.skill = Math.min(prof.talentCap, +(a.skill + effH * (prof.learnRate / 160)).toFixed(1));
+      }
+
+      // Kalender & Cabang
+      state.calendar.totalIdleHours += effH;
+      const days = Math.round(effH * 6);
+      state.calendar.day += days;
+      state.calendar.year = 1 + Math.floor((state.calendar.day - 1) / 360);
+      state.calendar.season = SEASONS[Math.floor(((state.calendar.day - 1) % 360) / 90)];
+
+      let brInc = Math.round(effH * 150 * p.unlockedGateTier);
+      for (const b of state.branches) brInc += days * b.dailyIncomeBr;
+      p.bronze += brInc;
+
+      if (!state.narrative.activeIssue) {
+        state.narrative.activeIssue = ISSUE_POOL[(state.narrative.resolvedCount) % ISSUE_POOL.length];
+      }
+
+      autoSpendStats();
+      addLog(`Idle +${effH}j (${mode}): +${bGain} Battle XP, +${sGain} Smith XP${lvUp > 0 ? `, Naik +${lvUp} Level -> Lv${p.level}` : ""}, +${formatBr(brInc)}.`);
+      renderDashboard();
+    }
+
+    function doLongRest(atOwn) {
+      const p = state.player;
+      const gTier = p.curses.highestGateTierCursed;
+      const baseCost = atOwn ? 0 : 20 * p.level * p.unlockedGateTier;
+      const curseCost = p.curses.activeStacks * (30 * p.level * gTier);
+      const total = baseCost + curseCost;
+      p.bronze = Math.max(0, p.bronze - total);
+      p.stamina.current = p.stamina.max;
+      p.curses.activeStacks = 0;
+      addLog(`Long Rest di Bengkel Sendiri (Biaya pembersihan kutukan: ${formatBr(total)}). Stamina pulih 100% & Kutukan Gate bersih.`);
+      renderDashboard();
+    }
+
+    function simulateGateCurse() {
+      const p = state.player;
+      p.curses.activeStacks++;
+      p.curses.highestGateTierCursed = p.unlockedGateTier;
+      addLog(`Kalah Gate Tier ${p.unlockedGateTier}! Terkena Kutukan Gate (-${4 * p.unlockedGateTier} stat/tumpukan, tumpukan aktif: ${p.curses.activeStacks}).`);
+      renderDashboard();
+    }
+
+    function challengeGate(forceWin) {
+      const p = state.player;
+      const dps = calcPlayerDps();
+      const reqDps = p.unlockedGateTier * 18;
+      if (!forceWin && dps < reqDps) {
+        simulateGateCurse();
+        return;
+      }
+      const targetClass = document.getElementById("gateSmithPointSel").value;
+      const prevTier = p.unlockedGateTier;
+      if (p.unlockedGateTier < 5) {
+        p.unlockedGateTier++;
+        const used = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
+        if (used < 5) p.smithTiers[targetClass] = (p.smithTiers[targetClass] || 0) + 1;
+      }
+      const cName = resolvePlayerClassName(p.smithTiers);
+      addLog(`MENANG GATE TIER ${prevTier}! Terbuka Tier ${p.unlockedGateTier} (Cap Stat ${p.unlockedGateTier * 30}) • Gelar Smith Class: ${cName}.`);
+      autoSpendStats();
+      renderDashboard();
+    }
+
+    function forgeAndUpgradeWeapon() {
+      const p = state.player;
+      const plusN = +(document.getElementById("plusNInput").value || 0);
+      const rarity = document.getElementById("rarityInput").value;
+      const enh = computeEnhancement(plusN, rarity === "Unique");
+      const names = ["Kapak Perang", "Kapak Besar", "Palu Perang", "Pedang Besar", "Maul Worldbreaker"];
+      const baseName = names[Math.min(4, p.unlockedGateTier - 1)];
+      const hasRunesmith = (p.smithTiers.Runesmith || 0) >= 1;
+      state.equipment.weapon = {
+        name: `${baseName} “Bisikan Leluhur” +${plusN}`,
+        stat: "STR",
+        tier: p.unlockedGateTier,
+        rarity,
+        enhancePlus: plusN,
+        trigger: "Earthbreaker",
+        element: "Fire",
+        hybridFusion: hasRunesmith ? "Plasma (Fire+Lightning)" : null
+      };
+      addLog(`Menempa & memasang ${state.equipment.weapon.name} [${rarity}] (${enh.phase}: +${enh.bonusPct}% Daya).`);
+      renderDashboard();
+    }
+
+    function runTrial(idx) {
+      const a = state.apprentices[idx];
+      const req = a.passedTrials === 0 ? 50 : 80;
+      if (a.skill < req) return;
+      a.passedTrials++;
+      a.loyalty = Math.min(100, a.loyalty + 10);
+      const prof = generateApprenticeProfile(a.seed, a.skill, a.passedTrials);
+      addLog(`Murid ${a.seed} LULUS Ujian #${a.passedTrials} (Skill ${req})! Cap Bakat naik ke ${prof.talentCap}, Loyalitas ${a.loyalty}, Kelas: ${prof.className}.`);
+      renderDashboard();
+    }
+
+    function openBranch(idx) {
+      const a = state.apprentices[idx];
+      if (a.skill < 60 || a.loyalty < 70 || a.passedTrials < 1 || a.branchCity) return;
+      const city = BRANCH_CITIES[state.branches.length % BRANCH_CITIES.length];
+      a.branchCity = city;
+      a.isCompanion = false;
+      const prof = generateApprenticeProfile(a.seed, a.skill, a.passedTrials);
+      const inc = Math.round(a.skill * 3.5 * state.player.unlockedGateTier);
+      state.branches.push({ city, apprenticeSeed: a.seed, specialty: prof.className, dailyIncomeBr: inc });
+      addLog(`Cabang Bengkel baru dibuka di ${city} dijaga oleh ${a.seed} (${prof.className}, +${formatBr(inc)}/hari).`);
+      renderDashboard();
+    }
+
+    function resolveIssue(choice) {
+      const iss = state.narrative.activeIssue;
+      if (!iss) return;
+      const dLoy = choice === "Mulia" ? 1 : choice === "Kejam" ? -1 : 0;
+      const dCon = choice === "Mulia" ? 5 : choice === "Kejam" ? -5 : 0;
+      state.player.conscienceScore += dCon;
+      for (const a of state.apprentices) a.loyalty = Math.max(0, Math.min(100, a.loyalty + dLoy));
+      state.narrative.resolvedCount++;
+      state.narrative.activeIssue = null;
+      addLog(`Isu Moral [${iss.id}] diputuskan: ${choice} (Conscience ${state.player.conscienceScore}, Loyalitas Murid ${dLoy >= 0 ? "+" + dLoy : dLoy}).`);
+      renderDashboard();
+    }
+
+    function fastForwardNextTier() {
+      const p = state.player;
+      const targetLv = p.unlockedGateTier * 30;
+      while (p.level < targetLv) {
+        runIdleTick(8, "Alternate");
+        p.stamina.current = p.stamina.max;
+      }
+      for (let i = 0; i < state.apprentices.length; i++) {
+        const a = state.apprentices[i];
+        if (a.passedTrials === 0 && a.skill >= 50) runTrial(i);
+        if (a.passedTrials === 1 && a.skill >= 80) runTrial(i);
+      }
+      document.getElementById("plusNInput").value = p.unlockedGateTier * 6;
+      forgeAndUpgradeWeapon();
+      challengeGate(true);
+    }
+
+    function renderDashboard() {
+      const p = state.player;
+      const cal = state.calendar;
+      const w = state.equipment.weapon;
+      const enh = computeEnhancement(w.enhancePlus, w.rarity === "Unique");
+      const className = resolvePlayerClassName(p.smithTiers);
+      const dps = calcPlayerDps();
+
+      document.getElementById("topMetricsGrid").innerHTML = `
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Level & Tier Dunia</div>
+          <div class="text-sm font-bold font-mono">Lv${p.level} / 150 (Tier ${p.unlockedGateTier})</div>
+        </div>
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Kalender Idle (60j = 1 Thn)</div>
+          <div class="text-sm font-bold font-mono">${cal.totalIdleHours}j • Thn ${cal.year} (${cal.season})</div>
+        </div>
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Smith Class 1-Kata</div>
+          <div class="text-sm font-bold text-[var(--primary)]">${className}</div>
+        </div>
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Stamina & Kutukan Gate</div>
+          <div class="text-sm font-bold font-mono ${p.curses.activeStacks > 0 ? "text-[var(--error)]" : ""}">${Math.round(p.stamina.current)}/${p.stamina.max} • Kutukan: ${p.curses.activeStacks}</div>
+        </div>
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Combat DPS Aktif</div>
+          <div class="text-sm font-bold font-mono text-[var(--primary)]">${dps} DPS</div>
+        </div>
+        <div class="p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[var(--muted-foreground)]">Kas Bengkel & Cabang</div>
+          <div class="text-sm font-bold font-mono">${formatBr(p.bronze)}</div>
+        </div>
+      `;
+
+      const q = getQuota(p.level);
+      const bPct = Math.min(100, Math.round((p.xp.battle / q) * 100));
+      const sPct = Math.min(100, Math.round((p.xp.smith / q) * 100));
+      document.getElementById("gateStatusBadge").textContent = `Gate Tier ${p.unlockedGateTier} • Cap Stat ${p.unlockedGateTier * 30} • Cap XP ${getHourlyCap(p.level)}/jam`;
+      document.getElementById("xpBarsBox").innerHTML = `
+        <div>
+          <div class="flex justify-between mb-1">
+            <span><strong>Battle XP Bar</strong> (Muatan Buff ke Smith: +${p.xp.crossBuffBattleToSmithPct}%)</span>
+            <span class="font-mono">${p.xp.battle} / ${q} XP (${bPct}%)</span>
+          </div>
+          <div class="w-full h-2.5 rounded bg-[var(--content)] overflow-hidden"><div style="width:${bPct}%" class="h-full bg-[var(--primary)]"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between mb-1">
+            <span><strong>Smith XP Bar</strong> (Muatan Buff ke Battle: +${p.xp.crossBuffSmithToBattlePct}%)</span>
+            <span class="font-mono">${p.xp.smith} / ${q} XP (${sPct}%)</span>
+          </div>
+          <div class="w-full h-2.5 rounded bg-[var(--content)] overflow-hidden"><div style="width:${sPct}%" class="h-full bg-amber-500"></div></div>
+        </div>
+      `;
+      document.getElementById("gateBossReadout").innerHTML =
+        `Target Gate: <strong>Gate Guardian Tier ${p.unlockedGateTier} (Lv${p.unlockedGateTier * 30})</strong> • Kutukan bila kalah: <b>-${4 * p.unlockedGateTier} stat</b> (Lumpuh di <b>${13 * p.unlockedGateTier}</b>)`;
+
+      const statHtml = Object.entries(p.stats).map(([k, v]) =>
+        `<div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)] text-center"><div class="text-[var(--muted-foreground)]">${k}</div><div class="font-mono font-bold text-sm">${v}</div></div>`
+      ).join("");
+      const smithAllocHtml = Object.entries(p.smithTiers).map(([k, v]) => `${k}: <b>${v}</b>`).join(" · ");
+
+      document.getElementById("statsAndWeaponBox").innerHTML = `
+        <div class="grid grid-cols-6 gap-2">${statHtml}</div>
+        <div class="p-2.5 rounded bg-[var(--content)] border border-[var(--card-border)] flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div><strong>Senjata Terpasang:</strong> <span class="text-[var(--primary)] font-bold">${w.name}</span> [${w.rarity} • Tier ${w.tier}]</div>
+            <div class="text-[11px] text-[var(--muted-foreground)]">${enh.phase}: <b>+${enh.bonusPct}% Daya (×${enh.mult})</b> • Trigger: <b>${w.trigger}</b> ${w.hybridFusion ? `• Hibrida: <b>${w.hybridFusion}</b>` : ""}</div>
+          </div>
+          <div class="text-right text-[11px]">
+            <div>Distribusi 5 Tier Smith:</div>
+            <div>${smithAllocHtml}</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("conscienceBadge").textContent = `Conscience: ${p.conscienceScore} (${p.conscienceScore > 0 ? "Mulia" : p.conscienceScore < 0 ? "Kejam" : "Netral"})`;
+      const iss = state.narrative.activeIssue;
+      document.getElementById("moralIssueBox").innerHTML = iss ? `
+        <div class="font-bold mb-1">[${iss.id}] ${iss.theme}</div>
+        <p class="text-[var(--muted-foreground)] mb-2">${iss.text}</p>
+        <div class="flex gap-2">
+          <button onclick="resolveIssue('Mulia')" class="px-3 py-1 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">Pilih Mulia (+5 Conscience, +1 Loyalitas Murid)</button>
+          <button onclick="resolveIssue('Netral')" class="px-3 py-1 rounded border border-[var(--border)] bg-[var(--card)] font-medium">Pilih Netral</button>
+          <button onclick="resolveIssue('Kejam')" class="px-3 py-1 rounded bg-[var(--error)] text-white font-bold">Pilih Kejam (-5 Conscience, -1 Loyalitas Murid)</button>
+        </div>
+      ` : `<div class="text-[var(--muted-foreground)]">Tidak ada isu moral aktif saat ini. Jalankan sesi Idle untuk memajukan hari kalender.</div>`;
+
+      document.getElementById("branchCountBadge").textContent = `${state.branches.length} Cabang Aktif`;
+      document.getElementById("apprenticesListBox").innerHTML = state.apprentices.map((a, idx) => {
+        const prof = generateApprenticeProfile(a.seed, a.skill, a.passedTrials);
+        const canTrial = (a.passedTrials === 0 && a.skill >= 50) || (a.passedTrials === 1 && a.skill >= 80);
+        const canBranch = !a.branchCity && !a.isCompanion && a.skill >= 60 && a.loyalty >= 70 && a.passedTrials >= 1;
+        return `
+          <div class="p-2.5 rounded bg-[var(--content)] border border-[var(--card-border)] space-y-1">
+            <div class="flex items-center justify-between">
+              <div>
+                <strong>${a.seed}</strong>
+                <span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] ml-1 font-semibold text-[var(--primary)]">${prof.className}</span>
+                ${a.isCompanion ? `<span class="px-1.5 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] ml-1 font-bold">Companion Aktif</span>` : ""}
+                ${a.branchCity ? `<span class="px-1.5 py-0.5 rounded bg-amber-600 text-white ml-1 font-bold">Kepala Cabang: ${a.branchCity}</span>` : ""}
+              </div>
+              <span class="font-mono">Ujian: ${a.passedTrials}/2</span>
+            </div>
+            <div class="flex flex-wrap justify-between text-[11px] text-[var(--muted-foreground)]">
+              <span>Skill: <b>${a.skill} / ${prof.talentCap}</b> (Laju ${prof.learnRate})</span>
+              <span>Loyalitas: <b>${a.loyalty}</b></span>
+              <span>Assist: <b>${prof.assistPct}%/3s</b> (${prof.aura})</span>
+            </div>
+            <div class="flex gap-2 pt-1">
+              ${canTrial ? `<button onclick="runTrial(${idx})" class="px-2.5 py-1 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-bold">Jalankan Ujian Murid (Cap Bakat +15)</button>` : ""}
+              ${canBranch ? `<button onclick="openBranch(${idx})" class="px-2.5 py-1 rounded bg-amber-600 text-white font-bold">Angkat Jadi Kepala Cabang Toko</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("eventLogBox").innerHTML = state.narrative.eventLogs.map(l => `<div>• ${l}</div>`).join("");
+
+      const jsonStr = JSON.stringify(state, null, 2);
+      const compactBytes = new Blob([JSON.stringify(state)]).size;
+      document.getElementById("saveSizeBadge").textContent = `${(compactBytes / 1024).toFixed(2)} KB (< 15 KB PASS)`;
+      document.getElementById("saveStateTextarea").value = jsonStr;
+    }
+
+    resetBetaState();
+  </script>
+</body>
+</html>

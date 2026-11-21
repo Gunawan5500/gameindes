@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Battle-Smith RPG — Simulator S&D + Grafik Live (100% Offline • 77 Lokasi)</title>
+<style>
+  :root { --bg:#121417; --card:#1b1f24; --box:#232930; --bd:#313a45; --fg:#e8edf2; --muted:#9aa7b4; --pri:#e09f3e; --pri-fg:#121417; --ok:#4cc38a; --warn:#f0a848; --err:#e56b6f; --info:#6cb4ee; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--fg); font-size:14px; line-height:1.45; }
+  .wrap { max-width:1140px; margin:0 auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; }
+  .grid { display:grid; grid-template-columns:1fr; gap:12px; }
+  .charts { display:grid; grid-template-columns:1fr; gap:12px; }
+  @media (min-width:900px) { .grid { grid-template-columns:340px 1fr; align-items:start; } .charts { grid-template-columns:7fr 5fr; } }
+  h1 { margin:0; font-size:17px; } h2 { margin:0 0 6px; font-size:14px; }
+  .muted { color:var(--muted); font-size:12px; } .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .pill { font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--bd); background:var(--box); display:inline-block; }
+  .btn { font-size:12px; padding:7px 10px; border-radius:8px; border:1px solid var(--bd); background:var(--box); color:var(--fg); cursor:pointer; font-weight:600; }
+  .btn:hover { border-color:var(--pri); } .btn.pri { background:var(--pri); color:var(--pri-fg); border-color:var(--pri); }
+  .btn.sm { padding:4px 8px; font-size:11px; }
+  select, input[type=range] { width:100%; background:var(--box); color:var(--fg); border:1px solid var(--bd); border-radius:8px; padding:7px; font-size:12px; }
+  .box { background:var(--box); border:1px solid var(--bd); border-radius:8px; padding:8px; }
+  .item { background:var(--box); border:1px solid var(--bd); border-radius:10px; padding:10px; margin-bottom:8px; cursor:pointer; }
+  .item.focus { border-color:var(--pri); } .item.locked { opacity:.55; }
+  .tag { font-size:11px; padding:1px 6px; border-radius:6px; border:1px solid var(--bd); margin-right:4px; display:inline-block; }
+  .tag.good { color:var(--ok); border-color:var(--ok); } .tag.warn { color:var(--warn); border-color:var(--warn); } .tag.info { color:var(--info); border-color:var(--info); }
+  .banner { padding:10px; border-radius:10px; font-size:12px; font-weight:600; border:1px solid var(--err); color:var(--err); background:var(--card); display:none; }
+  .logbox { max-height:190px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; font-size:11px; }
+  .kv { display:flex; justify-content:space-between; font-size:12px; padding:2px 0; color:var(--muted); } .kv strong { color:var(--fg); }
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; } .g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; text-align:center; }
+  canvas { width:100%; height:210px; display:block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card row">
+    <div>
+      <div class="row" style="justify-content:flex-start"><h1>Battle-Smith RPG — Simulator S&amp;D + Grafik Live</h1><span class="pill">v0.2 • 100% Offline • 77 Lokasi</span></div>
+      <div class="muted" style="margin-top:3px">Klik Skenario Cepat atau klik kartu item untuk melihat grafik harga, proyeksi pulih 12 jam, dan perbandingan lintas kota.</div>
+    </div>
+    <div class="row"><div class="box"><div class="muted">Kas</div><div id="gold" class="mono" style="font-weight:700">5g</div></div><div class="box"><div class="muted">Waktu</div><div id="clock" class="mono" style="font-weight:700">Hari 1 • 08:00</div></div></div>
+  </div>
+
+  <div class="card row">
+    <span class="muted" style="font-weight:700">UJI CEPAT:</span>
+    <div class="row" style="gap:6px">
+      <button class="btn sm" onclick="preset('village_exploit')">1. Borong Desa &amp; Anti-Eksploitasi</button>
+      <button class="btn sm" onclick="preset('embargo_winter')">2. Embargo Api-Es + Winter</button>
+      <button class="btn sm" onclick="preset('war_boycott')">3. Open War + Boikot + Shadow</button>
+      <button class="btn sm" onclick="preset('parent_ripple')">4. Riak 25% Induk → Desa</button>
+      <button class="btn sm" onclick="resetSim()">Reset</button>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <div class="row"><div><h2>Grafik 1: Riwayat Harga &amp; Proyeksi Pulih 12 Jam</h2><div id="c1-sub" class="muted"></div></div><div style="min-width:170px"><select id="c-item" onchange="setFocus(this.value)"></select></div></div>
+      <div class="muted" style="margin:6px 0;display:flex;gap:10px;flex-wrap:wrap">
+        <span><strong style="color:#6cb4ee">━</strong> Pasar Live</span>
+        <span><strong style="color:#4cc38a">╌</strong> Proyeksi Pulih 12j</span>
+        <span><strong style="color:#f0a848">┈</strong> Tempa Teredam</span>
+        <span><strong style="color:#9aa7b4">╌</strong> Acuan</span>
+      </div>
+      <div class="box"><canvas id="cv-line"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Grafik 2: Perbandingan Harga Lintas Kota</h2>
+      <div class="muted" style="margin-bottom:6px">Hijau = murah (beli), Oranye = mahal (jual/embargo/perang)</div>
+      <div class="box"><canvas id="cv-bar"></canvas></div>
+      <div id="arb-tip" class="box muted" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="row"><h2>1. Lokasi (77 Permukiman)</h2><span id="cls-badge" class="pill">Major City</span></div>
+        <div class="row" style="justify-content:flex-start;gap:4px;margin:8px 0">
+          <button class="btn sm fbtn" data-f="ALL" onclick="setFilter('ALL')">Semua</button>
+          <button class="btn sm fbtn" data-f="Major City" onclick="setFilter('Major City')">Major</button>
+          <button class="btn sm fbtn" data-f="City" onclick="setFilter('City')">City</button>
+          <button class="btn sm fbtn" data-f="Town" onclick="setFilter('Town')">Town</button>
+          <button class="btn sm fbtn" data-f="Village" onclick="setFilter('Village')">Village</button>
+        </div>
+        <select id="loc-sel" onchange="selectLoc(this.value)"></select>
+        <div id="loc-info" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"></div>
+      </div>
+
+      <div class="card">
+        <h2>2. Politik WD-2, Musim &amp; CHA</h2>
+        <div class="g2" style="margin-bottom:8px">
+          <button class="btn" onclick="toggleSeason()"><div class="muted">Musim</div><div id="lbl-season">Spring</div></button>
+          <button class="btn" onclick="toggleFestival()"><div class="muted">Festival</div><div id="lbl-fest">Off</div></button>
+          <button class="btn" onclick="toggleWar()"><div class="muted">Open War</div><div id="lbl-war">Damai</div></button>
+          <button class="btn" onclick="toggleBoycott()"><div class="muted">Boikot</div><div id="lbl-boy">Normal</div></button>
+        </div>
+        <label class="box row" style="margin-bottom:8px;cursor:pointer">
+          <div><div style="font-size:12px;font-weight:700">Shadow Syndicate</div><div class="muted">Tembus boikot/kelas (+45%)</div></div>
+          <input id="chk-shadow" type="checkbox" onchange="toggleShadow(this.checked)">
+        </label>
+        <div class="kv"><span>Stat CHA</span><strong id="cha-lbl" class="mono">CHA 10 (+0%)</strong></div>
+        <input id="cha-rng" type="range" min="10" max="35" value="10" oninput="setCha(Number(this.value))">
+      </div>
+
+      <div class="card">
+        <h2>3. Lompat Waktu (Lazy Math)</h2>
+        <div class="g3" style="margin-bottom:8px">
+          <button class="btn sm" onclick="advH(1)">+1 Jam</button>
+          <button class="btn sm" onclick="advH(6)">+6 Jam</button>
+          <button class="btn sm" onclick="advH(12)">+12j Prune</button>
+        </div>
+        <div class="g2">
+          <button class="btn pri sm" onclick="idleDays(1)">Idle +1 Hari</button>
+          <button class="btn sm" onclick="idleDays(7)">Idle +7 Hari</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row"><h2>4. Monitor Oppo A54</h2><span class="mono" style="font-size:11px;color:var(--ok)">&lt; 150 MB</span></div>
+        <div class="g3" style="margin-top:6px">
+          <div class="box"><div class="muted">Delta</div><div id="st-d" class="mono" style="font-weight:700">0</div></div>
+          <div class="box"><div class="muted">Save</div><div id="st-b" class="mono" style="font-weight:700">0 B</div></div>
+          <div class="box"><div class="muted">Hitung</div><div id="st-m" class="mono" style="font-weight:700">0 ms</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div id="banner" class="banner"></div>
+      <div class="card">
+        <div class="row"><h2>Meja Pasar (Klik Item untuk Fokus Grafik)</h2><span id="cap-lbl" class="muted mono"></span></div>
+        <div id="mkt-list" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="row"><h2>Log Kabar &amp; Transaksi</h2><button class="btn sm" onclick="state.logs=[];render()">Bersihkan</button></div>
+        <div id="logs" class="logbox mono" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const CONFIG = {"version":"0.1-demo","note":"Semua angka bersifat DEMO untuk uji coba Basic S&D Engine (WD-5.07)","currency":{"bronze_per_silver":100,"silver_per_gold":100,"bronze_per_gold":10000},"snd":{"sensitivity_k":0.5,"multiplier_min":0.4,"multiplier_max":2.5,"full_recovery_hours":12,"shop_buy_from_player_spread":0.55,"parent_ripple_weight":0.25,"forging_cost_damping":0.5,"origin_area_discount":0.8},"cha_bonus":{"threshold":10,"per_point":0.01,"max_bonus":0.25},"market_class_rank":{"Village":1,"Town":2,"City":3,"Major City":4},"market_class_depth_mult":{"Village":0.4,"Town":0.8,"City":1.4,"Major City":2.5},"market_class_allowed_rarities":{"Village":["Common","Uncommon"],"Town":["Common","Uncommon","Rare"],"City":["Common","Uncommon","Rare","Epic"],"Major City":["Common","Uncommon","Rare","Epic","Legendary"]},"market_class_cash_cap_br":{"Village":1500,"Town":8000,"City":35000,"Major City":150000},"rarity_base_depth":{"Common":40,"Uncommon":25,"Rare":12,"Epic":5,"Legendary":2},"world_modifiers":{"open_war_weapon_demand_mult":1.35,"open_war_material_demand_mult":1.2,"embargo_enemy_origin_supply_mult":0.55,"alliance_origin_discount_mult":0.9,"winter_fire_demand_mult":1.25,"festival_luxury_demand_mult":1.2,"shadow_syndicate_buy_markup":1.45,"shadow_syndicate_sell_spread":0.45},"offline_simulation":{"max_detailed_days":7,"caravan_events_per_day":3}};
+const LOCATIONS = [{"location_id":"loc_01_whitepine_village","location_name":"Whitepine Village","settlement_type":"Village","area_id":"hollowfrost_range","area_name":"Hollowfrost Range","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_49_hollowfrost_market","is_contested_enclave":"Y"},{"location_id":"loc_02_rimeclaw_village","location_name":"Rimeclaw Village","settlement_type":"Village","area_id":"hollowfrost_range","area_name":"Hollowfrost Range","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_49_hollowfrost_market","is_contested_enclave":"Y"},{"location_id":"loc_03_glacierhold_outpost","location_name":"Glacierhold Outpost","settlement_type":"Village","area_id":"hollowfrost_range","area_name":"Hollowfrost Range","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_49_hollowfrost_market","is_contested_enclave":"N"},{"location_id":"loc_04_gullrock_village","location_name":"Gullrock Village","settlement_type":"Village","area_id":"cinderwatch_isles","area_name":"Cinderwatch Isles","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_50_gullquay_harbor","is_contested_enclave":"Y"},{"location_id":"loc_05_fogbell_village","location_name":"Fogbell Village","settlement_type":"Village","area_id":"cinderwatch_isles","area_name":"Cinderwatch Isles","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_50_gullquay_harbor","is_contested_enclave":"Y"},{"location_id":"loc_06_cinderwatch_outpost","location_name":"Cinderwatch Outpost","settlement_type":"Village","area_id":"cinderwatch_isles","area_name":"Cinderwatch Isles","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_50_gullquay_harbor","is_contested_enclave":"N"},{"location_id":"loc_07_shepherd_s_rest_village","location_name":"Shepherd's Rest Village","settlement_type":"Village","area_id":"greymoor_downs","area_name":"Greymoor Downs","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_51_greymoor_town","is_contested_enclave":"N"},{"location_id":"loc_08_cairnfield_village","location_name":"Cairnfield Village","settlement_type":"Village","area_id":"greymoor_downs","area_name":"Greymoor Downs","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_51_greymoor_town","is_contested_enclave":"N"},{"location_id":"loc_09_wailing_outpost","location_name":"Wailing Outpost","settlement_type":"Village","area_id":"greymoor_downs","area_name":"Greymoor Downs","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_51_greymoor_town","is_contested_enclave":"Y"},{"location_id":"loc_10_reedshallows_village","location_name":"Reedshallows Village","settlement_type":"Village","area_id":"blackmere_fens","area_name":"Blackmere Fens","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_52_reedmire_quay","is_contested_enclave":"N"},{"location_id":"loc_11_gloomwater_village","location_name":"Gloomwater Village","settlement_type":"Village","area_id":"blackmere_fens","area_name":"Blackmere Fens","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_52_reedmire_quay","is_contested_enclave":"N"},{"location_id":"loc_12_drownedheart_outpost","location_name":"Drownedheart Outpost","settlement_type":"Village","area_id":"blackmere_fens","area_name":"Blackmere Fens","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_52_reedmire_quay","is_contested_enclave":"N"},{"location_id":"loc_13_mossroot_village","location_name":"Mossroot Village","settlement_type":"Village","area_id":"elderwake_grove","area_name":"Elderwake Grove","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_53_mossgate_trading_post","is_contested_enclave":"N"},{"location_id":"loc_14_whisperbark_village","location_name":"Whisperbark Village","settlement_type":"Village","area_id":"elderwake_grove","area_name":"Elderwake Grove","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_53_mossgate_trading_post","is_contested_enclave":"N"},{"location_id":"loc_15_crownroot_outpost","location_name":"Crownroot Outpost","settlement_type":"Village","area_id":"elderwake_grove","area_name":"Elderwake Grove","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_53_mossgate_trading_post","is_contested_enclave":"N"},{"location_id":"loc_16_fallowleaf_village","location_name":"Fallowleaf Village","settlement_type":"Village","area_id":"rustleaf_weald","area_name":"Rustleaf Weald","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_54_fallowgate_town","is_contested_enclave":"Y"},{"location_id":"loc_17_amberdeep_village","location_name":"Amberdeep Village","settlement_type":"Village","area_id":"rustleaf_weald","area_name":"Rustleaf Weald","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_54_fallowgate_town","is_contested_enclave":"Y"},{"location_id":"loc_18_witchlight_outpost","location_name":"Witchlight Outpost","settlement_type":"Village","area_id":"rustleaf_weald","area_name":"Rustleaf Weald","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_54_fallowgate_town","is_contested_enclave":"Y"},{"location_id":"loc_19_stillwater_village","location_name":"Stillwater Village","settlement_type":"Village","area_id":"hollowbarrow_highlands","area_name":"Hollowbarrow Highlands","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_55_stillmere_town","is_contested_enclave":"N"},{"location_id":"loc_20_barrowdown_village","location_name":"Barrowdown Village","settlement_type":"Village","area_id":"hollowbarrow_highlands","area_name":"Hollowbarrow Highlands","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_55_stillmere_town","is_contested_enclave":"N"},{"location_id":"loc_21_kinglesscrag_outpost","location_name":"Kinglesscrag Outpost","settlement_type":"Village","area_id":"hollowbarrow_highlands","area_name":"Hollowbarrow Highlands","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_55_stillmere_town","is_contested_enclave":"Y"},{"location_id":"loc_22_tidewrack_village","location_name":"Tidewrack Village","settlement_type":"Village","area_id":"saltgrave_coast","area_name":"Saltgrave Coast","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_56_port_rotdock","is_contested_enclave":"Y"},{"location_id":"loc_23_quayside_village","location_name":"Quayside Village","settlement_type":"Village","area_id":"saltgrave_coast","area_name":"Saltgrave Coast","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_56_port_rotdock","is_contested_enclave":"N"},{"location_id":"loc_24_lanternreef_outpost","location_name":"Lanternreef Outpost","settlement_type":"Village","area_id":"saltgrave_coast","area_name":"Saltgrave Coast","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_56_port_rotdock","is_contested_enclave":"N"},{"location_id":"loc_25_briar_meadow_village","location_name":"Briar Meadow Village","settlement_type":"Village","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"loc_57_hollowroad_market","is_contested_enclave":"N"},{"location_id":"loc_26_hollowroad_village","location_name":"Hollowroad Village","settlement_type":"Village","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"loc_57_hollowroad_market","is_contested_enclave":"N"},{"location_id":"loc_27_thornfall_outpost","location_name":"Thornfall Outpost","settlement_type":"Village","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"loc_57_hollowroad_market","is_contested_enclave":"Y"},{"location_id":"loc_28_greenmaw_village","location_name":"Greenmaw Village","settlement_type":"Village","area_id":"bonethorn_peninsula","area_name":"Bonethorn Peninsula","faction_id":"thornback_tribe","faction_name":"Thornback Tribe","parent_location_id":"loc_58_greenmaw_settlement","is_contested_enclave":"Y"},{"location_id":"loc_29_thornback_village","location_name":"Thornback Village","settlement_type":"Village","area_id":"bonethorn_peninsula","area_name":"Bonethorn Peninsula","faction_id":"thornback_tribe","faction_name":"Thornback Tribe","parent_location_id":"loc_58_greenmaw_settlement","is_contested_enclave":"N"},{"location_id":"loc_30_marrowdeep_outpost","location_name":"Marrowdeep Outpost","settlement_type":"Village","area_id":"bonethorn_peninsula","area_name":"Bonethorn Peninsula","faction_id":"thornback_tribe","faction_name":"Thornback Tribe","parent_location_id":"loc_58_greenmaw_settlement","is_contested_enclave":"Y"},{"location_id":"loc_31_ironroot_village","location_name":"Ironroot Village","settlement_type":"Village","area_id":"wyrmspine_mountains","area_name":"Wyrmspine Mountains","faction_id":"wyrmspine_hold","faction_name":"Wyrmspine Hold","parent_location_id":"loc_59_wyrmspine_gate","is_contested_enclave":"N"},{"location_id":"loc_32_snowline_village","location_name":"Snowline Village","settlement_type":"Village","area_id":"wyrmspine_mountains","area_name":"Wyrmspine Mountains","faction_id":"wyrmspine_hold","faction_name":"Wyrmspine Hold","parent_location_id":"loc_59_wyrmspine_gate","is_contested_enclave":"N"},{"location_id":"loc_33_summitwatch_outpost","location_name":"Summitwatch Outpost","settlement_type":"Village","area_id":"wyrmspine_mountains","area_name":"Wyrmspine Mountains","faction_id":"wyrmspine_hold","faction_name":"Wyrmspine Hold","parent_location_id":"loc_59_wyrmspine_gate","is_contested_enclave":"N"},{"location_id":"loc_34_dryreed_village","location_name":"Dryreed Village","settlement_type":"Village","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"loc_60_ashwind_great_camp","is_contested_enclave":"Y"},{"location_id":"loc_35_saltlake_village","location_name":"Saltlake Village","settlement_type":"Village","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"loc_60_ashwind_great_camp","is_contested_enclave":"N"},{"location_id":"loc_36_dustwind_outpost","location_name":"Dustwind Outpost","settlement_type":"Village","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"loc_60_ashwind_great_camp","is_contested_enclave":"N"},{"location_id":"loc_37_pinewatch_village","location_name":"Pinewatch Village","settlement_type":"Village","area_id":"frostpine_taiga","area_name":"Frostpine Taiga","faction_id":"frostpine_tribe","faction_name":"Frostpine Tribe","parent_location_id":"loc_61_wolfmoon_market","is_contested_enclave":"Y"},{"location_id":"loc_38_wolfmoon_village","location_name":"Wolfmoon Village","settlement_type":"Village","area_id":"frostpine_taiga","area_name":"Frostpine Taiga","faction_id":"frostpine_tribe","faction_name":"Frostpine Tribe","parent_location_id":"loc_61_wolfmoon_market","is_contested_enclave":"N"},{"location_id":"loc_39_deepfrost_outpost","location_name":"Deepfrost Outpost","settlement_type":"Village","area_id":"frostpine_taiga","area_name":"Frostpine Taiga","faction_id":"frostpine_tribe","faction_name":"Frostpine Tribe","parent_location_id":"loc_61_wolfmoon_market","is_contested_enclave":"N"},{"location_id":"loc_40_cooledune_village","location_name":"Cooledune Village","settlement_type":"Village","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"loc_62_cooledune_oasis","is_contested_enclave":"N"},{"location_id":"loc_41_glasssand_village","location_name":"Glasssand Village","settlement_type":"Village","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"loc_62_cooledune_oasis","is_contested_enclave":"N"},{"location_id":"loc_42_cindermaw_outpost","location_name":"Cindermaw Outpost","settlement_type":"Village","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"loc_62_cooledune_oasis","is_contested_enclave":"N"},{"location_id":"loc_43_rimeshore_village","location_name":"Rimeshore Village","settlement_type":"Village","area_id":"crownfrost_isle","area_name":"Crownfrost Isle","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_63_frostquay_quay","is_contested_enclave":"Y"},{"location_id":"loc_44_barbican_village","location_name":"Barbican Village","settlement_type":"Village","area_id":"crownfrost_isle","area_name":"Crownfrost Isle","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_63_frostquay_quay","is_contested_enclave":"Y"},{"location_id":"loc_45_crownfrost_outpost","location_name":"Crownfrost Outpost","settlement_type":"Village","area_id":"crownfrost_isle","area_name":"Crownfrost Isle","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_63_frostquay_quay","is_contested_enclave":"Y"},{"location_id":"loc_46_driftwood_village","location_name":"Driftwood Village","settlement_type":"Village","area_id":"wraithtide_isles","area_name":"Wraithtide Isles","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_64_mistquay_quay","is_contested_enclave":"N"},{"location_id":"loc_47_fogbound_village","location_name":"Fogbound Village","settlement_type":"Village","area_id":"wraithtide_isles","area_name":"Wraithtide Isles","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_64_mistquay_quay","is_contested_enclave":"N"},{"location_id":"loc_48_wraithspire_outpost","location_name":"Wraithspire Outpost","settlement_type":"Village","area_id":"wraithtide_isles","area_name":"Wraithtide Isles","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"loc_64_mistquay_quay","is_contested_enclave":"N"},{"location_id":"loc_49_hollowfrost_market","location_name":"Hollowfrost Market","settlement_type":"Town","area_id":"hollowfrost_range","area_name":"Hollowfrost Range","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_71_fort_barbican","is_contested_enclave":"Y"},{"location_id":"loc_50_gullquay_harbor","location_name":"Gullquay Harbor","settlement_type":"Town","area_id":"cinderwatch_isles","area_name":"Cinderwatch Isles","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_66_fogbell_harbor","is_contested_enclave":"Y"},{"location_id":"loc_51_greymoor_town","location_name":"Greymoor Town","settlement_type":"Town","area_id":"greymoor_downs","area_name":"Greymoor Downs","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_72_barrowdown_tomb_city","is_contested_enclave":"Y"},{"location_id":"loc_52_reedmire_quay","location_name":"Reedmire Quay","settlement_type":"Town","area_id":"blackmere_fens","area_name":"Blackmere Fens","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_53_mossgate_trading_post","location_name":"Mossgate Trading Post","settlement_type":"Town","area_id":"elderwake_grove","area_name":"Elderwake Grove","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_70_elderwake_hall","is_contested_enclave":"N"},{"location_id":"loc_54_fallowgate_town","location_name":"Fallowgate Town","settlement_type":"Town","area_id":"rustleaf_weald","area_name":"Rustleaf Weald","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"loc_70_elderwake_hall","is_contested_enclave":"N"},{"location_id":"loc_55_stillmere_town","location_name":"Stillmere Town","settlement_type":"Town","area_id":"hollowbarrow_highlands","area_name":"Hollowbarrow Highlands","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"loc_72_barrowdown_tomb_city","is_contested_enclave":"N"},{"location_id":"loc_56_port_rotdock","location_name":"Port Rotdock","settlement_type":"Town","area_id":"saltgrave_coast","area_name":"Saltgrave Coast","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_66_fogbell_harbor","is_contested_enclave":"N"},{"location_id":"loc_57_hollowroad_market","location_name":"Hollowroad Market","settlement_type":"Town","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"loc_65_fort_thornfall","is_contested_enclave":"Y"},{"location_id":"loc_58_greenmaw_settlement","location_name":"Greenmaw Settlement","settlement_type":"Town","area_id":"bonethorn_peninsula","area_name":"Bonethorn Peninsula","faction_id":"thornback_tribe","faction_name":"Thornback Tribe","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_59_wyrmspine_gate","location_name":"Wyrmspine Gate","settlement_type":"Town","area_id":"wyrmspine_mountains","area_name":"Wyrmspine Mountains","faction_id":"wyrmspine_hold","faction_name":"Wyrmspine Hold","parent_location_id":"loc_75_wyrmspine_forgecity","is_contested_enclave":"N"},{"location_id":"loc_60_ashwind_great_camp","location_name":"Ashwind Great Camp","settlement_type":"Town","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"loc_68_saltlake_caravan_market","is_contested_enclave":"Y"},{"location_id":"loc_61_wolfmoon_market","location_name":"Wolfmoon Market","settlement_type":"Town","area_id":"frostpine_taiga","area_name":"Frostpine Taiga","faction_id":"frostpine_tribe","faction_name":"Frostpine Tribe","parent_location_id":"loc_67_pinewatch_market","is_contested_enclave":"Y"},{"location_id":"loc_62_cooledune_oasis","location_name":"Cooledune Oasis","settlement_type":"Town","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"loc_69_glasssand_temple","is_contested_enclave":"N"},{"location_id":"loc_63_frostquay_quay","location_name":"Frostquay Quay","settlement_type":"Town","area_id":"crownfrost_isle","area_name":"Crownfrost Isle","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"loc_71_fort_barbican","is_contested_enclave":"Y"},{"location_id":"loc_64_mistquay_quay","location_name":"Mistquay Quay","settlement_type":"Town","area_id":"wraithtide_isles","area_name":"Wraithtide Isles","faction_id":"infernal_hierarchy","faction_name":"Infernal Hierarchy","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_65_fort_thornfall","location_name":"Fort Thornfall","settlement_type":"City","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"loc_73_briarfall_city","is_contested_enclave":"N"},{"location_id":"loc_66_fogbell_harbor","location_name":"Fogbell Harbor","settlement_type":"City","area_id":"cinderwatch_isles","area_name":"Cinderwatch Isles","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"loc_74_port_saltgrave","is_contested_enclave":"N"},{"location_id":"loc_67_pinewatch_market","location_name":"Pinewatch Market","settlement_type":"City","area_id":"frostpine_taiga","area_name":"Frostpine Taiga","faction_id":"frostpine_tribe","faction_name":"Frostpine Tribe","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_68_saltlake_caravan_market","location_name":"Saltlake Caravan Market","settlement_type":"City","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"loc_76_kurultai_camp","is_contested_enclave":"N"},{"location_id":"loc_69_glasssand_temple","location_name":"Glasssand Temple","settlement_type":"City","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"loc_77_obsidian_city","is_contested_enclave":"Y"},{"location_id":"loc_70_elderwake_hall","location_name":"Elderwake Hall","settlement_type":"City","area_id":"elderwake_grove","area_name":"Elderwake Grove","faction_id":"elderwake_council","faction_name":"Elderwake Council","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_71_fort_barbican","location_name":"Fort Barbican","settlement_type":"City","area_id":"crownfrost_isle","area_name":"Crownfrost Isle","faction_id":"frostcrown_remnant","faction_name":"Frostcrown Remnant","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_72_barrowdown_tomb_city","location_name":"Barrowdown Tomb-City","settlement_type":"City","area_id":"hollowbarrow_highlands","area_name":"Hollowbarrow Highlands","faction_id":"barrow_wardens","faction_name":"Barrow Wardens","parent_location_id":"","is_contested_enclave":"Y"},{"location_id":"loc_73_briarfall_city","location_name":"Briarfall City","settlement_type":"Major City","area_id":"briarfall_marches","area_name":"Briarfall Marches","faction_id":"briarfall_crown","faction_name":"Briarfall Crown","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_74_port_saltgrave","location_name":"Port Saltgrave","settlement_type":"Major City","area_id":"saltgrave_coast","area_name":"Saltgrave Coast","faction_id":"saltgrave_league","faction_name":"Saltgrave League","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_75_wyrmspine_forgecity","location_name":"Wyrmspine Forgecity","settlement_type":"Major City","area_id":"wyrmspine_mountains","area_name":"Wyrmspine Mountains","faction_id":"wyrmspine_hold","faction_name":"Wyrmspine Hold","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_76_kurultai_camp","location_name":"Kurultai Camp","settlement_type":"Major City","area_id":"ashwind_steppe","area_name":"Ashwind Steppe","faction_id":"ashwind_clans","faction_name":"Ashwind Clans","parent_location_id":"","is_contested_enclave":"N"},{"location_id":"loc_77_obsidian_city","location_name":"Obsidian City","settlement_type":"Major City","area_id":"emberwaste","area_name":"Emberwaste","faction_id":"emberwaste_order","faction_name":"Emberwaste Order","parent_location_id":"","is_contested_enclave":"N"}];
+const INITIAL_RELS = [["briarfall_crown","saltgrave_league","Cold War",-40],["briarfall_crown","wyrmspine_hold","Friendly",35],["briarfall_crown","ashwind_clans","Embargo",-65],["briarfall_crown","emberwaste_order","Cold War",-25],["briarfall_crown","infernal_hierarchy","Cold War",-54],["briarfall_crown","frostcrown_remnant","Embargo",-60],["briarfall_crown","thornback_tribe","Cold War",-45],["saltgrave_league","frostpine_tribe","Friendly",25],["saltgrave_league","thornback_tribe","Cold War",-35],["wyrmspine_hold","emberwaste_order","Cold War",-30],["wyrmspine_hold","infernal_hierarchy","Cold War",-50],["wyrmspine_hold","barrow_wardens","Cold War",-40],["wyrmspine_hold","elderwake_council","Embargo",-65],["ashwind_clans","emberwaste_order","Friendly",30],["ashwind_clans","infernal_hierarchy","Cold War",-45],["emberwaste_order","infernal_hierarchy","Cold War",-50],["emberwaste_order","frostcrown_remnant","Embargo",-70],["emberwaste_order","frostpine_tribe","Cold War",-35],["infernal_hierarchy","frostcrown_remnant","Cold War",-45],["infernal_hierarchy","barrow_wardens","Cold War",-54],["infernal_hierarchy","elderwake_council","Cold War",-52],["infernal_hierarchy","frostpine_tribe","Cold War",-45],["infernal_hierarchy","thornback_tribe","Cold War",-45],["elderwake_council","frostpine_tribe","Friendly",30]];
+const ITEMS = [{"item_id":"mat_iron_ore","item_name":"Raw Iron Ore (Grade I)","category":"material","rarity":"Common","base_price_br":20,"origin_area_id":"wyrmspine_mountains","element_tag":"Tanah","min_market_class":"Village"},{"item_id":"mat_pine_resin","item_name":"Frostpine Resin (Grade I)","category":"material","rarity":"Common","base_price_br":25,"origin_area_id":"frostpine_taiga","element_tag":"Es","min_market_class":"Village"},{"item_id":"mat_marsh_hide","item_name":"Blackmere Hide (Grade II)","category":"material","rarity":"Uncommon","base_price_br":80,"origin_area_id":"blackmere_fens","element_tag":"Gelap","min_market_class":"Village"},{"item_id":"mat_ember_shard","item_name":"Ember Obsidian Shard","category":"material","rarity":"Rare","base_price_br":320,"origin_area_id":"emberwaste","element_tag":"Api","min_market_class":"Town"},{"item_id":"mat_barrow_silver","item_name":"Barrow Sanctified Silver","category":"material","rarity":"Epic","base_price_br":1200,"origin_area_id":"hollowbarrow_highlands","element_tag":"Cahaya","min_market_class":"City"},{"item_id":"mat_frostcrown_core","item_name":"Heart of Frostcrown","category":"material","rarity":"Legendary","base_price_br":24000,"origin_area_id":"crownfrost_isle","element_tag":"Es","min_market_class":"Major City"},{"item_id":"wpn_iron_axe","item_name":"Kapak Perang (Tier 1)","category":"weapon","rarity":"Common","base_price_br":180,"origin_area_id":"","element_tag":"Netral","min_market_class":"Village"},{"item_id":"wpn_ashwind_bow","item_name":"Busur Pendek (Tier 2)","category":"weapon","rarity":"Uncommon","base_price_br":650,"origin_area_id":"ashwind_steppe","element_tag":"Petir","min_market_class":"Town"},{"item_id":"wpn_ember_blade","item_name":"Pedang Rune Api (Tier 3)","category":"weapon","rarity":"Rare","base_price_br":2400,"origin_area_id":"emberwaste","element_tag":"Api","min_market_class":"City"},{"item_id":"wpn_unique_replica","item_name":"Skema Warblade (Epic)","category":"weapon","rarity":"Epic","base_price_br":7200,"origin_area_id":"","element_tag":"Gelap","min_market_class":"City"},{"item_id":"util_portal_seal","item_name":"Portal Seal (Tier 1)","category":"utility","rarity":"Rare","base_price_br":500,"origin_area_id":"","element_tag":"Netral","min_market_class":"Town"}];
+const COMPARE = ['loc_73_briarfall_city','loc_74_port_saltgrave','loc_75_wyrmspine_forgecity','loc_77_obsidian_city','loc_49_hollowfrost_market','loc_01_whitepine_village'];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const HOUR = 3600000;
+function fmt(br) { const n = br < 0 ? '-' : ''; let r = Math.round(Math.abs(br)); const g = Math.floor(r / 10000); r %= 10000; const s = Math.floor(r / 100); const b = r % 100; const p = []; if (g) p.push(g + 'g'); if (s) p.push(s + 's'); if (b || !p.length) p.push(b + 'br'); return n + p.join(' '); }
+function rngSeed(seed) { let a = seed >>> 0; return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+let state;
+function init() {
+  const locMap = new Map(LOCATIONS.map(l => [l.location_id, l]));
+  const areaFac = new Map(); LOCATIONS.forEach(l => { if (!areaFac.has(l.area_id)) areaFac.set(l.area_id, l.faction_id); });
+  const rk = (a, b) => a < b ? a + '|' + b : b + '|' + a;
+  const relMap = new Map(INITIAL_RELS.map(([a, b, st, sc]) => [rk(a, b), { status: st, score: sc }]));
+  state = { locMap, areaFac, relMap, rk, deltas: new Map(), hist: new Map(), sel: 'loc_73_briarfall_city', focus: 'mat_ember_shard', filter: 'ALL', now: Date.UTC(2026, 10, 19, 8, 0, 0), day: 1, season: 'Spring', fest: false, shadow: false, cha: 10, gold: 50000, inv: Object.fromEntries(ITEMS.map(i => [i.item_id, i.rarity === 'Legendary' ? 1 : 5])), wars: new Set(), boys: new Set(), events: [], logs: ['[Hari 1] Simulator 77 Lokasi + Grafik Live siap!'] };
+  snap('Awal');
+}
+const getRel = (a, b) => (!a || !b || a === b) ? 'Self' : (state.relMap.get(state.rk(a, b))?.status ?? 'Neutral');
+const depthOf = (l, it) => Math.max(1, (CONFIG.rarity_base_depth[it.rarity] || 20) * (CONFIG.market_class_depth_mult[l.settlement_type] || 1));
+function effSDAt(lid, iid, ts) {
+  const bd = depthOf(state.locMap.get(lid), ITEMS.find(i => i.item_id === iid));
+  const e = state.deltas.get(lid + '::' + iid);
+  if (!e) return { s: bd, d: bd };
+  const r = clamp((ts - e.ts) / (CONFIG.snd.full_recovery_hours * HOUR), 0, 1);
+  if (r >= 1) return { s: bd, d: bd };
+  return { s: Math.max(0.25, e.s + (bd - e.s) * r), d: Math.max(0.25, e.d + (bd - e.d) * r) };
+}
+const localMAt = (lid, iid, ts) => { const { s, d } = effSDAt(lid, iid, ts); return clamp(Math.pow(d / s, CONFIG.snd.sensitivity_k), CONFIG.snd.multiplier_min, CONFIG.snd.multiplier_max); };
+function canTrade(l, it) {
+  if (state.boys.has(l.faction_id) && !state.shadow) return { ok: false, r: 'Boikot (Shadow saja)' };
+  const rk = CONFIG.market_class_rank;
+  if (!state.shadow && (rk[l.settlement_type] < rk[it.min_market_class] || !CONFIG.market_class_allowed_rarities[l.settlement_type].includes(it.rarity))) return { ok: false, r: 'Min. ' + it.min_market_class };
+  return { ok: true, r: 'OK' };
+}
+function priceAt(lid, iid, mode, ts = state.now) {
+  const l = state.locMap.get(lid), it = ITEMS.find(i => i.item_id === iid), wm = CONFIG.world_modifiers;
+  const lm = localMAt(lid, iid, ts); let em = lm, pm = null;
+  if (l.parent_location_id && state.locMap.has(l.parent_location_id)) { pm = localMAt(l.parent_location_id, iid, ts); em = lm * (1 - CONFIG.snd.parent_ripple_weight) + pm * CONFIG.snd.parent_ripple_weight; }
+  let wMult = 1, tags = [];
+  if (it.origin_area_id && it.origin_area_id === l.area_id) { wMult *= CONFIG.snd.origin_area_discount; tags.push(['Area Asal -20%', 'good']); }
+  const ofac = it.origin_area_id ? state.areaFac.get(it.origin_area_id) : null;
+  if (ofac && ofac !== l.faction_id) {
+    const rel = getRel(l.faction_id, ofac);
+    if (rel === 'Embargo' || rel === 'Open War') { const b = Math.pow(1 / wm.embargo_enemy_origin_supply_mult, CONFIG.snd.sensitivity_k); wMult *= b; tags.push([rel + ' +' + Math.round((b - 1) * 100) + '%', 'warn']); }
+    else if (rel === 'Alliance') { wMult *= wm.alliance_origin_discount_mult; tags.push(['Alliance -10%', 'good']); }
+  }
+  if (state.wars.has(l.faction_id)) {
+    if (it.category === 'weapon') { wMult *= wm.open_war_weapon_demand_mult; tags.push(['Open War +35%', 'warn']); }
+    else if (it.category === 'material') { wMult *= wm.open_war_material_demand_mult; tags.push(['Open War +20%', 'warn']); }
+  }
+  if (state.season === 'Winter' && it.element_tag === 'Api') { wMult *= wm.winter_fire_demand_mult; tags.push(['Winter Api +25%', 'warn']); }
+  if (state.fest && ['Rare', 'Epic', 'Legendary'].includes(it.rarity)) { wMult *= wm.festival_luxury_demand_mult; tags.push(['Festival +20%', 'info']); }
+  for (const ev of state.events) if (ev.lid === lid && ev.iid === iid) { const m = Math.pow(ev.dm / ev.sm, CONFIG.snd.sensitivity_k); wMult *= m; tags.push(['Karavan ' + (m >= 1 ? '+' : '') + Math.round((m - 1) * 100) + '%', m >= 1 ? 'warn' : 'good']); }
+  if (pm !== null && Math.abs(pm - 1) > 0.02) tags.push(['Riak Induk ×' + pm.toFixed(2), 'info']);
+  const tm = clamp(em * wMult, CONFIG.snd.multiplier_min, CONFIG.snd.multiplier_max), mp = it.base_price_br * tm;
+  const dp = it.base_price_br + (mp - it.base_price_br) * CONFIG.snd.forging_cost_damping;
+  let fp = mp;
+  if (state.shadow) fp = mode === 'buy' ? mp * wm.shadow_syndicate_buy_markup : mp * wm.shadow_syndicate_sell_spread;
+  else if (mode === 'sell') fp = mp * CONFIG.snd.shop_buy_from_player_spread * (1 + Math.min(0.25, Math.max(0, state.cha - 10) * 0.01));
+  return { mp: Math.round(mp), dp: Math.round(dp), fp: Math.max(1, Math.round(fp)), tm, tags };
+}
+function snap(lbl, lid = state.sel, iid = state.focus) {
+  const k = lid + '::' + iid; if (!state.hist.has(k)) state.hist.set(k, []);
+  const arr = state.hist.get(k), q = priceAt(lid, iid, 'buy', state.now);
+  arr.push({ lbl, mp: q.mp, dp: q.dp }); if (arr.length > 10) arr.shift();
+}
+function log(m) { state.logs.unshift(m); if (state.logs.length > 40) state.logs.pop(); }
+function trade(iid, qty, act) {
+  const l = state.locMap.get(state.sel), it = ITEMS.find(i => i.item_id === iid), chk = canTrade(l, it);
+  if (!chk.ok) { log('[Ditolak] ' + it.item_name + ': ' + chk.r); render(); return; }
+  state.focus = iid; const k = l.location_id + '::' + iid; if (!state.hist.has(k)) snap('Awal', l.location_id, iid);
+  const q = priceAt(l.location_id, iid, act), tot = q.fp * qty;
+  if (act === 'buy') { if (state.gold < tot) { log('[Gagal] Kas kurang.'); render(); return; } state.gold -= tot; state.inv[iid] = (state.inv[iid] || 0) + qty; }
+  else {
+    if ((state.inv[iid] || 0) < qty) { log('[Gagal] Stok kurang.'); render(); return; }
+    const cap = CONFIG.market_class_cash_cap_br[l.settlement_type];
+    if (!state.shadow && tot > cap) { log('[Modal Kurang] Maks ' + fmt(cap)); render(); return; }
+    state.inv[iid] -= qty; state.gold += tot;
+  }
+  const e = effSDAt(l.location_id, iid, state.now);
+  state.deltas.set(k, { s: act === 'buy' ? Math.max(0.5, e.s - qty) : e.s + qty, d: act === 'buy' ? e.d + qty * 0.25 : Math.max(0.5, e.d - qty * 0.15), ts: state.now });
+  snap((act === 'buy' ? 'B' : 'J') + qty, l.location_id, iid);
+  log('[' + act.toUpperCase() + '] ' + qty + 'x ' + it.item_name + ' = ' + fmt(tot));
+  render();
+}
+function advH(h) { state.now += h * HOUR; let p = 0; for (const [k, v] of state.deltas.entries()) if ((state.now - v.ts) / HOUR >= CONFIG.snd.full_recovery_hours) { state.deltas.delete(k); p++; } snap('+' + h + 'j'); log('[Lazy Math +' + h + 'j] Prune ' + p + ' entri.'); render(); }
+function idleDays(d) {
+  const rng = rngSeed(202611 + state.day * 997 + d), hubs = LOCATIONS.filter(l => l.settlement_type !== 'Village');
+  state.day += d; state.now += d * 0.5 * HOUR; state.events = [];
+  for (let i = 0; i < 3; i++) { const l = hubs[Math.floor(rng() * hubs.length)], it = ITEMS[Math.floor(rng() * ITEMS.length)], sup = rng() > 0.45; state.events.push({ lid: l.location_id, iid: it.item_id, sm: sup ? 1.4 : 0.65, dm: sup ? 1.0 : 1.25 }); log('[H' + state.day + ' Karavan] ' + l.location_name + ': ' + it.item_name + (sup ? ' melimpah' : ' langka')); }
+  snap('H' + state.day); render();
+}
+function preset(n) {
+  init();
+  if (n === 'village_exploit') { state.sel = 'loc_01_whitepine_village'; state.focus = 'mat_iron_ore'; snap('Awal'); trade('mat_iron_ore', 5, 'buy'); trade('mat_iron_ore', 5, 'buy'); trade('mat_iron_ore', 5, 'buy'); }
+  else if (n === 'embargo_winter') { state.sel = 'loc_49_hollowfrost_market'; state.focus = 'mat_ember_shard'; snap('Normal'); state.season = 'Winter'; snap('Winter'); }
+  else if (n === 'war_boycott') { state.sel = 'loc_73_briarfall_city'; state.focus = 'wpn_iron_axe'; snap('Damai'); state.wars.add('briarfall_crown'); snap('War'); state.boys.add('briarfall_crown'); }
+  else if (n === 'parent_ripple') { state.sel = 'loc_01_whitepine_village'; state.focus = 'mat_pine_resin'; snap('Awal'); state.sel = 'loc_49_hollowfrost_market'; trade('mat_pine_resin', 25, 'buy'); state.sel = 'loc_01_whitepine_village'; snap('Riak'); }
+  render();
+}
+function resetSim() { init(); render(); }
+function setFilter(f) { state.filter = f; render(); }
+function selectLoc(id) { state.sel = id; snap('Pindah'); render(); }
+function setFocus(id) { state.focus = id; if (!state.hist.has(state.sel + '::' + id)) snap('Awal'); render(); }
+function toggleSeason() { state.season = state.season === 'Spring' ? 'Winter' : 'Spring'; snap(state.season); render(); }
+function toggleFestival() { state.fest = !state.fest; snap(state.fest ? 'Fest' : 'End'); render(); }
+function toggleWar() { const f = state.locMap.get(state.sel).faction_id; state.wars.has(f) ? state.wars.delete(f) : state.wars.add(f); snap(state.wars.has(f) ? 'War' : 'Damai'); render(); }
+function toggleBoycott() { const f = state.locMap.get(state.sel).faction_id; state.boys.has(f) ? state.boys.delete(f) : state.boys.add(f); render(); }
+function toggleShadow(c) { state.shadow = c; render(); }
+function setCha(v) { state.cha = v; render(); }
+
+function prepCv(id) {
+  const cv = document.getElementById(id), dpr = window.devicePixelRatio || 1, rc = cv.getBoundingClientRect();
+  const w = Math.max(250, Math.floor(rc.width)), h = Math.max(180, Math.floor(rc.height));
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h); return { ctx, w, h };
+}
+function drawCharts() {
+  const it = ITEMS.find(i => i.item_id === state.focus), l = state.locMap.get(state.sel);
+  // Line chart
+  const { ctx, w, h } = prepCv('cv-line');
+  const hist = state.hist.get(l.location_id + '::' + it.item_id) || [{ lbl: 'Awal', ...priceAt(l.location_id, it.item_id, 'buy') }];
+  const proj = [3, 6, 9, 12].map(hr => ({ lbl: '+' + hr + 'j', ...priceAt(l.location_id, it.item_id, 'buy', state.now + hr * HOUR) }));
+  const all = [...hist, ...proj], sp = hist.length - 1;
+  const vals = [it.base_price_br, ...all.map(p => p.mp), ...all.map(p => p.dp)];
+  const minV = Math.max(0, Math.min(...vals) * 0.85), maxV = Math.max(...vals, it.base_price_br * 1.2) * 1.12, span = Math.max(1, maxV - minV);
+  const pL = 50, pR = 12, pT = 16, pB = 24, cw = w - pL - pR, ch = h - pT - pB;
+  const xA = i => pL + (all.length === 1 ? cw / 2 : (i / (all.length - 1)) * cw), yA = v => pT + ch - ((v - minV) / span) * ch;
+  ctx.font = '10px ui-monospace,monospace'; ctx.strokeStyle = '#313a45'; ctx.lineWidth = 1;
+  for (let g = 0; g <= 3; g++) { const v = minV + (span * g) / 3, y = yA(v); ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(w - pR, y); ctx.stroke(); ctx.fillStyle = '#9aa7b4'; ctx.textAlign = 'right'; ctx.fillText(fmt(v), pL - 5, y + 3); }
+  const sx = xA(sp); ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(sx, pT, w - pR - sx, ch);
+  ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = '#9aa7b4'; ctx.beginPath(); ctx.moveTo(pL, yA(it.base_price_br)); ctx.lineTo(w - pR, yA(it.base_price_br)); ctx.stroke(); ctx.restore();
+  if (it.category === 'material') { ctx.save(); ctx.setLineDash([2, 3]); ctx.strokeStyle = '#f0a848'; ctx.lineWidth = 2; ctx.beginPath(); all.forEach((p, i) => i ? ctx.lineTo(xA(i), yA(p.dp)) : ctx.moveTo(xA(i), yA(p.dp))); ctx.stroke(); ctx.restore(); }
+  ctx.strokeStyle = '#6cb4ee'; ctx.lineWidth = 2.5; ctx.beginPath(); hist.forEach((p, i) => i ? ctx.lineTo(xA(i), yA(p.mp)) : ctx.moveTo(xA(i), yA(p.mp))); ctx.stroke();
+  ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#4cc38a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, yA(hist[sp].mp)); proj.forEach((p, k) => ctx.lineTo(xA(sp + 1 + k), yA(p.mp))); ctx.stroke(); ctx.restore();
+  all.forEach((p, i) => { ctx.fillStyle = i <= sp ? '#6cb4ee' : '#4cc38a'; ctx.beginPath(); ctx.arc(xA(i), yA(p.mp), i === sp ? 4 : 2.5, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#9aa7b4'; ctx.textAlign = 'center'; ctx.fillText(p.lbl, xA(i), h - 6); });
+  document.getElementById('c1-sub').textContent = it.item_name + ' di ' + l.location_name + ' (Acuan ' + fmt(it.base_price_br) + ' → Kini ' + fmt(hist[sp].mp) + ')';
+
+  // Bar chart
+  const b = prepCv('cv-bar'), ids = [...COMPARE]; if (!ids.includes(state.sel)) ids[ids.length - 1] = state.sel;
+  const rows = ids.map(id => { const cl = state.locMap.get(id), q = priceAt(id, it.item_id, 'buy'); return { id, name: cl.location_name.replace(' Forgecity', '').replace(' Village', ' Vlg').replace(' Market', ' Mkt'), p: q.mp, m: q.tm }; });
+  const maxP = Math.max(...rows.map(r => r.p), it.base_price_br * 1.2), minR = rows.reduce((a, c) => a.p < c.p ? a : c), maxR = rows.reduce((a, c) => a.p > c.p ? a : c);
+  const bL = 104, bR = 58, bW = b.w - bL - bR, rH = (b.h - 16) / rows.length; b.ctx.font = '10px ui-monospace,monospace';
+  rows.forEach((r, i) => {
+    const y = 8 + i * rH + rH * 0.18, bh = Math.max(13, rH * 0.62), bw = Math.max(4, (r.p / maxP) * bW), isS = r.id === state.sel;
+    b.ctx.fillStyle = isS ? '#e8edf2' : '#9aa7b4'; b.ctx.textAlign = 'right'; b.ctx.fillText((isS ? '▸ ' : '') + r.name, bL - 6, y + bh * 0.72);
+    b.ctx.fillStyle = r.m >= 1.15 ? '#f0a848' : (r.m <= 0.9 ? '#4cc38a' : '#6cb4ee'); b.ctx.fillRect(bL, y, bw, bh);
+    b.ctx.fillStyle = '#e8edf2'; b.ctx.textAlign = 'left'; b.ctx.fillText(fmt(r.p), bL + bw + 5, y + bh * 0.72);
+  });
+  const pct = Math.round(((maxR.p - minR.p) / Math.max(1, minR.p)) * 100);
+  document.getElementById('arb-tip').innerHTML = pct > 10 ? '<strong>Peluang Karavan (+' + pct + '%):</strong> Beli di <strong>' + minR.name + '</strong> (' + fmt(minR.p) + ') → jual di <strong>' + maxR.name + '</strong> (' + fmt(maxR.p) + ').' : 'Harga relatif rata antar-kota. Coba nyalakan Winter atau Open War!';
+}
+
+function render() {
+  const t0 = performance.now();
+  const fil = state.filter === 'ALL' ? LOCATIONS : LOCATIONS.filter(l => l.settlement_type === state.filter);
+  if (!fil.some(l => l.location_id === state.sel)) state.sel = fil[0].location_id;
+  document.getElementById('loc-sel').innerHTML = fil.map(l => '<option value="' + l.location_id + '"' + (l.location_id === state.sel ? ' selected' : '') + '>[' + l.settlement_type + '] ' + l.location_name + ' — ' + l.faction_name + '</option>').join('');
+  document.getElementById('c-item').innerHTML = ITEMS.map(it => '<option value="' + it.item_id + '"' + (it.item_id === state.focus ? ' selected' : '') + '>' + it.item_name + '</option>').join('');
+  document.querySelectorAll('.fbtn').forEach(b => b.className = 'btn sm fbtn' + (b.dataset.f === state.filter ? ' pri' : ''));
+  const l = state.locMap.get(state.sel), dt = new Date(state.now);
+  document.getElementById('clock').textContent = 'Hari ' + state.day + ' • ' + String(dt.getUTCHours()).padStart(2, '0') + ':' + String(dt.getUTCMinutes()).padStart(2, '0');
+  document.getElementById('gold').textContent = fmt(state.gold); document.getElementById('cls-badge').textContent = l.settlement_type;
+  const par = l.parent_location_id ? state.locMap.get(l.parent_location_id) : null;
+  document.getElementById('loc-info').innerHTML = '<div class="kv"><span>Faksi</span><strong>' + l.faction_name + '</strong></div><div class="kv"><span>Area</span><strong>' + l.area_name + '</strong></div><div class="kv"><span>Induk (25%)</span><strong>' + (par ? par.location_name : '-') + '</strong></div><div class="kv"><span>Rarity</span><strong>' + CONFIG.market_class_allowed_rarities[l.settlement_type].join(', ') + '</strong></div>';
+  document.getElementById('cap-lbl').textContent = 'Modal: ' + fmt(CONFIG.market_class_cash_cap_br[l.settlement_type]);
+  document.getElementById('lbl-season').textContent = state.season; document.getElementById('lbl-fest').textContent = state.fest ? 'Aktif' : 'Off';
+  document.getElementById('lbl-war').textContent = state.wars.has(l.faction_id) ? 'OPEN WAR' : 'Damai'; document.getElementById('lbl-boy').textContent = state.boys.has(l.faction_id) ? 'BOIKOT' : 'Normal';
+  document.getElementById('chk-shadow').checked = state.shadow; document.getElementById('cha-lbl').textContent = 'CHA ' + state.cha + ' (+' + Math.min(25, Math.max(0, state.cha - 10)) + '%)';
+
+  const bn = document.getElementById('banner');
+  if (state.boys.has(l.faction_id) && !state.shadow) { bn.style.display = 'block'; bn.style.borderColor = 'var(--err)'; bn.style.color = 'var(--err)'; bn.textContent = 'Boikot ' + l.faction_name + '! Centang Shadow Syndicate untuk akses.'; }
+  else if (state.shadow) { bn.style.display = 'block'; bn.style.borderColor = 'var(--warn)'; bn.style.color = 'var(--warn)'; bn.textContent = 'Mode Shadow Syndicate aktif (+45% beli, 45% jual).'; }
+  else bn.style.display = 'none';
+
+  document.getElementById('mkt-list').innerHTML = ITEMS.map(it => {
+    const chk = canTrade(l, it), bq = priceAt(l.location_id, it.item_id, 'buy'), sq = priceAt(l.location_id, it.item_id, 'sell'), foc = it.item_id === state.focus;
+    const tgs = bq.tags.map(([t, c]) => '<span class="tag ' + c + '">' + t + '</span>').join('');
+    return '<div onclick="setFocus('' + it.item_id + '')" class="item' + (foc ? ' focus' : '') + (chk.ok ? '' : ' locked') + '"><div class="row"><div><strong>' + (foc ? '📊 ' : '') + it.item_name + '</strong> <span class="pill">' + it.rarity + '</span> <span class="muted">Stok: <strong class="mono" style="color:var(--fg)">' + (state.inv[it.item_id] || 0) + '</strong></span><div style="margin-top:4px"><span class="muted mono">Acuan ' + fmt(it.base_price_br) + ' • ×' + bq.tm.toFixed(2) + '</span> ' + tgs + '</div></div><div onclick="event.stopPropagation()">' + (chk.ok ? '<div style="text-align:right"><div class="mono" style="font-size:12px;margin-bottom:4px">Beli <strong>' + fmt(bq.fp) + '</strong> | Jual <strong style="color:var(--ok)">' + fmt(sq.fp) + '</strong></div><button class="btn pri sm" onclick="trade('' + it.item_id + '',1,'buy')">Beli 1</button> <button class="btn sm" onclick="trade('' + it.item_id + '',5,'buy')">Beli 5</button> <button class="btn sm" onclick="trade('' + it.item_id + '',1,'sell')">Jual 1</button> <button class="btn sm" onclick="trade('' + it.item_id + '',5,'sell')">Jual 5</button></div>' : '<span class="tag" style="color:var(--err);border-color:var(--err)">Terkunci: ' + chk.r + '</span>') + '</div></div></div>';
+  }).join('');
+
+  const sv = JSON.stringify({ day: state.day, season: state.season, deltas: Object.fromEntries(state.deltas) });
+  document.getElementById('st-d').textContent = state.deltas.size;
+  document.getElementById('st-b').textContent = sv.length < 1024 ? sv.length + ' B' : (sv.length / 1024).toFixed(2) + ' KB';
+  document.getElementById('st-m').textContent = (performance.now() - t0).toFixed(1) + ' ms';
+  document.getElementById('logs').innerHTML = state.logs.map(x => '<div class="box">' + x + '</div>').join('');
+  drawCharts();
+}
+window.addEventListener('resize', drawCharts);
+init(); render();
+</script>
+</body>
+</html>
