@@ -250,8 +250,43 @@
       { id: "w_cha_4", name: "Tongkat Penguasa", stat: "CHA", tier: 4, tag: "Dekat", trigger: "Command Aura", modeWeights: [25, 40, 35], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
       { id: "w_cha_5", name: "Cambuk Dagang", stat: "CHA", tier: 5, tag: "Dekat", trigger: "Debt Lash", modeWeights: [30, 45, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
       { id: "w_cha_6", name: "Pedang Upacara", stat: "CHA", tier: 6, tag: "Dekat", trigger: "Grand Ovation", modeWeights: [25, 35, 40], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
-      { id: "w_cha_r2", name: "Meriam Genggam Komando", stat: "CHA", tier: 6, tag: "Jauh", trigger: "Salvo Signal", modeWeights: [25, 35, 40], budget: { damage: 27, speed: 18, accuracy: 28, defense: 0, trigger: 27 } }
+      { id: "w_cha_r2", name: "Meriam Genggam Komando", stat: "CHA", tier: 6, tag: "Jauh", trigger: "Salvo Signal", modeWeights: [25, 35, 40], budget: { damage: 27, speed: 18, accuracy: 28, defense: 0, trigger: 27 } },
+
+      // 15 Jenis Armor Resmi CD-5.02b (5 Slot x 3 Kelas: Ringan, Sedang, Berat)
+      { id: "a_chest_light", isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Ringan", name: "Zirah Kulit Bayangan", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Shadow Weave", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 20, accuracy: 15, defense: 30, trigger: 25 } },
+      { id: "a_chest_med",   isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Sedang", name: "Zirah Sisik Elemen", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Elemental Carapace", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 10, accuracy: 10, defense: 35, trigger: 35 } },
+      { id: "a_chest_heavy", isArmor: true, slot: "Zirah", acPct: 40, armorClass: "Berat",  name: "Zirah Pelat Adamantine", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Adamantine Bulwark", modeWeights: [55, 25, 20], budget: { damage: 5, speed: 5, accuracy: 10, defense: 50, trigger: 30 } },
+
+      { id: "a_shield_light", isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Ringan", name: "Buckler Tangkis Cepat", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Buckler Riposte", modeWeights: [30, 50, 20], budget: { damage: 15, speed: 20, accuracy: 15, defense: 25, trigger: 25 } },
+      { id: "a_shield_med",   isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Sedang", name: "Perisai Segel Rune", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Runic Ward Shield", modeWeights: [20, 30, 50], budget: { damage: 10, speed: 10, accuracy: 15, defense: 30, trigger: 35 } },
+      { id: "a_shield_heavy", isArmor: true, slot: "Perisai", acPct: 25, armorClass: "Berat",  name: "Perisai Menara Benteng", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Fortress Wall", modeWeights: [60, 25, 15], budget: { damage: 5, speed: 5, accuracy: 10, defense: 55, trigger: 25 } },
+
+      { id: "a_helm_light", isArmor: true, slot: "Helm", acPct: 15, armorClass: "Ringan", name: "Tudung Bidik Pemburu", stat: "WIS", tier: 1, tag: "Armor Ringan", trigger: "Predator's Visor", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 15, accuracy: 30, defense: 20, trigger: 25 } },
+      { id: "a_helm_med",   isArmor: true, slot: "Helm", acPct: 15, armorClass: "Sedang", name: "Mahkota Pelindung Pikiran", stat: "CHA", tier: 2, tag: "Armor Sedang", trigger: "Mind-Ward Circlet", modeWeights: [25, 35, 40], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+      { id: "a_helm_heavy", isArmor: true, slot: "Helm", acPct: 15, armorClass: "Berat",  name: "Helm Baja Juggernaut", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Iron Juggernaut Helm", modeWeights: [55, 30, 15], budget: { damage: 5, speed: 5, accuracy: 15, defense: 50, trigger: 25 } },
+
+      { id: "a_glove_light", isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Ringan", name: "Sarung Tangan Presisi", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Sleight Grips", modeWeights: [30, 50, 20], budget: { damage: 10, speed: 25, accuracy: 20, defense: 20, trigger: 25 } },
+      { id: "a_glove_med",   isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Sedang", name: "Bracer Penyalur Inti", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Channeler's Bracers", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+      { id: "a_glove_heavy", isArmor: true, slot: "Sarung", acPct: 10, armorClass: "Berat",  name: "Gauntlet Penghancur Baja", stat: "STR", tier: 3, tag: "Armor Berat", trigger: "Crushing Gauntlets", modeWeights: [55, 25, 20], budget: { damage: 20, speed: 10, accuracy: 10, defense: 35, trigger: 25 } },
+
+      { id: "a_boot_light", isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Ringan", name: "Sepatu Langkah Angin", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Windstep Boots", modeWeights: [30, 50, 20], budget: { damage: 5, speed: 30, accuracy: 15, defense: 25, trigger: 25 } },
+      { id: "a_boot_med",   isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Sedang", name: "Sepatu Penjelajah Medan", stat: "WIS", tier: 2, tag: "Armor Sedang", trigger: "Strider Treads", modeWeights: [30, 40, 30], budget: { damage: 5, speed: 20, accuracy: 15, defense: 30, trigger: 30 } },
+      { id: "a_boot_heavy", isArmor: true, slot: "Sepatu", acPct: 10, armorClass: "Berat",  name: "Greaves Pengguncang Bumi", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Earthshaker Greaves", modeWeights: [55, 30, 15], budget: { damage: 10, speed: 15, accuracy: 10, defense: 45, trigger: 20 } }
     ];
+
+    const ARMORER_SECONDARY_TRIGGERS = {
+      Zirah:   { req: 1, name: "Heart of the Forge (+12% HP & Regen 2%)" },
+      Perisai: { req: 2, name: "Unbreakable Aegis (+10% Block & 30% Mit->Might)" },
+      Helm:    { req: 3, name: "Tactical Command Crown (-1.5s CD Skill)" },
+      Sarung:  { req: 4, name: "Ironclad Grip (+15% Daya Weapon Trigger)" },
+      Sepatu:  { req: 5, name: "Seismic Stride (-12% Acc & Spd Musuh)" }
+    };
+
+    const ARMORER_ULTIMATE_TRIGGERS = {
+      Berat:  "Living Citadel of the World-Forge (-20% Dmg Masuk, Cap Mitigate 70%, & Citadel Nova 50% HP tiap 5s)",
+      Sedang: "Prismatic Sanctuary Matrix (+25% Resist 6 Elemen & Pantulan Weakness Exploit ×1.5)",
+      Ringan: "Phantom Mirage Carapace (Cap Dodge+Parry 45% & Counter-Slash 120% Dmg)"
+    };
 
     const HYBRIDS = {
       "api+es": { name: "Uap (Steam)", elements_wd: ["Fire", "Ice"], desc: "Mengurangi akurasi musuh -12% & +12% Skill Damage", combat_bonus: { enemy_acc_debuff_pct: 12, skill_dmg_pct: 12 } },
@@ -430,13 +465,22 @@
 
     function checkItemCompatibility(g) {
       const t = state.smithTiers;
+      const armTier = t.Armorer || 0;
+      const isPureArmorer = armTier === 5;
       const matches = [];
-      if (g.tag === "Jauh") matches.push("Rangesmith");
-      else matches.push("Weaponsmith");
 
-      if (g.stat === "CON") matches.push("Armorer");
-      if (g.stat === "INT" || g.fused || g.hybrid) matches.push("Runesmith");
-      if (g.stat === "CHA" || g.stat === "WIS" || (g.enhancePlus || 0) > 0) matches.push("Reforger");
+      if (g.isArmor || (g.tag && g.tag.startsWith("Armor"))) {
+        if (g.armorClass === "Ringan") matches.push("Armorer", "Rangesmith", "Weaponsmith");
+        else if (g.armorClass === "Sedang") matches.push("Armorer", "Runesmith", "Reforger");
+        else matches.push("Armorer"); // Berat eksklusif Armorer
+      } else {
+        if (g.tag === "Jauh") matches.push("Rangesmith");
+        else matches.push("Weaponsmith");
+
+        if (g.stat === "CON") matches.push("Armorer");
+        if (g.stat === "INT" || g.fused || g.hybrid) matches.push("Runesmith");
+        if (g.stat === "CHA" || g.stat === "WIS" || (g.enhancePlus || 0) > 0) matches.push("Reforger");
+      }
 
       let bestRank = 0, matchedClass = null;
       for (const c of matches) {
@@ -445,12 +489,26 @@
           matchedClass = c;
         }
       }
+
+      // Cek +1 Secondary Armor Trigger & +1 Ultimate Armor Trigger (khusus Armorer CD-5.02b)
+      let secondaryTrigger = null;
+      let ultimateTrigger = null;
+      if (g.slot && ARMORER_SECONDARY_TRIGGERS[g.slot]) {
+        const secCfg = ARMORER_SECONDARY_TRIGGERS[g.slot];
+        if (armTier >= secCfg.req) secondaryTrigger = secCfg.name;
+      }
+      if (isPureArmorer && g.armorClass) {
+        ultimateTrigger = ARMORER_ULTIMATE_TRIGGERS[g.armorClass];
+      }
+
       return {
         ok: bestRank >= 1,
         matchedClass,
         rank: bestRank,
         bonusPct: bestRank >= 1 ? bestRank * 6 : -25,
-        requiredHint: matches.join(" / ")
+        requiredHint: [...new Set(matches)].join(" / "),
+        secondaryTrigger,
+        ultimateTrigger
       };
     }
 
@@ -496,13 +554,14 @@
       }).join("");
 
       const t = state.smithTiers;
+      const armTier = t.Armorer || 0;
       const initPlus = Math.floor((t.Reforger || 0) / 2);
       document.getElementById("smithComponentSummary").innerHTML = `
-        <strong>5 Komponen Barang Aktif (` + id.className + `):</strong>
+        <strong>5 Komponen Barang (` + id.className + `):</strong>
         Bilah Dekat <b>+${(t.Weaponsmith||0)*2}%</b> ·
-        Pelat/Def <b>+${(t.Armorer||0)*3}%</b> ·
+        Armor Trigger+1 <b>${armTier}/5 Slot${armTier===5 ? " + ULTIMATE AEGISBORN!" : ""}</b> ·
         Mekanik Jauh <b>+${(t.Rangesmith||0)*2.5}%</b> ·
-        Fusi/Rune <b>${t.Runesmith>=1 ? `Terbuka (+${t.Runesmith*6} Bobot)` : "Terkunci (Butuh Runesmith ≥1)"}</b> ·
+        Fusi/Rune <b>${t.Runesmith>=1 ? `Terbuka (+${t.Runesmith*6} Bobot)` : "Terkunci"}</b> ·
         Tempa Awal <b>+${initPlus} (+N)</b>
       `;
 
@@ -537,12 +596,19 @@
     function initWeaponSelect() {
       const sel = document.getElementById("weaponSel");
       const stats = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
-      sel.innerHTML = stats.map(st => {
-        const list = WEAPONS.filter(w => w.stat === st);
-        return `<optgroup label="Senjata ${st}">` + list.map(w =>
-          `<option value="${w.id}">[${w.stat} T${w.tier} • ${w.tag}] ${w.name} — Trigger: ${w.trigger} (Fusi dasar ${w.modeWeights[2]}%)</option>`
+      const weaponGroups = stats.map(st => {
+        const list = WEAPONS.filter(w => !w.isArmor && w.stat === st);
+        return `<optgroup label="Senjata ${st} (8)">` + list.map(w =>
+          `<option value="${w.id}">[${w.stat} T${w.tier} • ${w.tag}] ${w.name} — Trigger: ${w.trigger}</option>`
         ).join("") + `</optgroup>`;
       }).join("");
+
+      const armorList = WEAPONS.filter(w => w.isArmor);
+      const armorGroup = `<optgroup label="15 Armor CD-5.02b (5 Slot × 3 Kelas + Trigger Armorer)">` + armorList.map(a =>
+        `<option value="${a.id}">[${a.slot} ${a.acPct}% AC • ${a.armorClass}] ${a.name} — Base Trigger: ${a.trigger}</option>`
+      ).join("") + `</optgroup>`;
+
+      sel.innerHTML = weaponGroups + armorGroup;
       sel.value = "w_str_4";
     }
 
@@ -850,6 +916,10 @@
         name: `${c.weapon.name}${enhancePlus > 0 ? " +" + enhancePlus : ""} “${tName}”`,
         forgedBy: c.smithId.className,
         baseName: c.weapon.name,
+        isArmor: Boolean(c.weapon.isArmor),
+        slot: c.weapon.slot || null,
+        acPct: c.weapon.acPct || 0,
+        armorClass: c.weapon.armorClass || null,
         stat: c.weapon.stat,
         tier: Math.max(c.weapon.tier, getTier(state.lv)),
         tag: c.weapon.tag,
@@ -897,8 +967,15 @@
           <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Speed Budget</div><div class="font-mono font-bold">${g.budget.speed}%</div></div>
           <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Accuracy Budget</div><div class="font-mono font-bold">${g.budget.accuracy}%</div></div>
           <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Defense Budget</div><div class="font-mono font-bold">${g.budget.defense}</div></div>
-          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Trigger (${g.trigger})</div><div class="font-mono font-bold text-[var(--primary)]">${g.budget.trigger}</div></div>
+          <div class="p-1.5 rounded bg-[var(--card)]"><div class="text-[var(--muted-foreground)] text-[10px]">Base Trigger (${g.trigger})</div><div class="font-mono font-bold text-[var(--primary)]">${g.budget.trigger}</div></div>
         </div>
+        ${g.isArmor ? `
+          <div class="mt-2 p-2 rounded bg-[var(--card)] border border-[var(--border)] space-y-1">
+            <div><strong>Base Armor Trigger (${g.slot} ${g.armorClass}):</strong> <span class="text-[var(--primary)] font-semibold">${g.trigger}</span></div>
+            <div><strong>+1 Secondary Trigger Armorer:</strong> ${compat.secondaryTrigger ? `<span class="text-[var(--primary)] font-bold">${compat.secondaryTrigger}</span>` : `<span class="text-[var(--muted-foreground)]">Terkunci (Butuh Armorer Tier ≥ ${ARMORER_SECONDARY_TRIGGERS[g.slot]?.req || 1})</span>`}</div>
+            <div><strong>+1 Ultimate Trigger Armorer Murni (5+0 Aegisborn):</strong> ${compat.ultimateTrigger ? `<span class="text-[var(--primary)] font-bold">${compat.ultimateTrigger}</span>` : `<span class="text-[var(--muted-foreground)]">Terkunci (Eksklusif Armorer Murni 5+0 / Aegisborn)</span>`}</div>
+          </div>
+        ` : ""}
         <div class="mt-2 text-[var(--muted-foreground)] flex flex-wrap justify-between">
           <span>Inti Bahan: <strong>${g.mainMat.n}</strong> (+${g.mainMat.sb} ${g.mainMat.ps})</span>
           <span>Hidden Trait WD: <strong>${g.mainMat.ht}</strong> (${g.mainMat.hte})</span>

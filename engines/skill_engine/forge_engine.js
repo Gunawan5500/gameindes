@@ -198,6 +198,52 @@ export const WEAPONS_36 = [
 ];
 export const WEAPONS_48 = WEAPONS_36;
 
+// 15 Jenis Armor Resmi CD-5.02b (5 Slot x 3 Kelas: Ringan, Sedang, Berat) + 15 Base Armor Trigger Unik
+export const ARMORS_15 = [
+  // 1. Zirah / Chest (40% AC)
+  { id: "a_chest_light", itemType: "armor", slot: "Zirah", acPct: 40, armorClass: "Ringan", name: "Zirah Kulit Bayangan", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Shadow Weave", triggerDesc: "+15% Attack Speed & Crit usai Dodge", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 20, accuracy: 15, defense: 30, trigger: 25 } },
+  { id: "a_chest_med",   itemType: "armor", slot: "Zirah", acPct: 40, armorClass: "Sedang", name: "Zirah Sisik Elemen", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Elemental Carapace", triggerDesc: "Serap 15% serangan elemen ke Trigger (+5% Resist Elemen)", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 10, accuracy: 10, defense: 35, trigger: 35 } },
+  { id: "a_chest_heavy", itemType: "armor", slot: "Zirah", acPct: 40, armorClass: "Berat",  name: "Zirah Pelat Adamantine", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Adamantine Bulwark", triggerDesc: "+25% Mitigate Shield saat HP < 50%", modeWeights: [55, 25, 20], budget: { damage: 5, speed: 5, accuracy: 10, defense: 50, trigger: 30 } },
+
+  // 2. Perisai / Shield (25% AC)
+  { id: "a_shield_light", itemType: "armor", slot: "Perisai", acPct: 25, armorClass: "Ringan", name: "Buckler Tangkis Cepat", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Buckler Riposte", triggerDesc: "Balas 50% weapon dmg otomatis saat Parry", modeWeights: [30, 50, 20], budget: { damage: 15, speed: 20, accuracy: 15, defense: 25, trigger: 25 } },
+  { id: "a_shield_med",   itemType: "armor", slot: "Perisai", acPct: 25, armorClass: "Sedang", name: "Perisai Segel Rune", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Runic Ward Shield", triggerDesc: "Pantulkan 20% serangan elemen (+5% Resist Elemen)", modeWeights: [20, 30, 50], budget: { damage: 10, speed: 10, accuracy: 15, defense: 30, trigger: 35 } },
+  { id: "a_shield_heavy", itemType: "armor", slot: "Perisai", acPct: 25, armorClass: "Berat",  name: "Perisai Menara Benteng", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Fortress Wall", triggerDesc: "Redam 35% damage & Stagger lawan (-10% Speed musuh)", modeWeights: [60, 25, 15], budget: { damage: 5, speed: 5, accuracy: 10, defense: 55, trigger: 25 } },
+
+  // 3. Helm (15% AC)
+  { id: "a_helm_light", itemType: "armor", slot: "Helm", acPct: 15, armorClass: "Ringan", name: "udung Bidik Pemburu", stat: "WIS", tier: 1, tag: "Armor Ringan", trigger: "Predator's Visor", triggerDesc: "+8% Akurasi & deteksi celah Dodge lawan", modeWeights: [30, 45, 25], budget: { damage: 10, speed: 15, accuracy: 30, defense: 20, trigger: 25 } },
+  { id: "a_helm_med",   itemType: "armor", slot: "Helm", acPct: 15, armorClass: "Sedang", name: "Mahkota Pelindung Pikiran", stat: "CHA", tier: 2, tag: "Armor Sedang", trigger: "Mind-Ward Circlet", triggerDesc: "-30% durasi debuff/kutukan & -8% Cooldown Skill", modeWeights: [25, 35, 40], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+  { id: "a_helm_heavy", itemType: "armor", slot: "Helm", acPct: 15, armorClass: "Berat",  name: "Helm Baja Juggernaut", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Iron Juggernaut Helm", triggerDesc: "Redam 50% bonus Critical Hit lawan", modeWeights: [55, 30, 15], budget: { damage: 5, speed: 5, accuracy: 15, defense: 50, trigger: 25 } },
+
+  // 4. Sarung Tangan / Gauntlets (10% AC)
+  { id: "a_glove_light", itemType: "armor", slot: "Sarung", acPct: 10, armorClass: "Ringan", name: "Sarung Tangan Presisi", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Sleight Grips", triggerDesc: "+10% Attack Speed & +5% Parry", modeWeights: [30, 50, 20], budget: { damage: 10, speed: 25, accuracy: 20, defense: 20, trigger: 25 } },
+  { id: "a_glove_med",   itemType: "armor", slot: "Sarung", acPct: 10, armorClass: "Sedang", name: "Bracer Penyalur Inti", stat: "INT", tier: 2, tag: "Armor Sedang", trigger: "Channeler's Bracers", triggerDesc: "+12% daya Inti Elemen & Fusi Hibrida senjata", modeWeights: [20, 35, 45], budget: { damage: 10, speed: 15, accuracy: 15, defense: 25, trigger: 35 } },
+  { id: "a_glove_heavy", itemType: "armor", slot: "Sarung", acPct: 10, armorClass: "Berat",  name: "Gauntlet Penghancur Baja", stat: "STR", tier: 3, tag: "Armor Berat", trigger: "Crushing Gauntlets", triggerDesc: "+10% Armor Crush & daya hantam senjata berat", modeWeights: [55, 25, 20], budget: { damage: 20, speed: 10, accuracy: 10, defense: 35, trigger: 25 } },
+
+  // 5. Sepatu / Boots (10% AC)
+  { id: "a_boot_light", itemType: "armor", slot: "Sepatu", acPct: 10, armorClass: "Ringan", name: "Sepatu Langkah Angin", stat: "DEX", tier: 1, tag: "Armor Ringan", trigger: "Windstep Boots", triggerDesc: "+8% Dodge & hemat Stamina tempur -15%", modeWeights: [30, 50, 20], budget: { damage: 5, speed: 30, accuracy: 15, defense: 25, trigger: 25 } },
+  { id: "a_boot_med",   itemType: "armor", slot: "Sepatu", acPct: 10, armorClass: "Sedang", name: "Sepatu Penjelajah Medan", stat: "WIS", tier: 2, tag: "Armor Sedang", trigger: "Strider Treads", triggerDesc: "+5% Dodge, +5% Mitigate, & +5% Resist Elemen", modeWeights: [30, 40, 30], budget: { damage: 5, speed: 20, accuracy: 15, defense: 30, trigger: 30 } },
+  { id: "a_boot_heavy", itemType: "armor", slot: "Sepatu", acPct: 10, armorClass: "Berat",  name: "Greaves Pengguncang Bumi", stat: "CON", tier: 3, tag: "Armor Berat", trigger: "Earthshaker Greaves", triggerDesc: "Hapus penalti speed Armor Berat & +10% Poise", modeWeights: [55, 30, 15], budget: { damage: 10, speed: 15, accuracy: 10, defense: 45, trigger: 20 } }
+];
+
+// +1 Secondary Trigger per Slot Armor yang dibuka bertahap oleh Tier Armorer (1 s.d. 5)
+export const ARMORER_SECONDARY_TRIGGERS = {
+  Zirah:   { reqArmorerTier: 1, name: "Heart of the Forge", desc: "+12% Max HP & pulihkan 2% HP tiap Armor Trigger aktif", bonus: { max_hp_pct: 12, dmg_reduction_pct: 5 } },
+  Perisai: { reqArmorerTier: 2, name: "Unbreakable Aegis", desc: "+10% Block/Parry & ubah 30% Mitigate Perisai ke Raw Might", bonus: { skill_dmg_pct: 10, dmg_reduction_pct: 6 } },
+  Helm:    { reqArmorerTier: 3, name: "Tactical Command Crown", desc: "-1.5 dtk Cooldown Skill Defensif/Combo & kebal interupsi", bonus: { cooldown_reduction_sec: 1.5, dmg_reduction_pct: 5 } },
+  Sarung:  { reqArmorerTier: 4, name: "Ironclad Grip", desc: "+15% daya Weapon Trigger senjata yang digenggam", bonus: { trigger_power_pct: 15, skill_dmg_pct: 8 } },
+  Sepatu:  { reqArmorerTier: 5, name: "Seismic Stride", desc: "Guncang tanah: kurangi Akurasi & Speed serang musuh -12%", bonus: { enemy_debuff_pct: 12, dmg_reduction_pct: 6 } }
+};
+
+// +1 Ultimate Armor Trigger (Full-Set Capstone ke-11 khusus Armorer Murni 5+0 / Aegisborn)
+export const ARMORER_ULTIMATE_TRIGGERS = {
+  Berat:  { name: "Living Citadel of the World-Forge", desc: "-20% damage masuk ekstra, cap Mitigate 70%, & ledakan Citadel Nova (50% Max HP tiap 5 dtk)", bonus: { dmg_reduction_pct: 20, max_hp_pct: 20, skill_dmg_pct: 28 } },
+  Sedang: { name: "Prismatic Sanctuary Matrix", desc: "+25% Resist seluruh 6 Elemen & pantulan serangan elemen Weakness Exploit x1.5", bonus: { dmg_reduction_pct: 16, elem_resist_all_pct: 25, skill_dmg_pct: 25 } },
+  Ringan: { name: "Phantom Mirage Carapace", desc: "Cap Dodge+Parry naik ke 45% & serangan balik otomatis Phantom Counter-Slash (120% weapon dmg)", bonus: { dodge_parry_cap_bonus: 15, dmg_reduction_pct: 15, skill_dmg_pct: 30 } }
+};
+
+export const ALL_CRAFTABLE_ITEMS_63 = [...WEAPONS_48, ...ARMORS_15];
+
 /**
  * Parser CSV sederhana untuk membaca 208 bahan dari data/materials.csv WD
  */
