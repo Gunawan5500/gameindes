@@ -55,19 +55,41 @@ CD-2.01: Sistem Skill MMORPG/SWTOR Discipline & Cross-Stat Macro Loadout (150 No
 CD-2.02: title dihitung saat naik level. Spesialis bila stat terbesar unggul minimal 2 poin: +5% damage dan akurasi senjata sejenis, -5% senjata jenis lain. Bila tidak: Seimbang, tanpa penalti jenis senjata, plus muatan buff silang +10% lebih efisien. Corrupted tidak mengubah title.
 CD-2.03: un-fuse. 1 respec gratis per tier S, selebihnya 100br x level x poin x (1 + 0,25 x title unik), batas x4. Ganti perk, ganti pilihan Utility/Morph (+20), dan ganti 2 Sub-Stat Fokus memakai jatah yang sama.
 
-CD-3 Smith type dan perk
+CD-3 Smith type, anggaran 5 tier, nama 1-kata, dan mazhab barang (LOCKED)
 
-CD-3.01: 5 Smith type: Weaponsmith, Armorer, Reforger, Runesmith, Rangesmith (khusus senjata jarak jauh). Dipilih setelah Gate pertama. Tingkat 1-5. Type utama laju penuh sampai 5, type tambahan laju 50% maksimal 3. Tidak tergantikan oleh sistem skill CD-2.01, melainkan bersinergi langsung di engines/skill_engine/ (Weaponsmith memperkuat skill melee & trigger, Armorer memperkuat skill defensif & mitigate, Reforger mempercepat cooldown recovery & skala +N, Runesmith memperkuat skill elemen & efektivitas Cross-Stat Mod +4%/rank, Rangesmith memperkuat skill jarak jauh).
-CD-3.02: bonus dasar +6% per tingkat utama (maksimal +30%). Spesialis dapat perk di tingkat 3 dan 5. Gabungan dapat +3% per tingkat tambahan (maksimal +9%), tanpa perk. Nama: awalan tingkat utama (Raw, Tempered, Honed, Grand, Paragon) + akar pasangan + julukan tingkat tambahan. Akar pasangan Rangesmith belum dibuat.
-CD-3.03: perk (nama Inggris, syarat diselaraskan ke Cap Stat 150). Tingkat 3 = 6 perk stat tunggal (stat terkait minimal 45). Tingkat 5 = 15 perk hibrida pasangan stat (kedua stat minimal 75, contoh STR+DEX = Venomed Blade). Pilih 1 per tingkat. Ganti perk = un-fuse.
-CD-3.04: Runesmith slot rune per rarity (Common 0 sampai Unique 5), peluang retak cabut rune = 35% - 1% x INT (minimal 5%). Reforger pindah +N dengan penalti -2 (tingkat 1-2) atau -1 (tingkat 3-5), biaya 50% biaya enhance. Tahap upgrade senjata/item Unique menggunakan istilah resmi Resonance.
+CD-3.01: 5 Smith Class (Weaponsmith, Armorer, Rangesmith, Runesmith, Reforger) dengan Total Anggaran 5 Poin Tingkat (5 Tier). Pemain mendapat 1 poin tingkat tiap Tier dunia (total 5 poin di Lv150) yang bebas dialokasikan ke 5 Smith Class (contoh: 5 murni di 1 class; 4+1; 3+2; 3+1+1; 2+2+1; atau 1+1+1+1+1 mengambil semua 5 class di Tier 1).
+CD-3.02: Mazhab Pembuatan Barang & Kecocokan Pakai (Gabungan Opsi A + C). Semua pemain tetap bisa menempa seluruh 36 Senjata dan 5 Slot Armor di Bengkel Tempa (untuk pesanan NPC, dijual di toko, atau trofi Galeri). Namun:
+- 5 Komponen Barang (Opsi C): Setiap barang punya 5 aspek yang kekuatannya mengikuti poin Tier (0-5) pemain pada class terkait: (1) Weaponsmith = Bilah/Kepala Senjata Dekat & Battle-Harness Armor agresif; (2) Armorer = Pelat/Perisai, Armor Trigger, & Senjata Pertahanan CON/Berat; (3) Rangesmith = Mekanik/Busur Senjata Jauh & Ranger Gear tinggi Dodge; (4) Runesmith = Inti Elemen, Mode Fusi (6 Elemen Hibrida, butuh minimal Runesmith Tier 1 untuk Fusi mandiri), & Slot Rune; (5) Reforger = Struktur Enhance +N, Transfer +N, & Pemurnian Kualitas.
+- Kecocokan Pemakaian Tempur (Equip & Trigger Mastery, Opsi A): Pemain hanya mengaktifkan 100% Weapon/Armor Trigger dan bonus Mastery (+6% per poin tier pada class tersebut) jika memiliki minimal Tier 1 pada Smith Class yang menaungi barang tersebut (Weaponsmith = Senjata Dekat STR/DEX/WIS/CHA; Armorer = Senjata CON & Armor Berat/Perisai; Rangesmith = Senjata Jauh; Runesmith = Senjata INT/Rune & Senjata Hasil Fusi Hibrida; Reforger = Senjata/Armor ber-+N & Taktis). Bila poin class terkait = 0, barang tetap bisa di-equip darurat tetapi terkena penalti ketidakcocokan (-25% efektivitas & Trigger terkunci).
+CD-3.02b: Sistem Nama Kelas 1 Kata Unik (Single-Word Class Name, LOCKED):
+- Murni 1 Class (Tier 1 -> 2 -> 3 -> 4 -> 5):
+  - Weaponsmith: Bladesmith -> Edgewright -> Warmonger -> Vanquisher -> Archblade
+  - Armorer: Platesmith -> Shieldwright -> Bulwark -> Juggernaut -> Aegisborn
+  - Rangesmith: Bowyer -> Fletcher -> Deadeye -> Ballistary -> Horizoner
+  - Runesmith: Runescribe -> Glyphwright -> Spellforger -> Arcanist -> Runelord
+  - Reforger: Tinkerer -> Temperer -> Transmuter -> Alchemizer -> Sovereign
+- Gabungan 2 Class (20 Nama 1-Kata Berarah menurut Class Utama yang Tier-nya lebih tinggi; bila seri 2+2 mengacu class yang diambil lebih dulu):
+  - Utama Weaponsmith: +Armorer = Vanguard | +Rangesmith = Skirmisher | +Runesmith = Spellblade | +Reforger = Hellforger
+  - Utama Armorer: +Weaponsmith = Wardensmith | +Rangesmith = Sentinel | +Runesmith = Runeguard | +Reforger = Ironclad
+  - Utama Rangesmith: +Weaponsmith = Outrider | +Armorer = Bastionbow | +Runesmith = Arcarcher | +Reforger = Artificer
+  - Utama Runesmith: +Weaponsmith = Hexblade | +Armorer = Aegisrune | +Rangesmith = Starfletcher | +Reforger = Thaumaturge
+  - Utama Reforger: +Weaponsmith = Reaver | +Armorer = Colossus | +Rangesmith = Machinist | +Runesmith = Chronosmith
+- Multi-Class (3-5 Class): 3 Class = Polymath (dominan INT/Reforge) atau Arsenist (dominan Weapon/Armor/Range); 4 Class = Synthesist; Semua 5 Class Tier 1 (1+1+1+1+1) = Omnismith.
+CD-3.03: Perk Smith (nama Inggris, syarat Cap Stat 150). Tingkat 3 (terbuka jika ada class mencapai Tier >= 3 dan stat terkait >= 45) = 6 perk stat tunggal. Tingkat 5 (eksklusif hanya untuk Spesialis Murni 5 poin di 1 class dan kedua stat pasangan >= 75) = 15 perk hibrida pasangan stat (contoh STR+DEX = Venomed Blade). Pilih 1 per tingkat. Ganti perk & distribusi 5 poin Smith Class = un-fuse.
+CD-3.04: Runesmith slot rune per rarity (Common 0 sampai Unique 5), peluang retak cabut rune = 35% - 1% x INT (minimal 5%). Reforger pindah +N dengan penalti -2 (Tier 1-2) atau -1 (Tier 3-5), biaya 50% biaya enhance. Tahap upgrade senjata/item Unique menggunakan istilah resmi Resonance.
 
-CD-4 Senjata dan anggaran poin
+CD-4 Senjata (48 senjata: 32 Dekat + 16 Jauh) dan anggaran poin
 
-CD-4.01: 36 senjata, tiap stat 6 tier (tier 1 = awal). STR: Kapak Perang, Kapak Besar, Palu Perang, Pedang Besar, Gada Berduri, Maul. DEX: Belati, Pedang Pendek, Belati Kembar, Katana, Busur Pendek, Busur Panjang. CON: Gada Penjaga, Flail Baja, Gauntlet Baja, Palu Penjaga, Rantai Berduri, Pedang Penjaga. INT: Tongkat Rune, Pedang Rune, Palu Rune, Sabit Arcane, Cakram Rune, Rantai Rune. WIS: Tombak, Trisula, Naginata, Tongkat Bo, Tombak Lempar, Tombak Pemburu. CHA: Rapier, Saber, Pedang Bangsawan, Tongkat Penguasa, Cambuk Dagang, Pedang Upacara.
+CD-4.01: 48 senjata (8 senjata per stat = 6 senjata daftar awal + 2 senjata jarak jauh khusus Rangesmith per stat agar setiap stat memiliki opsi Jauh dari tier awal hingga puncak).
+- STR (6 Dekat, 2 Jauh): Kapak Perang (T1 Dekat), Kapak Besar (T2 Dekat), Kapak Lempar Berat (T2 Jauh), Palu Perang (T3 Dekat), Pedang Besar (T4 Dekat), Gada Berduri (T5 Dekat), Maul (T6 Dekat), Arbalest Baja (T6 Jauh).
+- DEX (4 Dekat, 4 Jauh): Belati (T1 Dekat), Pedang Pendek (T2 Dekat), Pisau Lempar Kembar (T2 Jauh), Belati Kembar (T3 Dekat), Katana (T4 Dekat), Busur Pendek (T5 Jauh), Busur Panjang (T6 Jauh), Crossbow Berulang (T6 Jauh).
+- CON (6 Dekat, 2 Jauh): Gada Penjaga (T1 Dekat), Flail Baja (T2 Dekat), Gauntlet Baja (T3 Dekat), Bola Rantai Berat (T3 Jauh), Palu Penjaga (T4 Dekat), Rantai Berduri (T5 Dekat), Pedang Penjaga (T6 Dekat), Ballista Perisai (T6 Jauh).
+- INT (5 Dekat, 3 Jauh): Tongkat Rune (T1 Dekat), Pedang Rune (T2 Dekat), Orb Rune Melayang (T2 Jauh), Palu Rune (T3 Dekat), Sabit Arcane (T4 Dekat), Cakram Rune (T5 Jauh), Rantai Rune (T6 Dekat), Senapan Rune (T6 Jauh).
+- WIS (5 Dekat, 3 Jauh): Tombak (T1 Dekat), Trisula (T2 Dekat), Sumpit Pemburu (T2 Jauh), Naginata (T3 Dekat), Tongkat Bo (T4 Dekat), Tombak Lempar (T5 Jauh), Tombak Pemburu (T6 Dekat), Busur Silang Pemburu (T6 Jauh).
+- CHA (6 Dekat, 2 Jauh): Rapier (T1 Dekat), Saber (T2 Dekat), Pedang Bangsawan (T3 Dekat), Pistol Flintlock Duel (T3 Jauh), Tongkat Penguasa (T4 Dekat), Cambuk Dagang (T5 Dekat), Pedang Upacara (T6 Dekat), Meriam Genggam Komando (T6 Jauh).
 CD-4.02: syarat pakai (ketiganya berlaku). Stat minimal = tier + rarity (Common +0, Uncommon +4, Rare +8, Epic +12, Legendary +16, Unique +20). Level minimal = tier + rarity (+0, +3, +6, +10, +15, +20). Stat di bawah syarat memberi penalti (senjata akurasi -1 per poin).
-CD-4.03: anggaran dibagi ke damage, speed, accuracy, defense, trigger (persen). Profil: STR 40/15/15/5/25, DEX 25/25/20/5/25, CON 25/15/15/25/20, INT 20/15/15/5/45, WIS 30/15/25/10/20, CHA 25/20/25/5/25. Batas per komponen: damage 15-50%, speed 5-30%, accuracy 5-30%, defense 0-30%, trigger 15-60%. Bobot (tebakan): damage 4 poin per 1, speed dan accuracy 1 poin per 1%, defense 2 poin per 1%. Kelebihan trigger memakai poin, kekurangan mengembalikan poin.
-CD-4.04: pembeda jarak di DEX. Tiap senjata bertag Dekat atau Jauh, jumlah senjata tetap 36. Dekat bisa parry. Jauh tidak bisa parry, dodge dan akurasi lebih tinggi, damage dasar lebih rendah atau stamina lebih boros. Angka belum ditetapkan.
+CD-4.03: anggaran dibagi ke damage, speed, accuracy, defense, trigger (persen). Profil Dekat: STR 40/15/15/5/25, DEX 25/25/20/5/25, CON 25/15/15/25/20, INT 20/15/15/5/45, WIS 30/15/25/10/20, CHA 25/20/25/5/25. Profil Jauh menyesuaikan stat dengan akurasi/speed lebih tinggi dan defense lebih rendah (dasar Jauh: 25/20/30/0/25). Batas per komponen: damage 15-50%, speed 5-30%, accuracy 5-30%, defense 0-30%, trigger 15-60%. Bobot (tebakan): damage 4 poin per 1, speed dan accuracy 1 poin per 1%, defense 2 poin per 1%. Kelebihan trigger memakai poin, kekurangan mengembalikan poin.
+CD-4.04: pembeda jarak Dekat vs Jauh (LOCKED: 48 senjata = 32 Dekat + 16 Jauh). Dekat bisa parry dan dinaungi Weaponsmith. Jauh tidak bisa parry, dodge dan akurasi lebih tinggi, dinaungi Rangesmith (+6% Mastery/tier & +2,5% Speed/Accuracy komponen tempa/tier).
 
 CD-5 Armor dan bertahan
 
@@ -78,28 +100,33 @@ CD-6 Murid dan CD-7 Kutukan, idle
 
 CD-6.01: murid punya 3 atribut utama (bakat, laju belajar, loyalitas) serta nilai skill fokus latihan (seperti menempa), semuanya memakai skala numerik 0-100 (LOCKED). Batas maksimal 5 murid (LOCKED, selaras WD-3.08). Moral Mulia/Kejam menggeser loyalitas ±1 (WD-3.13). Pemain pilih fokus latihan. Murid pilihan jadi pemilik/penjaga cabang saat pemain pindah (WD-3.10, WD-4.13).
 CD-7.01: stamina hanya di idle (Battle atau Smith, laju Battle lebih besar). Offline cap 8 jam. Kalah Gate = satu kutukan acak (debuff per stat maksimal -4, total 13+ tidak bisa bertarung).
-4. USULAN (belum dikonfirmasi)
-36 weapon trigger (satu per senjata, kelebihan dan kekurangan). Hanya Twister (Kapak Perang) dan Heavy Chain (Palu Perang) berasal dari GDD asli. Daftar nama: STR Twister, Cleave, Heavy Chain, Breaker Edge, Spike Burst, Earthbreaker. DEX Quick Stab, Riposte, Dual Flurry, Iaijutsu, Quick Draw, Piercing Shot. CON Guard Strike, Swing Lash, Counter Fist, Bulwark Slam, Thorn Chain, Sentinel Oath. INT Arcane Bolt, Rune Edge, Runic Shockwave (pengganti nama Resonance Hammer agar tidak rancu dengan Resonance upgrade Unique), Soul Reap, Orbit Discs, Binding Chain. WIS Keen Thrust, Triple Prong, Sweeping Arc, Disarm Sweep, Tracker Mark, Prey Sense. CHA Feint, Rally Cut, Noble Challenge, Command Aura, Debt Lash, Grand Ovation.
-Tag Jauh: Busur Pendek, Busur Panjang, Tombak Lempar, Cakram Rune. Senjata jarak jauh baru (crossbow, senapan fantasi) agar Rangesmith tidak sempit. Gunslinger ditunda.
+4. USULAN & Daftar 48 Weapon Trigger
+48 weapon trigger (satu per senjata: 36 trigger awal + 12 trigger senjata Jauh baru):
+- STR (8): Twister, Cleave, Splitting Throw (Kapak Lempar Berat - Jauh), Heavy Chain, Breaker Edge, Spike Burst, Earthbreaker, Siege Bolt (Arbalest Baja - Jauh).
+- DEX (8): Quick Stab, Riposte, Fan of Knives (Pisau Lempar Kembar - Jauh), Dual Flurry, Iaijutsu, Quick Draw (Busur Pendek - Jauh), Piercing Shot (Busur Panjang - Jauh), Rapid Volley (Crossbow Berulang - Jauh).
+- CON (8): Guard Strike, Swing Lash, Counter Fist, Entangling Weight (Bola Rantai Berat - Jauh), Bulwark Slam, Thorn Chain, Sentinel Oath, Fortress Shot (Ballista Perisai - Jauh).
+- INT (8): Arcane Bolt, Rune Edge, Prismatic Beam (Orb Rune Melayang - Jauh), Runic Shockwave, Soul Reap, Orbit Discs (Cakram Rune - Jauh), Binding Chain, Arcane Snipe (Senapan Rune - Jauh).
+- WIS (8): Keen Thrust, Triple Prong, Neurotoxin Dart (Sumpit Pemburu - Jauh), Sweeping Arc, Disarm Sweep, Tracker Mark (Tombak Lempar - Jauh), Prey Sense, Deadeye Pin (Busur Silang Pemburu - Jauh).
+- CHA (8): Feint, Rally Cut, Noble Challenge, Point-Blank Decree (Pistol Flintlock Duel - Jauh), Command Aura, Debt Lash, Grand Ovation, Salvo Signal (Meriam Genggam Komando - Jauh).
 Profil anggaran Jauh (opsi A): damage 25 / speed 20 / accuracy 30 / defense 0 / trigger 25.
 Mikro-bonus tiap poin stat 1-4 (berhenti di stat 5). Mitigate cap 50% damage mentah.
 5. Temuan beta test senjata (Lv10 vs monster Lv10, DEMO)
 STR bertahan 1,5-2 kali lebih lama dari stat lain di tier yang sama, karena damage +1 per 2 STR ada di atas anggaran senjata.
 CON paling lemah (DPS sekitar setengah STR). Bobot defense 2 poin per 1% tidak cukup.
-Jauh tidak terlalu kuat dengan nilai awal (dodge +8%, damage x0,9, stamina x1,2).
+Jauh kini diperkuat lewat 16 pilihan senjata lintas 6 stat dan komponen Rangesmith (+2,5% speed/accuracy per tier + 6% mastery per tier).
 Masalah monster terlalu keras di Lv30 (karena pengali lama x2,25) sudah diselesaikan di v3.2 lewat kelipatan zona 5 Tier linear (x1,0 s.d. x2,0) dan kenaikan cap stat menjadi 30/60/90/120/150.
 Opsi penyetelan antar-stat yang belum dipilih: A (bonus stat non-STR), B (kurangi damage anggaran STR), C (naikkan bobot defense dan trigger CON dan CHA). Rekomendasi: B dan C.
-5b. Model simulasi, Skill Engine, dan pemetaan data musuh WD
-Dipakai beta test senjata (HTML), engines/skill_engine/ (skill_data.json, skill_engine.js, test_skill_engine.js), dan perhitungan stat untuk 4.864 musuh di data/areas/*.json WD.
+5b. Model simulasi, Skill & Forge Engine, dan pemetaan data musuh WD
+Dipakai beta test senjata (HTML), bengkel-tempa-v3.html, engines/skill_engine/ (skill_data.json, skill_engine.js, forge_engine.js, test_skill_engine.js, test_forge_engine.js), dan perhitungan stat untuk 4.864 musuh di data/areas/*.json WD.
 
-Model beta test & Skill Engine
+Model beta test & Skill/Forge Engine
 
 Alokasi stat pemain: stat utama senjata 60% poin bebas, lalu urutan CON, DEX, WIS, STR, INT, CHA (tanpa stat utama) dengan porsi 25% dan 15%. Sisa poin mengisi sampai cap.
 Peluang kena = 75% + akurasi senjata + min(20, DEX) + 5 (title), maksimal 95%.
 Dodge = min(20, DEX x 0,5)% (+8% untuk senjata Jauh). Parry = min(20, DEX x 0,5)% hanya senjata Dekat. Critical = min(20, WIS)%, damage x2. Jumlah dodge, parry, dan critical dibatasi 30%.
 Senjata dari anggaran: damage = poin damage / 4, speed dan accuracy (%) = poinnya, defense (%) = poin / 2. Kecepatan serang dasar 1 per detik x (1 + speed).
-Damage per pukulan = (damage senjata + floor(STR/2) + bonus trigger) x 1,05 (title) x 0,9 (Jauh) x faktor elemen (x1,25 jika cocok weak musuh, x0,75 jika sama dengan el musuh, x1,0 untuk Neutral).
-Trigger (abstraksi): efektif = poin trigger x 0,8 x (1 + 1% x stat utama). STR, DEX, INT, WIS: tambah damage efektif/4. CON: pengurang damage efektif/2 (%). CHA: tambah damage efektif/8 dan pengurang efektif/4 (%). Pengurang total maksimal 60%.
+Damage per pukulan = (damage senjata + floor(STR/2) + bonus trigger) x (1 + mastery_smith_class) x 1,05 (title) x 0,9 (Jauh) x faktor elemen (x1,25 jika cocok weak musuh, x0,75 jika sama dengan el musuh, x1,0 untuk Neutral).
+Trigger (abstraksi): hanya aktif jika pemain memiliki minimal Tier 1 pada Smith Class yang cocok (jika tidak cocok: trigger = 0 dan penalti mastery -25%). Efektif = poin trigger x 0,8 x (1 + 1% x stat utama). STR, DEX, INT, WIS: tambah damage efektif/4. CON: pengurang damage efektif/2 (%). CHA: tambah damage efektif/8 dan pengurang efektif/4 (%). Pengurang total maksimal 60%.
 Monster menyerang sesuai speed role, akurasi sesuai role. Damage diterima = (mentah - min(CON/2, 50% mentah)) x (1 - pengurang) x (1 - resist_elemen_armor_sedang).
 Metrik: kill per HP bar. Stamina idle Battle = (100 + 5 x CON) / (25 per jam x pengali Jauh 1,2).
 Parameter Jauh (DEMO): dodge +8%, damage x0,9, stamina x1,2.
@@ -133,21 +160,24 @@ Placeholder punya_kelemahan (Y/N) dan penalti trigger INT x0,5 pada musuh tanpa 
 Nama trigger INT "Resonance Hammer" diganti menjadi "Runic Shockwave".
 36 skill breakpoint statis (pasif 5/15/25, aktif 10/20/30) diganti Sistem Skill SWTOR Discipline & Cross-Stat Macro Loadout 150 Node (+10 Core Passive, +20 Pilih 1-dari-3 Utility/Morph, +30 Rotational Active Skill).
 Syarat stat Perk Smith Tingkat 3 (stat 10) dan Tingkat 5 (stat 15) di skala demo diganti stat 45 (Tingkat 3) dan stat 75 pada kedua stat (Tingkat 5) di skala penuh 150.
+Sistem nama Smith Class multi-kata (awalan Raw..Paragon + akar pasangan) diganti Sistem Anggaran 5 Poin Tier & Nama Kelas 1-Kata Unik (CD-3.01 & CD-3.02b).
+Jumlah senjata 36 (hanya 4 senjata Jauh) diperluas menjadi 48 senjata (32 Dekat + 16 Jauh = +2 senjata Jauh baru per stat) agar Rangesmith seimbang di semua stat.
 7. OPEN
-Pemilik chunk dan pembagian AI. Penyetelan temuan beta test antar-stat (STR vs CON). XP dan drop anti-farm menurut selisih level. Daftar 21 nama & efek detail Perk Smith (saat ini baru Venomed Blade yang bernama, syarat stat sudah LOCKED di 45 dan 75). Slot trigger Armorer, penalti mati, biaya Long Rest, rumus +N final. Detail mekanik companion tempur murid, ujian murid, dan syarat teknis pewarisan toko (CD-6). Rarity dan +N di anggaran senjata. Bobot anggaran poin. 36 trigger belum disimulasikan satu per satu.
+Pemilik chunk dan pembagian AI. Penyetelan temuan beta test antar-stat (STR vs CON). XP dan drop anti-farm menurut selisih level. Daftar 21 nama & efek detail Perk Smith (saat ini baru Venomed Blade yang bernama, syarat stat sudah LOCKED di 45 dan 75). Slot trigger Armorer, penalti mati, biaya Long Rest, rumus +N final. Detail mekanik companion tempur murid, ujian murid, dan syarat teknis pewarisan toko (CD-6). Rarity dan +N di anggaran senjata. Bobot anggaran poin. 48 trigger belum disimulasikan efek uniknya satu per satu.
 8. Format Laporan Perubahan (isi tiap akhir sesi)
 LAPORAN PERUBAHAN
 Versi master yang dipakai: v3.1 -> v3.2
-Chunk: CD-1, CD-2, CD-3, CD-4, CD-5, CD-6, Bagian 2 & 5b (Tindak lanjut BRIEF WD -> CD v1 + Pembangunan Skill Engine)
+Chunk: CD-1, CD-2, CD-3, CD-4, CD-5, CD-6, Bagian 2 & 5b (Tindak lanjut BRIEF WD -> CD v1 + Skill & Forge Engine + 5-Tier Smith Class + 48 Senjata)
 Tanggal sesi: 20 November 2026
 1. Keputusan baru (ID, isi, status LOCKED/USULAN):
 - CD-1.01 & CD-1.07 (LOCKED): Mode Full Lv1-150 aktif (5 Tier x 30 level). Poin stat per level tetap +2 sampai Lv150 (total 311 poin). Cap stat tiap tier naik +30: 30 / 60 / 90 / 120 / 150 (kapasitas total 900).
 - CD-1.02b (LOCKED): Setiap Stat Utama memiliki 10 Sub-Stat (6 Tempur + 4 Profesi/Smith = 60 Sub-Stat total) dengan koefisien linear terukur di engines/skill_engine/skill_data.json. Pemain memilih 2 Sub-Stat Fokus per Stat Utama (+25% efisiensi, diubah lewat un-fuse).
 - CD-1.04 & CD-1.06 (LOCKED): Target total waktu minimum idle sampai Lv150 = ~720 jam (12 tahun kalender WD). Cap XP/jam setelah Lv30 = 1.200 + 60 x (L - 30) (8.400 XP/jam di Lv150).
 - CD-2.01 (LOCKED): Sistem Skill SWTOR Discipline & Cross-Stat Macro Loadout (150 Node = 25 per stat: +10 Core Passive, +20 pilih 1-dari-3 Utility/Morph, +30 Rotational Active Skill). Kapasitas Macro Bar 3-6 slot dari Sub-Stat INT Macro Capacity; tiap Skill Aktif punya 2 slot Cross-Stat Utility Mod.
-- CD-3.01 & CD-3.03 (LOCKED): 5 Smith Type tetap dipertahankan dan bersinergi dengan Skill Engine. Syarat stat Perk Smith Tingkat 3 = minimal 45; Tingkat 5 (hibrida pasangan stat) = kedua stat minimal 75.
+- CD-3.01, CD-3.02, CD-3.02b, & CD-3.03 (LOCKED): Anggaran total 5 Poin Tingkat (5 Tier) bebas distribusi ke 5 Smith Class. Sistem Nama Kelas 1-Kata Unik (Bladesmith..Archblade, Spellblade, Vanguard, Starfletcher, Omnismith, dst.). Aturan Mazhab Barang A+C (semua barang bisa ditempa dengan 5 aspek komponen; pemakaian tempur butuh minimal Tier 1 pada class terkait agar Trigger aktif dan bebas penalti -25%). Syarat stat Perk Tingkat 3 = 45, Tingkat 5 = 75 pada kedua stat (eksklusif 5 poin murni).
+- CD-4.01 & CD-4.04 (LOCKED): Penambahan 12 Senjata Jarak Jauh baru (2 per Stat, beserta 12 Weapon Trigger baru) sehingga total menjadi 48 Senjata (32 Dekat + 16 Jauh).
 - Kontrak Bagian 2 & Bagian 5b (LOCKED): Kelipatan zona dipetakan ke 5 Tier WD secara linear (+0,25/tier): x1,0 / x1,25 / x1,5 / x1,75 / x2,0.
-- Bagian 5b (LOCKED): Tabel pemetaan 5 Role WD (Brute, Skirmisher, Caster, Tank, Support) dan 4 Tipe WD (Reguler, Reguler Khusus, Mini Boss, Boss) ke pengali HP, damage, speed, akurasi, dodge, dan armor CD.
+- Bagian 5b (LOCKED): Tabel pemetaan 5 Role WD dan 4 Tipe WD ke pengali HP, damage, speed, akurasi, dodge, dan armor CD.
 - CD-5.02 & Bagian 5b (LOCKED): Adopsi 6 Elemen + Neutral WD beserta pembacaan kolom el dan weak. Serangan cocok weak = +25% damage dasar (+ sub-stat INT Weakness Exploit); sama dengan el = -25%. Armor Sedang memberi +5% resist per slot terhadap 1 elemen spesifik sesuai bahan/Attunement.
 - CD-6.01 (LOCKED): Batas maksimal 5 murid LOCKED. Skala numerik bakat, laju belajar, loyalitas, dan skill fokus murid dikunci pada 0-100.
 - Kontrak Bagian 2 & Bagian 4 (LOCKED): Standarisasi istilah Resonance, Attunement, Conscience. Trigger Palu Rune "Resonance Hammer" diganti menjadi "Runic Shockwave".
@@ -158,15 +188,17 @@ Tanggal sesi: 20 November 2026
 - Tabel peran/afinitas monster CSV lama & placeholder punya_kelemahan (Y/N) -> Tabel 5 Role & 4 Tipe WD + kolom el/weak 6 Elemen WD.
 - Nama trigger INT "Resonance Hammer" -> "Runic Shockwave".
 - 36 skill breakpoint statis (5..30) & syarat perk 10/15 -> 150 Node SWTOR Discipline + Cross-Stat Macro Loadout & syarat perk 45/75.
+- Nama Smith Class multi-kata -> Nama Kelas 1-Kata Unik dengan anggaran 5 Poin Tier.
+- Batas 36 senjata (4 Jauh) -> 48 senjata (32 Dekat + 16 Jauh).
 3. Nilai kontrak lintas chunk yang disentuh:
 - Skala level (Lv1-150, 5 Tier), cap stat (30/60/90/120/150), kelipatan zona (x1,0 s.d. x2,0), pemetaan role/tipe monster WD, 6 elemen + Neutral, skala murid 0-100 (maks 5 murid), dan istilah Resonance/Attunement/Conscience.
 4. KONFLIK dengan chunk lain (jika ada):
 - Tidak ada konflik; seluruh permintaan B1-B7 dari BRIEF WD -> CD telah diselesaikan dan diuji di engines/skill_engine/.
 5. OPEN baru:
-- Tidak ada (dua OPEN baru dari B1 mengenai rumus 60 Sub-Stat dan sistem skill/syarat perk skala 150 sudah diselesaikan lewat engines/skill_engine/).
+- Tidak ada.
 6. Parkir (topik milik chunk lain):
 - Tidak ada. Detail companion tempur, ujian murid, dan pewarisan toko tetap di OPEN CD-6 untuk sesi berikutnya.
 9. Log versi
 v3.0: basis GDD v2 dan perubahan sampai pembahasan Smith type ke-5 dan pembeda jarak DEX.
 v3.1: tambah PRJ-01 (fokus backend), bagian 5b (model simulasi dan spesifikasi CSV monster), status LOCKED rumus damage monster, OPEN diperbarui. Saran pembagian AI tercatat sebagai USULAN.
-v3.2: integrasi penuh BRIEF WD -> CD v1 (B1-B7) + pembangunan engines/skill_engine/: Mode Full Lv1-150, cap stat 30/60/90/120/150, 60 sub-stat (10 per stat dengan 2 fokus +25%), sistem skill SWTOR Discipline & Cross-Stat Macro Loadout (150 node) yang bersinergi dengan 5 Smith Type (syarat perk 45/75), target idle Lv150 ~720 jam, kelipatan zona 5 Tier linear (x1,0-x2,0), pemetaan 5 Role & 4 Tipe monster WD, adopsi 6 elemen + Neutral & resist armor sedang per elemen, skala murid 0-100 (maks 5 murid LOCKED), dan penggantian nama trigger Runic Shockwave.
+v3.2: integrasi penuh BRIEF WD -> CD v1 (B1-B7) + pembangunan engines/skill_engine/ & forge_engine.js + bengkel-tempa-v3.html: Mode Full Lv1-150, cap stat 30/60/90/120/150, 60 sub-stat, sistem skill SWTOR Discipline & Cross-Stat Macro Loadout (150 node), anggaran 5 Tier Smith Class dengan nama 1-kata unik & aturan Mazhab Barang A+C, perluasan senjata menjadi 48 senjata (32 Dekat + 16 Jauh), target idle Lv150 ~720 jam, kelipatan zona 5 Tier linear (x1,0-x2,0), pemetaan 5 Role & 4 Tipe monster WD, adopsi 6 elemen + Neutral, dan skala murid 0-100.

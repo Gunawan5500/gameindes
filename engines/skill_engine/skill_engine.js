@@ -139,32 +139,95 @@ export function createSkillEngine(skillData) {
     return { type: "Seimbang", primaryStat: null, sameWeaponBonusPct: 0, otherWeaponPenaltyPct: 0, crossBuffEfficiencyBonusPct: 10 };
   }
 
+  const SINGLE_CLASS_NAMES = {
+    Weaponsmith: ["Bladesmith", "Edgewright", "Warmonger", "Vanquisher", "Archblade"],
+    Armorer:     ["Platesmith", "Shieldwright", "Bulwark", "Juggernaut", "Aegisborn"],
+    Rangesmith:  ["Bowyer", "Fletcher", "Deadeye", "Ballistary", "Horizoner"],
+    Runesmith:   ["Runescribe", "Glyphwright", "Spellforger", "Arcanist", "Runelord"],
+    Reforger:    ["Tinkerer", "Temperer", "Transmuter", "Alchemizer", "Sovereign"]
+  };
+
+  const DUAL_CLASS_NAMES = {
+    "Weaponsmith+Armorer": "Vanguard",
+    "Weaponsmith+Rangesmith": "Skirmisher",
+    "Weaponsmith+Runesmith": "Spellblade",
+    "Weaponsmith+Reforger": "Hellforger",
+    "Armorer+Weaponsmith": "Wardensmith",
+    "Armorer+Rangesmith": "Sentinel",
+    "Armorer+Runesmith": "Runeguard",
+    "Armorer+Reforger": "Ironclad",
+    "Rangesmith+Weaponsmith": "Outrider",
+    "Rangesmith+Armorer": "Bastionbow",
+    "Rangesmith+Runesmith": "Arcarcher",
+    "Rangesmith+Reforger": "Artificer",
+    "Runesmith+Weaponsmith": "Hexblade",
+    "Runesmith+Armorer": "Aegisrune",
+    "Runesmith+Rangesmith": "Starfletcher",
+    "Runesmith+Reforger": "Thaumaturge",
+    "Reforger+Weaponsmith": "Reaver",
+    "Reforger+Armorer": "Colossus",
+    "Reforger+Rangesmith": "Machinist",
+    "Reforger+Runesmith": "Chronosmith"
+  };
+
   /**
-   * 4. Evaluasi Smith Type & Perk Eligibility (CD-3.01 - CD-3.03, diselaraskan ke Cap Stat 150)
-   *    - Perk Tingkat 3 (Stat Tunggal): Primary Smith Rank >= 3 & Stat >= 45
-   *    - Perk Tingkat 5 (Pasangan Stat Hibrida): Primary Smith Rank == 5 (Spesialis, tanpa secondary) & kedua Stat >= 75
+   * 4. Evaluasi Smith Class (Total 5 Poin Tingkat / 5 Tier, Nama Kelas 1 Kata CD-3.02b, & Mazhab Barang A+C)
    */
   function evaluateSmithMastery(stats, smithConfig = {}) {
-    const primaryType = smithConfig.primaryType || "Weaponsmith";
-    const primaryRank = Math.min(5, Math.max(1, smithConfig.primaryRank || 1));
-    const secondaryType = smithConfig.secondaryType || null;
-    const secondaryRank = secondaryType ? Math.min(3, Math.max(0, smithConfig.secondaryRank || 0)) : 0;
-    const isSpecialistSmith = !secondaryType || secondaryRank === 0;
+    // Dukung format baru { tiers: { Weaponsmith: 3, Runesmith: 2 } } maupun format lama { primaryType, primaryRank }
+    let tiers = { Weaponsmith: 0, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
+    if (smithConfig.tiers) {
+      for (const k of Object.keys(tiers)) {
+        tiers[k] = Math.max(0, Math.min(5, +(smithConfig.tiers[k] || 0)));
+      }
+    } else {
+      const pType = smithConfig.primaryType || "Weaponsmith";
+      const pRank = Math.min(5, Math.max(1, +(smithConfig.primaryRank || 1)));
+      tiers[pType] = pRank;
+      if (smithConfig.secondaryType && smithConfig.secondaryRank > 0) {
+        const sType = smithConfig.secondaryType;
+        tiers[sType] = Math.min(5 - pRank, Math.max(0, +(smithConfig.secondaryRank || 0)));
+      }
+    }
+
+    // Batasi total anggaran maksimal 5 poin tier
+    const activeEntries = Object.entries(tiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    const totalPointsUsed = activeEntries.reduce((acc, [, v]) => acc + v, 0);
+    const primaryType = activeEntries.length ? activeEntries[0][0] : "Weaponsmith";
+    const primaryRank = activeEntries.length ? activeEntries[0][1] : 1;
+    const secondaryType = activeEntries.length > 1 ? activeEntries[1][0] : null;
+    const secondaryRank = activeEntries.length > 1 ? activeEntries[1][1] : 0;
+    const isSpecialistSmith = activeEntries.length === 1 && primaryRank === 5;
+
+    // Resolusi Nama Kelas 1 Kata (CD-3.02b)
+    let singleWordClassName = "Apprentice";
+    if (activeEntries.length === 1) {
+      singleWordClassName = SINGLE_CLASS_NAMES[primaryType][Math.min(5, Math.max(1, primaryRank)) - 1];
+    } else if (activeEntries.length === 2) {
+      singleWordClassName = DUAL_CLASS_NAMES[`${primaryType}+${secondaryType}`] || "Hybrid";
+    } else if (activeEntries.length === 3) {
+      const magicPts = (tiers.Runesmith || 0) + (tiers.Reforger || 0);
+      const martialPts = (tiers.Weaponsmith || 0) + (tiers.Armorer || 0) + (tiers.Rangesmith || 0);
+      singleWordClassName = magicPts >= martialPts ? "Polymath" : "Arsenist";
+    } else if (activeEntries.length === 4) {
+      singleWordClassName = "Synthesist";
+    } else if (activeEntries.length >= 5) {
+      singleWordClassName = "Omnismith";
+    }
 
     const pData = skillData.smith_types[primaryType] || skillData.smith_types.Weaponsmith;
-    const craftBonusPct = primaryRank * pData.primary_bonus_per_rank_pct + (secondaryRank * 3);
-    const rankPrefix = pData.rank_prefixes[primaryRank - 1];
+    const craftBonusPct = primaryRank * 6 + (totalPointsUsed - primaryRank) * 3;
 
-    // Perk eligibility (Scale 150: Tier 3 single stat >= 45, Tier 5 dual stat >= 75)
+    // Perk eligibility (CD-3.03: Tier 3 single stat >= 45 jika punya class >= 3; Tier 5 dual stat >= 75 eksklusif 5 poin murni)
     const eligibleSingleStatPerks = [];
     const eligibleHybridPairPerks = [];
 
-    if (isSpecialistSmith && primaryRank >= 3) {
+    if (primaryRank >= 3) {
       for (const s of STATS) {
         if ((stats[s] || 1) >= 45) eligibleSingleStatPerks.push(s);
       }
     }
-    if (isSpecialistSmith && primaryRank >= 5) {
+    if (isSpecialistSmith) {
       for (let i = 0; i < STATS.length; i++) {
         for (let j = i + 1; j < STATS.length; j++) {
           const s1 = STATS[i], s2 = STATS[j];
@@ -175,8 +238,38 @@ export function createSkillEngine(skillData) {
       }
     }
 
+    // Fungsi pengecekan kecocokan pemakaian senjata/barang (CD-3.02 Opsi A+C)
+    function checkWeaponCompatibility(weapon = {}) {
+      const matchingClasses = [];
+      if (weapon.tag === "Jauh") matchingClasses.push("Rangesmith");
+      else matchingClasses.push("Weaponsmith");
+
+      if (weapon.stat === "CON") matchingClasses.push("Armorer");
+      if (weapon.stat === "INT" || weapon.fused || weapon.hybridFusion) matchingClasses.push("Runesmith");
+      if (weapon.stat === "CHA" || weapon.stat === "WIS" || (weapon.enhancePlus || 0) > 0) matchingClasses.push("Reforger");
+
+      let bestRank = 0;
+      let matchedClass = null;
+      for (const c of matchingClasses) {
+        if ((tiers[c] || 0) > bestRank) {
+          bestRank = tiers[c];
+          matchedClass = c;
+        }
+      }
+      return {
+        isCompatible: bestRank >= 1,
+        matchedClass,
+        masteryRank: bestRank,
+        masteryBonusPct: bestRank >= 1 ? bestRank * 6 : -25,
+        triggerUnlocked: bestRank >= 1
+      };
+    }
+
     return {
-      titlePrefix: rankPrefix,
+      singleWordClassName,
+      titlePrefix: singleWordClassName,
+      tiers,
+      totalPointsUsed,
       primaryType,
       primaryRank,
       secondaryType,
@@ -185,7 +278,8 @@ export function createSkillEngine(skillData) {
       craftBonusPct,
       synergy: pData.skill_synergy,
       eligibleSingleStatPerks,
-      eligibleHybridPairPerks
+      eligibleHybridPairPerks,
+      checkWeaponCompatibility
     };
   }
 
@@ -395,9 +489,12 @@ export function createSkillEngine(skillData) {
 
     const critMultiplier = 2.0 + (sub.wis_crit_severity.value + pas.crit_dmg_pct) / 100;
 
-    // Trigger senjata
+    const compat = build.smith.checkWeaponCompatibility(weapon);
+    const masteryMult = 1 + compat.masteryBonusPct / 100;
+
+    // Trigger senjata (Hanya aktif jika cocok dengan minimal 1 Smith Class Tier >= 1; jika tidak cocok, trigger terkunci!)
     const mainStatVal = stats[weapon.stat] || 10;
-    const triggerMult = 1 + (sub.int_trigger_mastery.value + pas.trigger_power_pct) / 100;
+    const triggerMult = compat.triggerUnlocked ? (1 + (sub.int_trigger_mastery.value + pas.trigger_power_pct) / 100) : 0;
     const effectiveTrigger = wTrgPoints * 0.8 * (1 + 0.01 * mainStatVal) * triggerMult;
     const triggerDmgBonus = ["STR", "DEX", "INT", "WIS"].includes(weapon.stat)
       ? effectiveTrigger / 4
@@ -486,7 +583,7 @@ export function createSkillEngine(skillData) {
         const effectiveMonsterArmor = Math.max(0, monster.armor - armorPen);
         const expectedCritFactor = 1 + (Math.min(35, rawCrit + skillToCast.combinedModEffect.crit_chance_pct) / 100) * (critMultiplier - 1);
 
-        const dmg = baseStrike * skillMult * elemMult * expectedCritFactor * (1 - effectiveMonsterArmor / 100) * (playerHitChance / 100);
+        const dmg = baseStrike * masteryMult * skillMult * elemMult * expectedCritFactor * (1 - effectiveMonsterArmor / 100) * (playerHitChance / 100);
         monsterHp -= dmg;
         totalDamageDealt += dmg;
 
@@ -507,7 +604,7 @@ export function createSkillEngine(skillData) {
         const effectiveMonsterArmor = Math.max(0, monster.armor - armorPen);
         const expectedCritFactor = 1 + (rawCrit / 100) * (critMultiplier - 1);
 
-        const dmg = baseStrike * titleMult * rangedMult * elemMult * expectedCritFactor * (1 - effectiveMonsterArmor / 100) * (playerHitChance / 100);
+        const dmg = baseStrike * masteryMult * titleMult * rangedMult * elemMult * expectedCritFactor * (1 - effectiveMonsterArmor / 100) * (playerHitChance / 100);
         monsterHp -= dmg;
         totalDamageDealt += dmg;
       }
@@ -558,7 +655,9 @@ export function createSkillEngine(skillData) {
         tier,
         maxPlayerHp,
         title: build.title.type,
-        smithClass: `${build.smith.titlePrefix} ${build.smith.primaryType}`,
+        smithClass: build.smith.singleWordClassName,
+        smithTiers: build.smith.tiers,
+        weaponCompatibility: compat,
         macroSlotsUsed: `${build.equippedSkills.length}/${build.maxSlots}`,
         unlockedNodes: build.unlockedCount
       },

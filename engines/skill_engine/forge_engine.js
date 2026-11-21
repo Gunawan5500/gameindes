@@ -134,56 +134,69 @@ export const HYBRID_FUSIONS = {
   }
 };
 
-// 36 Senjata Resmi CD-4.01 + 36 Weapon Trigger Bagian 4 + Bobot Mode Inti [Terkunci, Fleksibel, Fusi]
+// 48 Senjata Resmi CD-4.01 (36 Dasar + 12 Jauh Baru = 8 Senjata per Stat: 32 Dekat + 16 Jauh) + 48 Weapon Trigger
 export const WEAPONS_36 = [
-  // STR (6) - Budget: Dmg 40, Spd 15, Acc 15, Def 5, Trg 25
+  // STR (8: 6 Dekat, 2 Jauh)
   { id: "w_str_1", name: "Kapak Perang", stat: "STR", tier: 1, tag: "Dekat", trigger: "Twister", modeWeights: [55, 30, 15], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
   { id: "w_str_2", name: "Kapak Besar", stat: "STR", tier: 2, tag: "Dekat", trigger: "Cleave", modeWeights: [60, 25, 15], budget: { damage: 42, speed: 13, accuracy: 15, defense: 5, trigger: 25 } },
+  { id: "w_str_r1", name: "Kapak Lempar Berat", stat: "STR", tier: 2, tag: "Jauh", trigger: "Splitting Throw", modeWeights: [40, 40, 20], budget: { damage: 35, speed: 15, accuracy: 25, defense: 0, trigger: 25 } },
   { id: "w_str_3", name: "Palu Perang", stat: "STR", tier: 3, tag: "Dekat", trigger: "Heavy Chain", modeWeights: [55, 35, 10], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
   { id: "w_str_4", name: "Pedang Besar", stat: "STR", tier: 4, tag: "Dekat", trigger: "Breaker Edge", modeWeights: [50, 30, 20], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
   { id: "w_str_5", name: "Gada Berduri", stat: "STR", tier: 5, tag: "Dekat", trigger: "Spike Burst", modeWeights: [55, 25, 20], budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
   { id: "w_str_6", name: "Maul", stat: "STR", tier: 6, tag: "Dekat", trigger: "Earthbreaker", modeWeights: [60, 20, 20], budget: { damage: 45, speed: 10, accuracy: 15, defense: 5, trigger: 25 } },
+  { id: "w_str_r2", name: "Arbalest Baja", stat: "STR", tier: 6, tag: "Jauh", trigger: "Siege Bolt", modeWeights: [35, 35, 30], budget: { damage: 38, speed: 12, accuracy: 25, defense: 0, trigger: 25 } },
 
-  // DEX (6) - Dekat (25/25/20/5/25) & Jauh (25/20/30/0/25)
+  // DEX (8: 4 Dekat, 4 Jauh)
   { id: "w_dex_1", name: "Belati", stat: "DEX", tier: 1, tag: "Dekat", trigger: "Quick Stab", modeWeights: [30, 50, 20], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
   { id: "w_dex_2", name: "Pedang Pendek", stat: "DEX", tier: 2, tag: "Dekat", trigger: "Riposte", modeWeights: [30, 50, 20], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
+  { id: "w_dex_r1", name: "Pisau Lempar Kembar", stat: "DEX", tier: 2, tag: "Jauh", trigger: "Fan of Knives", modeWeights: [25, 45, 30], budget: { damage: 22, speed: 28, accuracy: 25, defense: 0, trigger: 25 } },
   { id: "w_dex_3", name: "Belati Kembar", stat: "DEX", tier: 3, tag: "Dekat", trigger: "Dual Flurry", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 25, accuracy: 20, defense: 5, trigger: 25 } },
   { id: "w_dex_4", name: "Katana", stat: "DEX", tier: 4, tag: "Dekat", trigger: "Iaijutsu", modeWeights: [35, 40, 25], budget: { damage: 28, speed: 25, accuracy: 20, defense: 2, trigger: 25 } },
   { id: "w_dex_5", name: "Busur Pendek", stat: "DEX", tier: 5, tag: "Jauh", trigger: "Quick Draw", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
   { id: "w_dex_6", name: "Busur Panjang", stat: "DEX", tier: 6, tag: "Jauh", trigger: "Piercing Shot", modeWeights: [25, 45, 30], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
+  { id: "w_dex_r2", name: "Crossbow Berulang", stat: "DEX", tier: 6, tag: "Jauh", trigger: "Rapid Volley", modeWeights: [20, 45, 35], budget: { damage: 24, speed: 26, accuracy: 25, defense: 0, trigger: 25 } },
 
-  // CON (6) - Budget: Dmg 25, Spd 15, Acc 15, Def 25, Trg 20
+  // CON (8: 6 Dekat, 2 Jauh)
   { id: "w_con_1", name: "Gada Penjaga", stat: "CON", tier: 1, tag: "Dekat", trigger: "Guard Strike", modeWeights: [50, 35, 15], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
   { id: "w_con_2", name: "Flail Baja", stat: "CON", tier: 2, tag: "Dekat", trigger: "Swing Lash", modeWeights: [45, 35, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
   { id: "w_con_3", name: "Gauntlet Baja", stat: "CON", tier: 3, tag: "Dekat", trigger: "Counter Fist", modeWeights: [50, 30, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+  { id: "w_con_r1", name: "Bola Rantai Berat", stat: "CON", tier: 3, tag: "Jauh", trigger: "Entangling Weight", modeWeights: [40, 35, 25], budget: { damage: 25, speed: 15, accuracy: 25, defense: 15, trigger: 20 } },
   { id: "w_con_4", name: "Palu Penjaga", stat: "CON", tier: 4, tag: "Dekat", trigger: "Bulwark Slam", modeWeights: [55, 30, 15], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
   { id: "w_con_5", name: "Rantai Berduri", stat: "CON", tier: 5, tag: "Dekat", trigger: "Thorn Chain", modeWeights: [40, 35, 25], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
   { id: "w_con_6", name: "Pedang Penjaga", stat: "CON", tier: 6, tag: "Dekat", trigger: "Sentinel Oath", modeWeights: [50, 30, 20], budget: { damage: 25, speed: 15, accuracy: 15, defense: 25, trigger: 20 } },
+  { id: "w_con_r2", name: "Ballista Perisai", stat: "CON", tier: 6, tag: "Jauh", trigger: "Fortress Shot", modeWeights: [45, 30, 25], budget: { damage: 25, speed: 12, accuracy: 23, defense: 20, trigger: 20 } },
 
-  // INT (6) - Budget: Dmg 20, Spd 15, Acc 15, Def 5, Trg 45 (Tinggi peluang Fusi!)
+  // INT (8: 5 Dekat, 3 Jauh)
   { id: "w_int_1", name: "Tongkat Rune", stat: "INT", tier: 1, tag: "Dekat", trigger: "Arcane Bolt", modeWeights: [15, 35, 50], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
   { id: "w_int_2", name: "Pedang Rune", stat: "INT", tier: 2, tag: "Dekat", trigger: "Rune Edge", modeWeights: [20, 35, 45], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+  { id: "w_int_r1", name: "Orb Rune Melayang", stat: "INT", tier: 2, tag: "Jauh", trigger: "Prismatic Beam", modeWeights: [10, 30, 60], budget: { damage: 20, speed: 15, accuracy: 20, defense: 0, trigger: 45 } },
   { id: "w_int_3", name: "Palu Rune", stat: "INT", tier: 3, tag: "Dekat", trigger: "Runic Shockwave", modeWeights: [20, 30, 50], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
   { id: "w_int_4", name: "Sabit Arcane", stat: "INT", tier: 4, tag: "Dekat", trigger: "Soul Reap", modeWeights: [15, 30, 55], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
   { id: "w_int_5", name: "Cakram Rune", stat: "INT", tier: 5, tag: "Jauh", trigger: "Orbit Discs", modeWeights: [10, 30, 60], budget: { damage: 20, speed: 15, accuracy: 20, defense: 0, trigger: 45 } },
   { id: "w_int_6", name: "Rantai Rune", stat: "INT", tier: 6, tag: "Dekat", trigger: "Binding Chain", modeWeights: [15, 30, 55], budget: { damage: 20, speed: 15, accuracy: 15, defense: 5, trigger: 45 } },
+  { id: "w_int_r2", name: "Senapan Rune", stat: "INT", tier: 6, tag: "Jauh", trigger: "Arcane Snipe", modeWeights: [15, 25, 60], budget: { damage: 22, speed: 15, accuracy: 23, defense: 0, trigger: 40 } },
 
-  // WIS (6) - Budget: Dmg 30, Spd 15, Acc 25, Def 10, Trg 20
+  // WIS (8: 5 Dekat, 3 Jauh)
   { id: "w_wis_1", name: "Tombak", stat: "WIS", tier: 1, tag: "Dekat", trigger: "Keen Thrust", modeWeights: [35, 45, 20], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
   { id: "w_wis_2", name: "Trisula", stat: "WIS", tier: 2, tag: "Dekat", trigger: "Triple Prong", modeWeights: [30, 45, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+  { id: "w_wis_r1", name: "Sumpit Pemburu", stat: "WIS", tier: 2, tag: "Jauh", trigger: "Neurotoxin Dart", modeWeights: [25, 45, 30], budget: { damage: 24, speed: 22, accuracy: 30, defense: 0, trigger: 24 } },
   { id: "w_wis_3", name: "Naginata", stat: "WIS", tier: 3, tag: "Dekat", trigger: "Sweeping Arc", modeWeights: [35, 40, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
   { id: "w_wis_4", name: "Tongkat Bo", stat: "WIS", tier: 4, tag: "Dekat", trigger: "Disarm Sweep", modeWeights: [30, 50, 20], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
   { id: "w_wis_5", name: "Tombak Lempar", stat: "WIS", tier: 5, tag: "Jauh", trigger: "Tracker Mark", modeWeights: [35, 45, 20], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
   { id: "w_wis_6", name: "Tombak Pemburu", stat: "WIS", tier: 6, tag: "Dekat", trigger: "Prey Sense", modeWeights: [35, 40, 25], budget: { damage: 30, speed: 15, accuracy: 25, defense: 10, trigger: 20 } },
+  { id: "w_wis_r2", name: "Busur Silang Pemburu", stat: "WIS", tier: 6, tag: "Jauh", trigger: "Deadeye Pin", modeWeights: [30, 40, 30], budget: { damage: 28, speed: 17, accuracy: 30, defense: 0, trigger: 25 } },
 
-  // CHA (6) - Budget: Dmg 25, Spd 20, Acc 25, Def 5, Trg 25
+  // CHA (8: 6 Dekat, 2 Jauh)
   { id: "w_cha_1", name: "Rapier", stat: "CHA", tier: 1, tag: "Dekat", trigger: "Feint", modeWeights: [30, 45, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
   { id: "w_cha_2", name: "Saber", stat: "CHA", tier: 2, tag: "Dekat", trigger: "Rally Cut", modeWeights: [35, 40, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
   { id: "w_cha_3", name: "Pedang Bangsawan", stat: "CHA", tier: 3, tag: "Dekat", trigger: "Noble Challenge", modeWeights: [30, 40, 30], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+  { id: "w_cha_r1", name: "Pistol Flintlock Duel", stat: "CHA", tier: 3, tag: "Jauh", trigger: "Point-Blank Decree", modeWeights: [25, 40, 35], budget: { damage: 25, speed: 20, accuracy: 30, defense: 0, trigger: 25 } },
   { id: "w_cha_4", name: "Tongkat Penguasa", stat: "CHA", tier: 4, tag: "Dekat", trigger: "Command Aura", modeWeights: [25, 40, 35], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
   { id: "w_cha_5", name: "Cambuk Dagang", stat: "CHA", tier: 5, tag: "Dekat", trigger: "Debt Lash", modeWeights: [30, 45, 25], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
-  { id: "w_cha_6", name: "Pedang Upacara", stat: "CHA", tier: 6, tag: "Dekat", trigger: "Grand Ovation", modeWeights: [25, 35, 40], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } }
+  { id: "w_cha_6", name: "Pedang Upacara", stat: "CHA", tier: 6, tag: "Dekat", trigger: "Grand Ovation", modeWeights: [25, 35, 40], budget: { damage: 25, speed: 20, accuracy: 25, defense: 5, trigger: 25 } },
+  { id: "w_cha_r2", name: "Meriam Genggam Komando", stat: "CHA", tier: 6, tag: "Jauh", trigger: "Salvo Signal", modeWeights: [25, 35, 40], budget: { damage: 27, speed: 18, accuracy: 28, defense: 0, trigger: 27 } }
 ];
+export const WEAPONS_48 = WEAPONS_36;
 
 /**
  * Parser CSV sederhana untuk membaca 208 bahan dari data/materials.csv WD
@@ -316,8 +329,9 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
     successChance = Math.max(5, Math.min(98, +successChance.toFixed(1)));
 
     // Bobot Mode Elemen [Terkunci, Fleksibel, Fusi]
-    // Sub-Stat INT Attunement Craft & Runesmith meningkatkan bobot mode Fusi!
-    const runesmithFusionBoost = smith.primaryType === "Runesmith" ? smith.primaryRank * 6 : 0;
+    // Sub-Stat INT Attunement Craft & Poin Tier Runesmith (0-5) meningkatkan bobot mode Fusi!
+    const runesmithTier = smith.tiers ? (smith.tiers.Runesmith || 0) : (smith.primaryType === "Runesmith" ? smith.primaryRank : 0);
+    const runesmithFusionBoost = runesmithTier * 6;
     const modeWeights = [
       weapon.modeWeights[0] + 8 * cnt("stabil"),
       weapon.modeWeights[1] + 8 * cnt("pengikat"),
@@ -379,7 +393,7 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
   }
 
   /**
-   * 2. Eksekusi Tempa (forge() dari bengkel-tempa-v2.html + Hidden Trait WD + Konversi ke Senjata Skill Engine)
+   * 2. Eksekusi Tempa (forge() + 5 Komponen Barang Opsi C + Kecocokan Pemakaian Opsi A)
    */
   function executeForge(params, rngFn = Math.random) {
     const pv = previewForge(params);
@@ -387,7 +401,6 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
 
     const rollSuccess = rngFn() * 100;
     if (rollSuccess > pv.successChance) {
-      // Gagal tempa: hitung bahan hilang (dikurangi Pengikat & Sub-Stat CON Material Conservation)
       const lossRatio = (0.3 + rngFn() * 0.3) * (pv.hasBinder ? 0.7 : 1.0) * (1 - pv.subStatBonuses.conservePct / 100);
       const lostCount = Math.min(pv.n, Math.max(1, Math.round(pv.n * lossRatio)));
       const lostMaterials = pv.picks.slice(0, lostCount).map(m => m.n);
@@ -400,13 +413,18 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
       };
     }
 
-    // Skor Kualitas (q) diperkuat oleh Sub-Stat INT Smith's Tools & Smith Class Bonus
+    // 5 Komponen Barang (Opsi C) dari distribusi 5 Tier Smith Class:
+    const sTiers = pv.smith.tiers || { Weaponsmith: 2, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
+    const reforgerPolishBonus = (sTiers.Reforger || 0) * 3.5;
+
+    // Skor Kualitas (q) diperkuat oleh Sub-Stat INT Smith's Tools, Smith Class Bonus, & Komponen Reforger
     const qualityScore = rngFn() * 70
       + Math.min(45, (params.level || 30) * 0.4)
       + pv.avgQ * 4
       + (pv.resonanceStatus === "selaras" ? 6 : 0)
       + pv.subStatBonuses.toolsBonus
       + (pv.smith.craftBonusPct * 0.35)
+      + reforgerPolishBonus
       - (params.isIdle ? 8 : 0);
 
     const qualityTierIdx = qualityScore < 30 ? 0 : qualityScore < 55 ? 1 : qualityScore < 72 ? 2 : qualityScore < 85 ? 3 : 4;
@@ -443,19 +461,29 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
       }
     }
 
-    // Bahan utama (kualitas tertinggi) menyumbangkan nama kata senjata & Hidden Trait WD!
     const mainMaterial = pv.picks.slice().sort((a, b) => (b.craft_power_pts || b.q) - (a.craft_power_pts || a.q))[0];
     const elemBonusPct = pv.coreElement
       ? ({ kecil: 5, sedang: 10, besar: 15 }[pv.coreSize] || 10) * (modeIdx === 0 ? 1.3 : 1.0)
       : 0;
 
-    // Skala Anggaran Senjata CD-4.03 dengan Kualitas Tempa + Inti Elemen + Craft Power Bahan WD
+    // 5 Komponen Barang (Opsi C) memberikan bonus anatomi spesifik pada barang yang ditempa:
+    // - Weaponsmith Tier: +2% Melee Damage & Trigger per tier
+    // - Rangesmith Tier: +2.5% Ranged Speed & Accuracy per tier
+    // - Armorer Tier: +3% Defense/Guard Budget per tier
+    // - Runesmith Tier: +2.5% Trigger/Elemental Resonance per tier
+    // - Reforger Tier: +1 Enhance (+N) awal setiap 2 tier Reforger
+    const wsmMult = pv.weapon.tag === "Dekat" ? 1 + (sTiers.Weaponsmith || 0) * 0.02 : 1.0;
+    const rngMult = pv.weapon.tag === "Jauh" ? 1 + (sTiers.Rangesmith || 0) * 0.025 : 1.0;
+    const armMult = 1 + (sTiers.Armorer || 0) * 0.03;
+    const runMult = 1 + (sTiers.Runesmith || 0) * 0.025;
+    const initialEnhancePlus = Math.floor((sTiers.Reforger || 0) / 2);
+
     const scaledBudget = {
-      damage: +(pv.weapon.budget.damage * qualityMult * (1 + elemBonusPct / 100)).toFixed(1),
-      speed: +(pv.weapon.budget.speed * qualityMult).toFixed(1),
-      accuracy: +(pv.weapon.budget.accuracy * qualityMult).toFixed(1),
-      defense: +(pv.weapon.budget.defense * qualityMult).toFixed(1),
-      trigger: +(pv.weapon.budget.trigger * qualityMult * (1 + pv.totalCraftPower * 0.005)).toFixed(1)
+      damage: +(pv.weapon.budget.damage * qualityMult * wsmMult * (1 + elemBonusPct / 100) * (1 + initialEnhancePlus * 0.04)).toFixed(1),
+      speed: +(pv.weapon.budget.speed * qualityMult * rngMult).toFixed(1),
+      accuracy: +(pv.weapon.budget.accuracy * qualityMult * rngMult).toFixed(1),
+      defense: +(pv.weapon.budget.defense * qualityMult * armMult + (sTiers.Armorer || 0) * 1.5).toFixed(1),
+      trigger: +(pv.weapon.budget.trigger * qualityMult * wsmMult * runMult * (1 + pv.totalCraftPower * 0.005)).toFixed(1)
     };
 
     const elementWd = pv.coreElement ? (ELEMENT_ID_TO_WD[pv.coreElement] || "Neutral") : "Neutral";
@@ -464,11 +492,13 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
       uid: `FW-${Date.now()}-${Math.floor(rngFn() * 1000)}`,
       baseWeaponId: pv.weapon.id,
       baseWeaponName: pv.weapon.name,
-      name: `${pv.weapon.name} "${traitName}"`,
+      name: `${pv.weapon.name}${initialEnhancePlus > 0 ? " +" + initialEnhancePlus : ""} "${traitName}"`,
+      forgedByClass: pv.smith.singleWordClassName || pv.smith.primaryType,
       stat: pv.weapon.stat,
       tier: Math.max(pv.weapon.tier, Math.ceil((params.level || 30) / 30)),
       tag: pv.weapon.tag,
       triggerName: pv.weapon.trigger,
+      enhancePlus: initialEnhancePlus,
       mainMaterialName: mainMaterial.n,
       mainMaterialHiddenTrait: mainMaterial.hidden_trait || "Dormant",
       mainMaterialHiddenEffect: mainMaterial.hidden_trait_effect || "",
@@ -498,13 +528,11 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
   }
 
   /**
-   * 3. Fitur FUSI INTI KEDUA (fuse() dari bengkel-tempa-v2.html + Sub-Stat CON Quench Stability & INT Attunement Craft!)
-   *    - Jika Inti ke-2 sama dengan Inti ke-1 -> Naik Tingkat Inti (kecil -> sedang -> besar -> agung) & perkuat damage elemen!
-   *    - Jika Inti ke-2 berbeda -> Membentuk 1 dari 6 ELEMEN HIBRIDA (Uap, Magma, Badai Beku, Gerhana, Gempa Listrik, Plasma)!
+   * 3. Fitur FUSI INTI KEDUA (Butuh minimal Runesmith Tier 1 untuk Fusi mandiri sesuai CD-3.02 Opsi A+C!)
    */
   function fuseSecondCore({
     forgedWeapon,
-    secondElementId, // "api", "es", "petir", "tanah", "cahaya", "gelap"
+    secondElementId,
     level = 30,
     stats = { CON: 30, INT: 30 },
     focusSubStats = {},
@@ -518,10 +546,19 @@ export function createForgeEngine({ skillEngine, weapons = WEAPONS_36, materials
       return { success: false, message: "Fusi membutuhkan minimal Level Smith 10." };
     }
 
+    const smith = skillEngine ? skillEngine.evaluateSmithMastery(stats, smithConfig) : { tiers: { Runesmith: 3 } };
+    const runesmithTier = smith.tiers ? (smith.tiers.Runesmith || 0) : (smithConfig.primaryType === "Runesmith" ? (smithConfig.primaryRank || 1) : 0);
+    if (runesmithTier < 1) {
+      return {
+        success: false,
+        message: "Fusi Inti Kedua membutuhkan minimal Runesmith Tier 1 (contoh: ambil Runescribe, Spellblade, Hexblade, Arcarcher, atau Omnismith)."
+      };
+    }
+
     const sub = skillEngine ? skillEngine.computeSubStats(stats, focusSubStats).byId : {};
     const quenchBonus = sub.con_quench_stability ? sub.con_quench_stability.value * 0.35 : 0;
     const attuneBonus = sub.int_attunement_craft ? sub.int_attunement_craft.value * 0.35 : 0;
-    const runesmithBonus = smithConfig.primaryType === "Runesmith" ? (smithConfig.primaryRank || 1) * 2.5 : 0;
+    const runesmithBonus = runesmithTier * 2.5;
 
     // Risiko gagal Fusi di bengkel-tempa-v2.html adalah 25%; dengan CON Quench Stability & INT Attunement turun hingga minimal 4%!
     const failChancePct = Math.max(4, +(25 - quenchBonus - attuneBonus - runesmithBonus).toFixed(1));
