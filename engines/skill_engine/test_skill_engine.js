@@ -106,14 +106,30 @@ const lv150Sim = engine.simulateBattle({
   selectedUtilities: lv150Utilities,
   loadout: lv150Loadout,
   smithConfig: { primaryType: "Weaponsmith", primaryRank: 5 },
-  weapon: { stat: "STR", tier: 5, tag: "Dekat", element: "Fire", budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+  weapon: { stat: "STR", tier: 5, rarity: "Unique", enhancePlus: 25, tag: "Dekat", element: "Fire", budget: { damage: 35, speed: 15, accuracy: 15, defense: 5, trigger: 30 } },
   armorClass: "sedang",
   armorElement: realWdEnemy150.el || "Ice",
   armorSlotsSameElement: 5,
+  apprenticeSeed: "APR-7F3A-Kael",
+  apprenticeSkill: 85,
+  apprenticeTrials: 2,
   wdEnemy: realWdEnemy150
 });
 
-console.log("Ringkasan Pemain Lv150:", lv150Sim.playerSummary);
+console.log("Ringkasan Pemain Lv150 (+25 Unique & Companion Seed):", lv150Sim.playerSummary);
 console.log("Stat Musuh WD Lv150:", lv150Sim.monsterSummary);
 console.log("Metrik Tempur Lv150:", lv150Sim.metrics);
 console.log("Sampel Log Rotasi Skill SWTOR:", lv150Sim.combatLogSample.slice(0, 6));
+
+console.log("\n=== 4. VERIFIKASI CD-1.08 (ANTI-FARM), CD-4.02 (+N TANPA BATAS SEIMBANG), CD-6.02 (SEED MURID), & CD-7 (KUTUKAN GATE & LONG REST) ===");
+console.log("- Anti-Farm (Pemain Lv150 vs Monster Lv120, delta -30):", engine.computeAntiFarmMultipliers(150, 120, 20));
+console.log("- Anti-Farm (Pemain Lv150 vs Monster Lv142, delta -8):", engine.computeAntiFarmMultipliers(150, 142, 20));
+console.log("- Enhance +15 (Overforge):", engine.computeWeaponEnhancement(15, false, 30, 5));
+console.log("- Enhance +30 (Transcendent Infinite):", engine.computeWeaponEnhancement(30, false, 30, 5));
+console.log("- Seed Murid #1 (APR-7F3A-Kael, Skill 85, 2 Ujian):", engine.generateApprenticeFromSeed("APR-7F3A-Kael", 85, 2));
+console.log("- Seed Murid #2 (APR-99B1-Lyra, Skill 62, 1 Ujian):", engine.generateApprenticeFromSeed("APR-99B1-Lyra", 62, 1));
+console.log("- Kutukan Gate Tier 5 & Biaya Long Rest (Cabang Sendiri vs Penginapan):", {
+  ownBranch: engine.computeGateCurseAndRest({ level: 150, gateTier: 5, activeCurseStacks: 2, atOwnWorkshopOrBranch: true, conCurseResistPct: 20 }),
+  townInn: engine.computeGateCurseAndRest({ level: 150, gateTier: 5, activeCurseStacks: 2, atOwnWorkshopOrBranch: false, conCurseResistPct: 20 })
+});
+

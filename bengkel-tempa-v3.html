@@ -162,9 +162,19 @@
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-4 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--card-border)] pb-2">
             <div>
-              <span class="font-bold text-sm">4. Uji Sinkronisasi Senjata × Kecocokan Smith Class × Rotasi Skill SWTOR</span>
+              <span class="font-bold text-sm">4. Uji Sinkronisasi Senjata × Enhance `+N` Tanpa Batas × Murid AI Seed × Skill SWTOR</span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex items-center gap-1 bg-[var(--content)] px-2 py-1 rounded border border-[var(--border)]">
+                <span>Enhance `+N`:</span>
+                <input id="testEnhancePlus" type="number" min="0" max="999" value="15" oninput="runEquippedSimulation()" class="w-14 bg-transparent font-mono font-bold text-[var(--primary)] text-center" />
+              </div>
+              <select id="testApprenticeSeed" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
+                <option value="APR-7F3A-Kael">Murid: APR-7F3A-Kael (Skill 85, Ujian 2)</option>
+                <option value="APR-99B1-Lyra">Murid: APR-99B1-Lyra (Skill 62, Ujian 1)</option>
+                <option value="APR-44C8-Garrick">Murid: APR-44C8-Garrick (Skill 92, Ujian 2)</option>
+                <option value="">(Tanpa Companion Murid)</option>
+              </select>
               <select id="testEnemyRole" onchange="runEquippedSimulation()" class="p-1 rounded bg-[var(--content)] border border-[var(--border)]">
                 <option value="Brute">Musuh: Brute</option>
                 <option value="Skirmisher">Musuh: Skirmisher</option>
@@ -1076,6 +1086,26 @@
       }).join("");
     }
 
+    function calcUncappedEnhancement(plusN) {
+      const n = Math.max(0, Math.floor(plusN || 0));
+      let pct = 0;
+      if (n > 0) pct += Math.min(5, n) * 4;
+      if (n > 5) pct += Math.min(5, n - 5) * 7;
+      if (n > 10) pct += Math.min(5, n - 10) * 12;
+      if (n > 15) pct += 45 * Math.log(1 + (n - 15) * 0.5);
+      return { n, bonusPct: +pct.toFixed(1), mult: +(1 + pct / 100).toFixed(3), phase: n > 15 ? `Transcendent (+${n})` : n >= 11 ? `Overforge (+${n})` : `Tempa (+${n})` };
+    }
+
+    function evalApprenticeSeed(seedStr) {
+      if (!seedStr) return null;
+      const presets = {
+        "APR-7F3A-Kael": { seed: "APR-7F3A-Kael", bg: "Pengembara", smithClass: "Runelord (5+0)", skill: 85, loyalty: 100, assistPct: 44.8, aura: "+15% Elemental & Trigger Dmg", branchOk: true },
+        "APR-99B1-Lyra": { seed: "APR-99B1-Lyra", bg: "Prajurit", smithClass: "Skirmisher (2+1)", skill: 62, loyalty: 65, assistPct: 36.7, aura: "+10% Atk Speed & Accuracy", branchOk: false },
+        "APR-44C8-Garrick": { seed: "APR-44C8-Garrick", bg: "Pandai Besi", smithClass: "Aegisborn (5+0)", skill: 92, loyalty: 95, assistPct: 47.2, aura: "+12% Mitigate & Perisai Darurat", branchOk: true }
+      };
+      return presets[seedStr] || presets["APR-7F3A-Kael"];
+    }
+
     function runEquippedSimulation() {
       const box = document.getElementById("equippedSimBox");
       const g = state.gallery[state.equippedIdx];
@@ -1086,6 +1116,11 @@
 
       const compat = checkItemCompatibility(g);
       const id = resolveSmithIdentity();
+      const plusInput = +(document.getElementById("testEnhancePlus")?.value || g.enhancePlus || 0);
+      const enh = calcUncappedEnhancement(plusInput);
+      const appSeed = document.getElementById("testApprenticeSeed")?.value || "";
+      const app = evalApprenticeSeed(appSeed);
+
       const role = document.getElementById("testEnemyRole").value;
       const type = document.getElementById("testEnemyType").value;
       const weak = document.getElementById("testEnemyWeak").value;
@@ -1115,11 +1150,13 @@
       const disc = DISCIPLINE_ACTIVES[g.stat];
       const unlockedSkills = disc.skills.filter(sk => st[g.stat] >= sk.req);
 
-      const totalBudget = 100 + 15 * (g.tier - 1);
-      const wDmg = (totalBudget * (g.budget.damage / 100)) / 4;
-      const rawMight = st.STR * 0.5 * 1.25;
-      const trigEff = compat.ok ? (totalBudget * (g.budget.trigger / 100)) * 0.8 * (1 + 0.01 * st[g.stat]) * (1 + (st.INT * 0.3) / 100) : 0;
-      const baseHit = (wDmg + rawMight + trigEff / 4) * (1 + compat.bonusPct / 100);
+      const rarityBonusMap = { Common: 0, Uncommon: 10, Rare: 22, Epic: 36, Legendary: 52, Unique: 75 };
+      const rBonus = rarityBonusMap[g.mainMat.r] || 22;
+      const totalBudget = 100 + 20 * (g.tier - 1) + rBonus;
+      const wDmg = ((totalBudget * (g.budget.damage / 100)) / 4) * enh.mult;
+      const rawMight = st.STR * 0.5 * 1.25 + (g.stat === "CON" ? st.CON * 0.15 : 0);
+      const trigEff = compat.ok ? (totalBudget * (g.budget.trigger / 100)) * 0.8 * (1 + 0.015 * st[g.stat]) * (1 + (st.INT * 0.3) / 100) * enh.mult : 0;
+      const baseHit = (wDmg + rawMight + trigEff / (g.stat === "CHA" ? 5 : 4)) * (1 + compat.bonusPct / 100);
 
       const perkDmgPct = (id.activeT3 ? (id.activeT3.dmgPct || 0) * id.activeT3.mult : 0) + (id.activeT5 ? (id.activeT5.dmgPct || 0) * id.activeT5.mult : 0);
       const perkHpPct = (id.activeT3 ? (id.activeT3.hpPct || 0) * id.activeT3.mult : 0) + (id.activeT5 ? (id.activeT5.hpPct || 0) * id.activeT5.mult : 0);
@@ -1138,13 +1175,14 @@
         rotDps += (baseHit * sk.mult) / sk.cd;
       }
 
+      const appDpsBonus = app ? (baseHit * (app.assistPct / 100) * (1 + st.CHA * 0.003)) / 3.0 : 0;
       const atkSpd = 1.0 * (1 + (g.budget.speed + st.DEX * 0.2) / 100);
       const hybBonusMult = 1 + ((g.hybrid?.combat_bonus?.skill_dmg_pct || 0) + (g.traitBonus?.skill_dmg_pct || 0) + perkDmgPct) / 100;
-      const dps = +(((baseHit * atkSpd) + rotDps) * elemMult * hybBonusMult).toFixed(1);
+      const dps = +((((baseHit * atkSpd) + rotDps + appDpsBonus) * elemMult * hybBonusMult)).toFixed(1);
 
       const playerHp = Math.round((20 + st.CON * 5 * 1.25 + 5 * tier) * (1 + perkHpPct / 100));
       const flatMit = Math.min(mDmg * 0.5, st.CON * 0.5 * 1.25);
-      const dtps = Math.max(1, +((mDmg - flatMit) * roleMap.spd * 0.55 * (1 - Math.min(0.4, perkDefPct / 100))).toFixed(2));
+      const dtps = Math.max(1, +((mDmg - flatMit) * roleMap.spd * 0.55 * (1 - Math.min(0.45, (perkDefPct + (g.budget.defense / 1.25)) / 100))).toFixed(2));
       const ttd = +(playerHp / dtps).toFixed(1);
       const kills = +((dps * ttd) / mHp).toFixed(2);
 
@@ -1161,23 +1199,23 @@
             <div class="text-[10px] font-semibold truncate">${activePerksLabel}</div>
           </div>
           <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
-            <div class="text-[var(--muted-foreground)]">Senjata & Trigger</div>
-            <div class="font-bold">${g.name}</div>
+            <div class="text-[var(--muted-foreground)]">Enhance +N Tanpa Batas (CD-4.02)</div>
+            <div class="font-bold">${enh.phase} (+${enh.bonusPct}% Daya)</div>
             <div class="text-[11px] ${compat.ok ? "text-[var(--primary)]" : "text-[var(--error)]"}">
               Trigger ${g.trigger}: ${compat.ok ? `AKTIF (+${compat.bonusPct}% Mastery)` : "TERKUNCI (-25%)"}
             </div>
           </div>
           <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
-            <div class="text-[var(--muted-foreground)]">Status Elemen / Fusi Hibrida</div>
-            <div class="font-bold">${g.hybrid ? g.hybrid.name : (g.coreEl || "Neutral")}</div>
-            <div class="text-[11px] ${elemMatched ? "text-[var(--primary)] font-bold" : "text-[var(--muted-foreground)]"}">
-              ${elemMatched ? `Weakness Exploit Aktif! (×${elemMult.toFixed(2)})` : "Netral (×1.00)"}
+            <div class="text-[var(--muted-foreground)]">Companion Murid AI Seed (CD-6.02)</div>
+            <div class="font-bold">${app ? `${app.seed} (${app.smithClass})` : "Tanpa Murid Pendamping"}</div>
+            <div class="text-[11px] text-[var(--primary)]">
+              ${app ? `Assist ${app.assistPct}%/3s · ${app.aura} · Cabang: ${app.branchOk ? "SIAP" : "Belum"}` : "Pilih seed murid di atas"}
             </div>
           </div>
           <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)]">
             <div class="text-[var(--muted-foreground)]">Performa vs ${type} Lv${state.lv}</div>
             <div class="font-bold font-mono text-sm text-[var(--primary)]">${dps} DPS · ${kills} Kill/HP</div>
-            <div class="text-[11px] font-mono">HP ${playerHp} vs Musuh ${mHp} HP</div>
+            <div class="text-[11px] font-mono">HP ${playerHp} vs Musuh ${mHp} HP (${elemMatched ? `Weak ×${elemMult.toFixed(2)}` : "Netral"})</div>
           </div>
         </div>
         <div class="p-2 rounded bg-[var(--content)] border border-[var(--card-border)] flex flex-wrap items-center justify-between gap-2">

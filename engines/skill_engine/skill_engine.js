@@ -488,6 +488,241 @@ export function createSkillEngine(skillData) {
     };
   }
 
+  const RARITY_BUDGET_BONUS = {
+    Common: 0,
+    Uncommon: 10,
+    Rare: 22,
+    Epic: 36,
+    Legendary: 52,
+    Unique: 75
+  };
+
+  /**
+   * CD-1.08: Anti-Farm XP & Drop Multipliers (Skala Lv1-150, LOCKED)
+   */
+  function computeAntiFarmMultipliers(playerLevel, monsterLevel, wisRareDropBonusPct = 0) {
+    const delta = monsterLevel - playerLevel;
+    let xpMult = 1.0;
+    let dropMult = 1.0;
+
+    if (delta >= 5) {
+      xpMult = 1.25;
+      dropMult = 1.15;
+    } else if (delta >= -5) {
+      xpMult = 1.0;
+      dropMult = 1.0;
+    } else if (delta >= -15) {
+      const stepsBelow = Math.abs(delta + 5); // 1..10
+      xpMult = Math.max(0.20, +(1.0 - 0.08 * stepsBelow).toFixed(2));
+      dropMult = Math.max(0.50, +(1.0 - 0.05 * stepsBelow).toFixed(2));
+    } else {
+      xpMult = 0.0;
+      dropMult = 0.25;
+    }
+
+    const effectiveDropMult = +(dropMult * (1 + wisRareDropBonusPct / 100)).toFixed(3);
+    return { delta, xpMult, baseDropMult: dropMult, effectiveDropMult };
+  }
+
+  /**
+   * CD-4.02 & CD-4.03: Rumus Enhance +N Tanpa Batas Seimbang (Gabungan Opsi A + C) & Anggaran Rarity
+   */
+  function computeWeaponEnhancement(plusLevel = 0, isUnique = false, strEnhancePowerPct = 0, reforgerTier = 0) {
+    const n = Math.max(0, Math.floor(plusLevel));
+    let bonusPct = 0;
+    let phase = "Base (+0)";
+    let baseSuccessRatePct = 100;
+    let overforgeTriggerBonusPct = 0;
+
+    if (n > 0) {
+      const p1 = Math.min(5, n);
+      bonusPct += p1 * 4; // +4% per level up to +5 (+20%)
+      phase = isUnique ? "Resonance I-II" : "Fase 1: Tempa Stabil (+1..+5)";
+      baseSuccessRatePct = 100 - (p1 - 1) * 5; // 100 -> 80%
+    }
+    if (n > 5) {
+      const p2 = Math.min(5, n - 5);
+      bonusPct += p2 * 7; // +7% per level +6..+10 (+55% total)
+      phase = isUnique ? "Resonance III-IV" : "Fase 2: Tempa Panas (+6..+10)";
+      baseSuccessRatePct = 70 - (p2 - 1) * 7.5; // 70 -> 40%
+    }
+    if (n > 10) {
+      const p3 = Math.min(5, n - 10);
+      bonusPct += p3 * 12; // +12% per level +11..+15 (+115% total)
+      phase = isUnique ? "Resonance V (Apex)" : "Fase 3: Masterwork Overforge (+11..+15)";
+      baseSuccessRatePct = 30 - (p3 - 1) * 5; // 30 -> 10%
+      if (n >= 15) overforgeTriggerBonusPct += 15;
+    }
+    if (n > 15) {
+      const extra = n - 15;
+      const logBonus = 45 * Math.log(1 + extra * 0.5);
+      bonusPct += logBonus;
+      overforgeTriggerBonusPct += extra * 1.0;
+      phase = isUnique ? `Transcendent Resonance (+${n})` : `Fase 4: Transcendent Infinite (+${n})`;
+      baseSuccessRatePct = Math.max(5, +(10 / (1 + 0.15 * extra)).toFixed(2));
+    }
+
+    const effectiveSuccessRatePct = isUnique
+      ? 100
+      : Math.min(95, +(baseSuccessRatePct + strEnhancePowerPct * 0.25 + reforgerTier * 3).toFixed(2));
+
+    return {
+      plusLevel: n,
+      isUnique,
+      phase,
+      powerBonusPct: +bonusPct.toFixed(2),
+      powerMultiplier: +(1 + bonusPct / 100).toFixed(4),
+      overforgeTriggerBonusPct: +overforgeTriggerBonusPct.toFixed(2),
+      effectiveSuccessRatePct,
+      canBreakWeapon: false,
+      minCheckpoint: n >= 15 ? 15 : (n >= 5 ? 5 : 0)
+    };
+  }
+
+  /**
+   * CD-6.02: Generator Seed Murid Prosedural & AI Autonomous Style (Opsi A + Seed AI Style)
+   */
+  function generateApprenticeFromSeed(seedString = "APR-7F3A-Kael", currentSkill = 45, passedTrials = 0) {
+    let hash = 2166136261;
+    for (let i = 0; i < seedString.length; i++) {
+      hash ^= seedString.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    const nextRand = () => {
+      hash ^= hash << 13;
+      hash ^= hash >>> 17;
+      hash ^= hash << 5;
+      return ((hash >>> 0) % 10000) / 10000;
+    };
+
+    const BACKGROUNDS = [
+      { name: "Pandai Besi", stats: ["STR", "CON", "INT"] },
+      { name: "Pemburu", stats: ["DEX", "CON", "WIS"] },
+      { name: "Pedagang", stats: ["CHA", "INT", "WIS"] },
+      { name: "Prajurit", stats: ["STR", "DEX", "CON"] },
+      { name: "Pelajar", stats: ["INT", "WIS", "CHA"] },
+      { name: "Pengembara", stats: ["STR", "DEX", "CHA"] }
+    ];
+    const SMITH_TYPES = ["Weaponsmith", "Armorer", "Rangesmith", "Runesmith", "Reforger"];
+
+    const baseTalent = Math.floor(45 + nextRand() * 50); // 45..94
+    const learningRate = Math.floor(45 + nextRand() * 50); // 45..94
+    const baseLoyalty = Math.floor(55 + nextRand() * 35); // 55..89
+    const bg = BACKGROUNDS[Math.floor(nextRand() * BACKGROUNDS.length)];
+
+    const trials = Math.max(0, Math.min(2, passedTrials));
+    const talentCap = Math.min(100, baseTalent + trials * 15);
+    const loyalty = Math.min(100, baseLoyalty + trials * 10);
+    const effectiveSkill = Math.min(talentCap, Math.max(0, currentSkill));
+
+    // AI otonom memilih gaya Smith Class (alokasi 5 poin Tier sesuai bakat/ujian)
+    const maxTierPts = effectiveSkill >= 80 && trials >= 2 ? 5 : effectiveSkill >= 50 && trials >= 1 ? 3 : Math.max(1, Math.ceil(effectiveSkill / 25));
+    const primarySmith = SMITH_TYPES[Math.floor(nextRand() * SMITH_TYPES.length)];
+    let secondarySmith = SMITH_TYPES[Math.floor(nextRand() * SMITH_TYPES.length)];
+    if (secondarySmith === primarySmith) secondarySmith = SMITH_TYPES[(SMITH_TYPES.indexOf(primarySmith) + 1) % 5];
+
+    const styleRoll = nextRand();
+    const smithTiers = { Weaponsmith: 0, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
+    if (styleRoll < 0.45) {
+      // Murni Spesialis
+      smithTiers[primarySmith] = maxTierPts;
+    } else if (styleRoll < 0.85 && maxTierPts >= 2) {
+      // Hibrida 2 Kelas
+      const pPts = Math.ceil(maxTierPts * 0.6);
+      smithTiers[primarySmith] = pPts;
+      smithTiers[secondarySmith] = maxTierPts - pPts;
+    } else {
+      // Polimatik / Omnismith
+      for (let i = 0; i < maxTierPts; i++) {
+        const c = SMITH_TYPES[i % 5];
+        smithTiers[c] += 1;
+      }
+    }
+
+    // Stat murid tumbuh mengikuti effectiveSkill dan latar belakang
+    const apprenticeStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 };
+    for (const s of STATS) {
+      const isBg = bg.stats.includes(s);
+      const weight = isBg ? 1.15 : 0.65;
+      apprenticeStats[s] = Math.max(5, Math.round(10 + effectiveSkill * weight * (0.85 + nextRand() * 0.3)));
+    }
+
+    const smithEval = evaluateSmithMastery(apprenticeStats, { tiers: smithTiers });
+    const primaryStat = bg.stats[0];
+    const disc = skillData.disciplines[primaryStat];
+    const aiSkills = disc ? disc.tiers.slice(0, Math.min(3, Math.ceil(maxTierPts / 2) + 1)).map(t => t.active_skill.name) : [];
+
+    // Aura pasif & Assist Strike (setiap 3 dtk = 15% + 0.35% * Skill)
+    const assistDamagePctPerStrike = +(15 + 0.35 * effectiveSkill).toFixed(2);
+    const passiveAura = {
+      Weaponsmith: { attack_speed_pct: 10, accuracy_pct: 10, label: "+10% Atk Speed & Accuracy" },
+      Rangesmith:  { attack_speed_pct: 10, accuracy_pct: 10, label: "+10% Atk Speed & Ranged Draw" },
+      Armorer:     { dmg_reduction_pct: 12, emergency_shield: true, label: "+12% Mitigate & Perisai Darurat" },
+      Runesmith:   { trigger_power_pct: 15, elemental_dmg_pct: 15, label: "+15% Elemental & Trigger Dmg" },
+      Reforger:    { drop_bonus_pct: 15, stamina_save_pct: 15, label: "+15% Drop Bahan & Efisiensi Stamina" }
+    }[smithEval.primaryType];
+
+    const canManageBranchShop = effectiveSkill >= 60 && loyalty >= 70 && trials >= 1;
+
+    return {
+      seed: seedString,
+      background: bg.name,
+      baseTalent,
+      talentCap,
+      learningRate,
+      loyalty,
+      effectiveSkill,
+      passedTrials: trials,
+      smithClass: smithEval.singleWordClassName,
+      primarySmithType: smithEval.primaryType,
+      smithTiers,
+      stats: apprenticeStats,
+      aiCombatSkills: aiSkills,
+      assistDamagePctPerStrike,
+      passiveAura,
+      canManageBranchShop
+    };
+  }
+
+  /**
+   * CD-7.01, CD-7.02, & CD-7.03: Skala Kutukan Gate, Penalti Mati Reguler, & Biaya Long Rest (Skala Lv1-150)
+   */
+  function computeGateCurseAndRest({ level = 30, gateTier = 1, activeCurseStacks = 1, atOwnWorkshopOrBranch = false, conCurseResistPct = 0 }) {
+    const playerTier = getTierForLevel(level);
+    const gTier = Math.min(5, Math.max(1, gateTier));
+    const resistFactor = 1 - Math.min(0.35, conCurseResistPct / 100);
+
+    const maxStatDebuffPerCurse = -Math.round(4 * gTier * resistFactor);
+    const incapacitateThreshold = 13 * gTier;
+    const currentTotalDebuff = Math.abs(maxStatDebuffPerCurse) * activeCurseStacks;
+    const isIncapacitated = currentTotalDebuff >= incapacitateThreshold;
+
+    const baseRestCostBr = atOwnWorkshopOrBranch ? 0 : 20 * level * playerTier;
+    const curseCleanseCostBr = activeCurseStacks * (30 * level * gTier);
+    const totalLongRestCostBr = baseRestCostBr + curseCleanseCostBr;
+
+    return {
+      playerTier,
+      gateTier: gTier,
+      maxStatDebuffPerCurse,
+      incapacitateThreshold,
+      currentTotalDebuff,
+      isIncapacitated,
+      regularDeathPenalty: {
+        staminaRemaining: 0,
+        crossBuffChargeLostPct: 25,
+        xpLost: 0,
+        appliesGateCurse: false
+      },
+      longRest: {
+        atOwnWorkshopOrBranch,
+        baseRestCostBr,
+        curseCleanseCostBr,
+        totalLongRestCostBr
+      }
+    };
+  }
+
   /**
    * 7. Simulasi Pertempuran Rotasi SWTOR (Time-stepped Rotation & Basic Attack vs Monster WD)
    */
@@ -498,10 +733,13 @@ export function createSkillEngine(skillData) {
     selectedUtilities = {},
     loadout = [],
     smithConfig = { primaryType: "Weaponsmith", primaryRank: 1 },
-    weapon = { stat: "STR", tier: 1, tag: "Dekat", element: "Neutral", budget: { damage: 40, speed: 15, accuracy: 15, defense: 5, trigger: 25 } },
+    weapon = { stat: "STR", tier: 1, rarity: "Common", enhancePlus: 0, tag: "Dekat", element: "Neutral", budget: { damage: 35, speed: 15, accuracy: 15, defense: 5, trigger: 30 } },
     armorClass = "sedang",
     armorElement = "Fire",
     armorSlotsSameElement = 5,
+    apprenticeSeed = null,
+    apprenticeSkill = 60,
+    apprenticeTrials = 1,
     wdEnemy = { name: "Ashwind Brute", lvl: 30, role: "Brute", type: "Reguler", el: "Fire", weak: "Ice" },
     maxSeconds = 120
   }) {
@@ -511,30 +749,45 @@ export function createSkillEngine(skillData) {
     const pas = build.passiveTotals;
     const monster = computeMonsterStats(wdEnemy);
 
+    // Evaluasi Companion Murid jika dibawa (CD-6.02)
+    const companion = apprenticeSeed
+      ? generateApprenticeFromSeed(apprenticeSeed, apprenticeSkill, apprenticeTrials)
+      : null;
+    const companionAura = companion ? companion.passiveAura : {};
+    const leadershipMult = 1 + (sub.cha_apprentice_lead ? sub.cha_apprentice_lead.value : 0) / 100;
+
     // HP Pemain = (20 + 5 * CON + 5 * tier) * (1 + max_hp_pct)
     const baseHp = 20 + sub.con_max_vitality.value + 5 * tier;
     const maxPlayerHp = Math.round(baseHp * (1 + pas.max_hp_pct / 100));
 
-    // Anggaran poin senjata = 100 + 15 * (weapon.tier - 1)
-    const totalBudget = 100 + 15 * ((weapon.tier || tier) - 1);
+    // Anggaran poin senjata (CD-4.03 LOCKED) = 100 + 20 * (weapon.tier - 1) + Bonus_Rarity
+    const rarityBonus = RARITY_BUDGET_BONUS[weapon.rarity || "Common"] || 0;
+    const totalBudget = 100 + 20 * ((weapon.tier || tier) - 1) + rarityBonus;
+    const enh = computeWeaponEnhancement(
+      weapon.enhancePlus || 0,
+      weapon.rarity === "Unique",
+      sub.str_enhance_power ? sub.str_enhance_power.value : 0,
+      build.smith.tiers.Reforger || 0
+    );
+
     const wDmgPoints = totalBudget * ((weapon.budget?.damage || 30) / 100);
     const wSpdPoints = totalBudget * ((weapon.budget?.speed || 15) / 100);
     const wAccPoints = totalBudget * ((weapon.budget?.accuracy || 15) / 100);
     const wDefPoints = totalBudget * ((weapon.budget?.defense || 10) / 100);
     const wTrgPoints = totalBudget * ((weapon.budget?.trigger || 25) / 100);
 
-    const weaponBaseDmg = wDmgPoints / 4;
+    const weaponBaseDmg = (wDmgPoints / 4) * enh.powerMultiplier;
     const isRanged = weapon.tag === "Jauh";
 
     // Kecepatan serang dasar
-    const totalAtkSpdPct = wSpdPoints + sub.dex_attack_speed.value + pas.attack_speed_pct;
+    const totalAtkSpdPct = wSpdPoints + sub.dex_attack_speed.value + pas.attack_speed_pct + (companionAura.attack_speed_pct || 0);
     const playerAttacksPerSec = +(1.0 * (1 + totalAtkSpdPct / 100)).toFixed(2);
 
     // Peluang kena (cap 95%)
     const titleHitBonus = build.title.type === "Spesialis"
       ? (build.title.primaryStat === weapon.stat ? 5 : -5)
       : 0;
-    const playerHitChance = Math.min(95, 75 + wAccPoints + sub.dex_accuracy.value + pas.accuracy_pct + titleHitBonus - monster.dodge);
+    const playerHitChance = Math.min(95, 75 + wAccPoints + sub.dex_accuracy.value + pas.accuracy_pct + (companionAura.accuracy_pct || 0) + titleHitBonus - monster.dodge);
 
     // Dodge, Parry, Critical (cap bersama bonus peluang +30% dari stat dasar)
     let rawDodge = Math.min(20, sub.dex_evasion.value) + (isRanged ? 8 : 0) + (armorClass === "ringan" ? 8 : armorClass === "sedang" ? 4 : 0) + pas.dodge_pct;
@@ -546,25 +799,29 @@ export function createSkillEngine(skillData) {
     const compat = build.smith.checkWeaponCompatibility(weapon);
     const masteryMult = 1 + compat.masteryBonusPct / 100;
 
-    // Trigger senjata (Hanya aktif jika cocok dengan minimal 1 Smith Class Tier >= 1; jika tidak cocok, trigger terkunci!)
+    // Trigger senjata (CD-4.03 LOCKED: skala stat utama 1.5% per poin, CON +15% Guard Damage, CHA /5 dan /3)
     const mainStatVal = stats[weapon.stat] || 10;
-    const triggerMult = compat.triggerUnlocked ? (1 + (sub.int_trigger_mastery.value + pas.trigger_power_pct) / 100) : 0;
-    const effectiveTrigger = wTrgPoints * 0.8 * (1 + 0.01 * mainStatVal) * triggerMult;
+    const triggerMult = compat.triggerUnlocked
+      ? (1 + (sub.int_trigger_mastery.value + pas.trigger_power_pct + enh.overforgeTriggerBonusPct + (companionAura.trigger_power_pct || 0)) / 100)
+      : 0;
+    const effectiveTrigger = wTrgPoints * 0.8 * (1 + 0.015 * mainStatVal) * triggerMult * enh.powerMultiplier;
+    const conGuardDmgBonus = (weapon.stat === "CON" || (build.smith.tiers.Armorer || 0) >= 1) ? (stats.CON || 10) * 0.15 : 0;
     const triggerDmgBonus = ["STR", "DEX", "INT", "WIS"].includes(weapon.stat)
       ? effectiveTrigger / 4
-      : weapon.stat === "CHA" ? effectiveTrigger / 8 : 0;
-    const triggerDefPct = weapon.stat === "CON" ? effectiveTrigger / 2 : weapon.stat === "CHA" ? effectiveTrigger / 4 : 0;
+      : weapon.stat === "CHA" ? effectiveTrigger / 5 : conGuardDmgBonus;
+    const triggerDefPct = weapon.stat === "CON" ? effectiveTrigger / 2 : weapon.stat === "CHA" ? effectiveTrigger / 3 : 0;
 
     // Faktor elemen dasar (B4 LOCKED: +25% weak + sub-stat INT Weakness Exploit; -25% sama el)
     function getElementMultiplier(atkElement, autoMatchWeakness = false) {
       const el = autoMatchWeakness || atkElement === "Adaptive" ? monster.weak : (atkElement || weapon.element || "Neutral");
+      const elemPotency = sub.int_elemental_potency.value + pas.elemental_dmg_pct + (companionAura.elemental_dmg_pct || 0);
       if (el !== "Neutral" && el === monster.weak) {
-        return 1.25 + (sub.int_weakness_exploit.value + pas.weakness_bonus_pct + sub.int_elemental_potency.value + pas.elemental_dmg_pct) / 100;
+        return 1.25 + (sub.int_weakness_exploit.value + pas.weakness_bonus_pct + elemPotency) / 100;
       }
       if (el !== "Neutral" && el === monster.el) {
         return 0.75;
       }
-      return 1.0 + (el !== "Neutral" ? (sub.int_elemental_potency.value + pas.elemental_dmg_pct) / 200 : 0);
+      return 1.0 + (el !== "Neutral" ? elemPotency / 200 : 0);
     }
 
     // Simulasi langkah waktu (dt = 0.5 detik)
@@ -576,6 +833,7 @@ export function createSkillEngine(skillData) {
     let skillsCastCount = 0;
     let procsTriggered = 0;
     let procsConsumed = 0;
+    let companionDamageDealt = 0;
 
     const cooldowns = new Map(build.equippedSkills.map(s => [s.id, 0]));
     const activeProcs = new Set();
@@ -584,6 +842,7 @@ export function createSkillEngine(skillData) {
 
     let basicAtkAccumulator = 0;
     let monsterAtkAccumulator = 0;
+    let companionAtkAccumulator = 0;
     const log = [];
 
     for (let t = 0; t < maxSeconds && playerHp > 0; t += dt) {
@@ -663,6 +922,19 @@ export function createSkillEngine(skillData) {
         totalDamageDealt += dmg;
       }
 
+      // 2b. Companion Murid Assist Strike tiap 3 detik (CD-6.02)
+      if (companion) {
+        companionAtkAccumulator += dt;
+        if (companionAtkAccumulator >= 3.0) {
+          companionAtkAccumulator -= 3.0;
+          const basePlayerStrike = (weaponBaseDmg + sub.str_raw_might.value + triggerDmgBonus) * masteryMult;
+          const assistDmg = basePlayerStrike * (companion.assistDamagePctPerStrike / 100) * leadershipMult;
+          monsterHp -= assistDmg;
+          totalDamageDealt += assistDmg;
+          companionDamageDealt += assistDmg;
+        }
+      }
+
       // Respawn monster jika mati untuk menghitung Kill per HP Bar
       while (monsterHp <= 0) {
         monsterHp += monster.hp;
@@ -676,13 +948,14 @@ export function createSkillEngine(skillData) {
         const effectiveMonsterHit = Math.max(20, monster.accuracy - sub.cha_intimidate.value - avoidChance);
         const rawIncoming = monster.dmg * (1 - Math.min(30, sub.cha_intimidate.value + pas.enemy_dmg_debuff_pct) / 100);
 
-        // Mitigate CON (cap 50% mentah)
-        const flatMitigate = Math.min(rawIncoming * 0.5, sub.con_mitigate.value);
+        // Mitigate CON (cap 50% mentah, atau 60% dengan Perk CON)
+        const mitigateCapRatio = build.smith.activePerkT3?.stat === "CON" ? 0.60 : 0.50;
+        const flatMitigate = Math.min(rawIncoming * mitigateCapRatio, sub.con_mitigate.value);
         const afterMitigate = Math.max(1, rawIncoming - flatMitigate);
 
-        // Pengurang persen (weapon defense + trigger + passive + buff, cap 60%)
+        // Pengurang persen (CD-4.03 LOCKED: weapon defense 1.25 poin = 1% DR + trigger + passive + buff, cap 60%)
         const armorClassMit = armorClass === "berat" ? 10 : armorClass === "sedang" ? 5 : 0;
-        const totalPctRed = Math.min(60, (wDefPoints / 2) + triggerDefPct + pas.dmg_reduction_pct + armorClassMit + activeBuffDmgRedPct);
+        const totalPctRed = Math.min(60, (wDefPoints / 1.25) + triggerDefPct + pas.dmg_reduction_pct + armorClassMit + activeBuffDmgRedPct + (companionAura.dmg_reduction_pct || 0));
 
         // Resist elemen Armor Sedang (B4 LOCKED: +5% per slot jika elemen cocok + Elemental Barrier INT)
         let elemResistPct = monster.el !== "Neutral" ? sub.int_elemental_barrier.value : 0;
@@ -702,6 +975,7 @@ export function createSkillEngine(skillData) {
     const dtps = +(totalDamageTaken / durationSec).toFixed(2);
     const timeToDieSec = dtps > 0 ? +(maxPlayerHp / dtps).toFixed(1) : 9999;
     const killsPerHpBar = +((dps * timeToDieSec) / monster.hp).toFixed(2);
+    const antiFarm = computeAntiFarmMultipliers(level, monster.lvl, sub.wis_rare_drop ? sub.wis_rare_drop.value : 0);
 
     return {
       playerSummary: {
@@ -712,10 +986,13 @@ export function createSkillEngine(skillData) {
         smithClass: build.smith.singleWordClassName,
         smithTiers: build.smith.tiers,
         weaponCompatibility: compat,
+        weaponEnhancement: enh,
+        companionSummary: companion,
         macroSlotsUsed: `${build.equippedSkills.length}/${build.maxSlots}`,
         unlockedNodes: build.unlockedCount
       },
       monsterSummary: monster,
+      antiFarmSummary: antiFarm,
       metrics: {
         dps,
         dtps,
@@ -723,7 +1000,8 @@ export function createSkillEngine(skillData) {
         killsPerHpBar,
         skillsCastCount,
         procsTriggered,
-        procsConsumed
+        procsConsumed,
+        companionDamageDealt: +companionDamageDealt.toFixed(1)
       },
       combatLogSample: log
     };
@@ -736,6 +1014,10 @@ export function createSkillEngine(skillData) {
     evaluateSmithMastery,
     getUnlockedNodes,
     buildMacroLoadout,
+    computeAntiFarmMultipliers,
+    computeWeaponEnhancement,
+    generateApprenticeFromSeed,
+    computeGateCurseAndRest,
     simulateBattle
   };
 }
