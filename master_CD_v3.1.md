@@ -75,7 +75,30 @@ CD-3.02b: Sistem Nama Kelas 1 Kata Unik (Single-Word Class Name, LOCKED):
   - Utama Runesmith: +Weaponsmith = Hexblade | +Armorer = Aegisrune | +Rangesmith = Starfletcher | +Reforger = Thaumaturge
   - Utama Reforger: +Weaponsmith = Reaver | +Armorer = Colossus | +Rangesmith = Machinist | +Runesmith = Chronosmith
 - Multi-Class (3-5 Class): 3 Class = Polymath (dominan INT/Reforge) atau Arsenist (dominan Weapon/Armor/Range); 4 Class = Synthesist; Semua 5 Class Tier 1 (1+1+1+1+1) = Omnismith.
-CD-3.03: Perk Smith (nama Inggris, syarat Cap Stat 150). Tingkat 3 (terbuka jika ada class mencapai Tier >= 3 dan stat terkait >= 45) = 6 perk stat tunggal. Tingkat 5 (eksklusif hanya untuk Spesialis Murni 5 poin di 1 class dan kedua stat pasangan >= 75) = 15 perk hibrida pasangan stat (contoh STR+DEX = Venomed Blade). Pilih 1 per tingkat. Ganti perk & distribusi 5 poin Smith Class = un-fuse.
+CD-3.03: 21 Perk Smith (LOCKED: nama Inggris, efek ganda Tempa + Tempur, syarat Cap Stat 150, plus Bonus Afinitas +25% bila stat perk selaras dengan Smith Class utama pemain: Weaponsmith=STR/DEX, Armorer=CON/STR, Rangesmith=DEX/WIS, Runesmith=INT/WIS, Reforger=CHA/CON). Pilih 1 per tingkat; ganti perk & distribusi 5 poin Smith Class = un-fuse.
+- Tingkat 3 = 6 Perk Stat Tunggal (terbuka jika ada Smith Class mencapai Tier >= 3 dan stat terkait >= 45):
+  1. STR — Titan's Anvil: (Tempa) +10 Skor Kualitas senjata dekat/berat & +1 Enhance (+N) gratis saat Mahakarya; (Tempur) +15% Armor Crush & +10% Raw Might.
+  2. DEX — Quicksilver Edge: (Tempa) +8% Speed & Accuracy Budget barang; (Tempur) +10% Attack Speed & tiap Dodge/Parry mempercepat cooldown skill 0,5 dtk.
+  3. CON — Unbreakable Crucible: (Tempa) -50% bahan hilang saat gagal & -10% risiko gagal Fusi; (Tempur) +15% Max HP & cap Mitigate CON naik dari 50% ke 60% damage mentah.
+  4. INT — Runic Overdrive: (Tempa) +20 Bobot Mode Fusi & -10% risiko retak cabut Rune; (Tempur) +20% Trigger Mastery & +15% bonus Weakness Exploit.
+  5. WIS — Seeker's Eye: (Tempa) +12% peluang Trait Langka; (Tempur) +8% Critical Chance & +25% Critical Severity.
+  6. CHA — Sovereign Seal: (Tempa) +20% harga jual & +15% laju belajar Murid; (Tempur) Debuff musuh -10% Damage/Akurasi & memperkuat Self-Buff +20%.
+- Tingkat 5 = 15 Perk Hibrida Pasangan Stat (eksklusif Spesialis Murni 5 poin di 1 Smith Class dan kedua stat pasangan >= 75):
+  1. STR+DEX — Venomed Blade: +20% Bleed/Poison DPS & kurangi Armor musuh -15%.
+  2. STR+CON — Colossus Might: Tambah 15% nilai CON/Vitality ke Raw Might & +12% Damage Reduction.
+  3. STR+INT — Spellforged Impact: +25% Elemental & Physical Hybrid Damage + bobot Mode Fusi senjata STR +25.
+  4. STR+WIS — Executioner's Verdict: +35% Critical Damage & +20% Armor Penetration pada target ber-Proc/HP < 50%.
+  5. STR+CHA — Warlord's Dreadblade: Kurangi Armor & Damage musuh -15% serta +20% Skill Active Damage.
+  6. DEX+CON — Mirage Bastion: Pulihkan 4% HP saat Dodge/Parry & +15% Mitigate Shield.
+  7. DEX+INT — Chrono Trigger: -20% Cooldown seluruh Skill Aktif & +30% Weapon Trigger DPS.
+  8. DEX+WIS — Phantom Deadeye: Akurasi terkunci 95% (abaikan Dodge lawan) & konversi Dodge/Parry ke +25% Critical Damage.
+  9. DEX+CHA — Duelist's Encore: +18% Attack Speed, Double Strike setelah Skill Aktif, & +15% nilai jual/Rep karya tempa.
+  10. CON+INT — Aegis of the Runelord: -15% semua damage masuk & pantulkan 30% damage teredam sebagai Elemen Kelemahan (weak) musuh.
+  11. CON+WIS — Immortal Foresight: Regenerasi 2% Max HP/dtk, kebal kritikal lawan, & +15% peluang Mahakarya di Bengkel.
+  12. CON+CHA — Citadel of Command: +20% Max HP, +15% Damage Reduction, & ubah 25% Defense Budget menjadi bonus Counter Damage.
+  13. INT+WIS — Omniscient Artificer: +1 Slot Macro Bar ekstra, Auto-Weakness Exploit (+30% elem dmg), & 2x peluang Trait Langka.
+  14. INT+CHA — Sovereign Runecaster: +25% efektivitas Cross-Stat Mod, risiko gagal Fusi turun ke 2%, & +22% damage senjata Fusi Hibrida.
+  15. WIS+CHA — Grand Inquisitor's Grace: Musuh menerima +25% damage dari semua sumber, +10% Crit Chance, & +25% Rare/Legendary Drop.
 CD-3.04: Runesmith slot rune per rarity (Common 0 sampai Unique 5), peluang retak cabut rune = 35% - 1% x INT (minimal 5%). Reforger pindah +N dengan penalti -2 (Tier 1-2) atau -1 (Tier 3-5), biaya 50% biaya enhance. Tahap upgrade senjata/item Unique menggunakan istilah resmi Resonance.
 
 CD-4 Senjata (48 senjata: 32 Dekat + 16 Jauh) dan anggaran poin
@@ -163,18 +186,18 @@ Syarat stat Perk Smith Tingkat 3 (stat 10) dan Tingkat 5 (stat 15) di skala demo
 Sistem nama Smith Class multi-kata (awalan Raw..Paragon + akar pasangan) diganti Sistem Anggaran 5 Poin Tier & Nama Kelas 1-Kata Unik (CD-3.01 & CD-3.02b).
 Jumlah senjata 36 (hanya 4 senjata Jauh) diperluas menjadi 48 senjata (32 Dekat + 16 Jauh = +2 senjata Jauh baru per stat) agar Rangesmith seimbang di semua stat.
 7. OPEN
-Pemilik chunk dan pembagian AI. Penyetelan temuan beta test antar-stat (STR vs CON). XP dan drop anti-farm menurut selisih level. Daftar 21 nama & efek detail Perk Smith (saat ini baru Venomed Blade yang bernama, syarat stat sudah LOCKED di 45 dan 75). Slot trigger Armorer, penalti mati, biaya Long Rest, rumus +N final. Detail mekanik companion tempur murid, ujian murid, dan syarat teknis pewarisan toko (CD-6). Rarity dan +N di anggaran senjata. Bobot anggaran poin. 48 trigger belum disimulasikan efek uniknya satu per satu.
+Pemilik chunk dan pembagian AI. Penyetelan temuan beta test antar-stat (STR vs CON). XP dan drop anti-farm menurut selisih level. Slot trigger Armorer, penalti mati, biaya Long Rest, rumus +N final. Detail mekanik companion tempur murid, ujian murid, dan syarat teknis pewarisan toko (CD-6). Rarity dan +N di anggaran senjata. Bobot anggaran poin. 48 trigger belum disimulasikan efek uniknya satu per satu.
 8. Format Laporan Perubahan (isi tiap akhir sesi)
 LAPORAN PERUBAHAN
 Versi master yang dipakai: v3.1 -> v3.2
-Chunk: CD-1, CD-2, CD-3, CD-4, CD-5, CD-6, Bagian 2 & 5b (Tindak lanjut BRIEF WD -> CD v1 + Skill & Forge Engine + 5-Tier Smith Class + 48 Senjata)
-Tanggal sesi: 20 November 2026
+Chunk: CD-1, CD-2, CD-3, CD-4, CD-5, CD-6, Bagian 2 & 5b (Tindak lanjut BRIEF WD -> CD v1 + Skill & Forge Engine + 5-Tier Smith Class + 48 Senjata + 21 Perk Smith)
+Tanggal sesi: 20-21 November 2026
 1. Keputusan baru (ID, isi, status LOCKED/USULAN):
 - CD-1.01 & CD-1.07 (LOCKED): Mode Full Lv1-150 aktif (5 Tier x 30 level). Poin stat per level tetap +2 sampai Lv150 (total 311 poin). Cap stat tiap tier naik +30: 30 / 60 / 90 / 120 / 150 (kapasitas total 900).
 - CD-1.02b (LOCKED): Setiap Stat Utama memiliki 10 Sub-Stat (6 Tempur + 4 Profesi/Smith = 60 Sub-Stat total) dengan koefisien linear terukur di engines/skill_engine/skill_data.json. Pemain memilih 2 Sub-Stat Fokus per Stat Utama (+25% efisiensi, diubah lewat un-fuse).
 - CD-1.04 & CD-1.06 (LOCKED): Target total waktu minimum idle sampai Lv150 = ~720 jam (12 tahun kalender WD). Cap XP/jam setelah Lv30 = 1.200 + 60 x (L - 30) (8.400 XP/jam di Lv150).
 - CD-2.01 (LOCKED): Sistem Skill SWTOR Discipline & Cross-Stat Macro Loadout (150 Node = 25 per stat: +10 Core Passive, +20 pilih 1-dari-3 Utility/Morph, +30 Rotational Active Skill). Kapasitas Macro Bar 3-6 slot dari Sub-Stat INT Macro Capacity; tiap Skill Aktif punya 2 slot Cross-Stat Utility Mod.
-- CD-3.01, CD-3.02, CD-3.02b, & CD-3.03 (LOCKED): Anggaran total 5 Poin Tingkat (5 Tier) bebas distribusi ke 5 Smith Class. Sistem Nama Kelas 1-Kata Unik (Bladesmith..Archblade, Spellblade, Vanguard, Starfletcher, Omnismith, dst.). Aturan Mazhab Barang A+C (semua barang bisa ditempa dengan 5 aspek komponen; pemakaian tempur butuh minimal Tier 1 pada class terkait agar Trigger aktif dan bebas penalti -25%). Syarat stat Perk Tingkat 3 = 45, Tingkat 5 = 75 pada kedua stat (eksklusif 5 poin murni).
+- CD-3.01, CD-3.02, CD-3.02b, & CD-3.03 (LOCKED): Anggaran total 5 Poin Tingkat (5 Tier) bebas distribusi ke 5 Smith Class. Sistem Nama Kelas 1-Kata Unik. Aturan Mazhab Barang A+C (semua barang bisa ditempa dengan 5 aspek komponen; pemakaian tempur butuh minimal Tier 1 pada class terkait). Daftar lengkap 21 Perk Smith (6 Perk Stat Tunggal Tier 3 syarat stat >= 45 + 15 Perk Hibrida Pasangan Stat Tier 5 syarat 5 poin murni & kedua stat >= 75, dengan Bonus Afinitas +25% bila cocok dengan Smith Class utama).
 - CD-4.01 & CD-4.04 (LOCKED): Penambahan 12 Senjata Jarak Jauh baru (2 per Stat, beserta 12 Weapon Trigger baru) sehingga total menjadi 48 Senjata (32 Dekat + 16 Jauh).
 - Kontrak Bagian 2 & Bagian 5b (LOCKED): Kelipatan zona dipetakan ke 5 Tier WD secara linear (+0,25/tier): x1,0 / x1,25 / x1,5 / x1,75 / x2,0.
 - Bagian 5b (LOCKED): Tabel pemetaan 5 Role WD dan 4 Tipe WD ke pengali HP, damage, speed, akurasi, dodge, dan armor CD.
@@ -187,7 +210,7 @@ Tanggal sesi: 20 November 2026
 - Kelipatan zona 3 tingkat (x1 / x1,5 / x2,25) -> 5 Tier linear (x1,0 / x1,25 / x1,5 / x1,75 / x2,0).
 - Tabel peran/afinitas monster CSV lama & placeholder punya_kelemahan (Y/N) -> Tabel 5 Role & 4 Tipe WD + kolom el/weak 6 Elemen WD.
 - Nama trigger INT "Resonance Hammer" -> "Runic Shockwave".
-- 36 skill breakpoint statis (5..30) & syarat perk 10/15 -> 150 Node SWTOR Discipline + Cross-Stat Macro Loadout & syarat perk 45/75.
+- 36 skill breakpoint statis (5..30) & syarat perk 10/15 -> 150 Node SWTOR Discipline + Cross-Stat Macro Loadout & 21 Perk Smith lengkap (syarat 45/75).
 - Nama Smith Class multi-kata -> Nama Kelas 1-Kata Unik dengan anggaran 5 Poin Tier.
 - Batas 36 senjata (4 Jauh) -> 48 senjata (32 Dekat + 16 Jauh).
 3. Nilai kontrak lintas chunk yang disentuh:
@@ -195,10 +218,10 @@ Tanggal sesi: 20 November 2026
 4. KONFLIK dengan chunk lain (jika ada):
 - Tidak ada konflik; seluruh permintaan B1-B7 dari BRIEF WD -> CD telah diselesaikan dan diuji di engines/skill_engine/.
 5. OPEN baru:
-- Tidak ada.
+- Tidak ada (OPEN mengenai daftar 21 perk telah ditutup dan dikunci di CD-3.03).
 6. Parkir (topik milik chunk lain):
 - Tidak ada. Detail companion tempur, ujian murid, dan pewarisan toko tetap di OPEN CD-6 untuk sesi berikutnya.
 9. Log versi
 v3.0: basis GDD v2 dan perubahan sampai pembahasan Smith type ke-5 dan pembeda jarak DEX.
 v3.1: tambah PRJ-01 (fokus backend), bagian 5b (model simulasi dan spesifikasi CSV monster), status LOCKED rumus damage monster, OPEN diperbarui. Saran pembagian AI tercatat sebagai USULAN.
-v3.2: integrasi penuh BRIEF WD -> CD v1 (B1-B7) + pembangunan engines/skill_engine/ & forge_engine.js + bengkel-tempa-v3.html: Mode Full Lv1-150, cap stat 30/60/90/120/150, 60 sub-stat, sistem skill SWTOR Discipline & Cross-Stat Macro Loadout (150 node), anggaran 5 Tier Smith Class dengan nama 1-kata unik & aturan Mazhab Barang A+C, perluasan senjata menjadi 48 senjata (32 Dekat + 16 Jauh), target idle Lv150 ~720 jam, kelipatan zona 5 Tier linear (x1,0-x2,0), pemetaan 5 Role & 4 Tipe monster WD, adopsi 6 elemen + Neutral, dan skala murid 0-100.
+v3.2: integrasi penuh BRIEF WD -> CD v1 (B1-B7) + pembangunan engines/skill_engine/ & forge_engine.js + bengkel-tempa-v3.html: Mode Full Lv1-150, cap stat 30/60/90/120/150, 60 sub-stat, sistem skill SWTOR Discipline & Cross-Stat Macro Loadout (150 node), anggaran 5 Tier Smith Class dengan nama 1-kata unik, aturan Mazhab Barang A+C, 21 Perk Smith lengkap (CD-3.03), perluasan senjata menjadi 48 senjata (32 Dekat + 16 Jauh), target idle Lv150 ~720 jam, kelipatan zona 5 Tier linear (x1,0-x2,0), pemetaan 5 Role & 4 Tipe monster WD, adopsi 6 elemen + Neutral, dan skala murid 0-100.

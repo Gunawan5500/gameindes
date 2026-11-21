@@ -170,11 +170,45 @@ export function createSkillEngine(skillData) {
     "Reforger+Runesmith": "Chronosmith"
   };
 
+  const SMITH_CLASS_AFFINITY = {
+    Weaponsmith: ["STR", "DEX"],
+    Armorer:     ["CON", "STR"],
+    Rangesmith:  ["DEX", "WIS"],
+    Runesmith:   ["INT", "WIS"],
+    Reforger:    ["CHA", "CON"]
+  };
+
+  const SMITH_PERKS_T3 = {
+    STR: { id: "perk_t3_str", stat: "STR", name: "Titan's Anvil", forge: { quality_bonus: 10, masterwork_plus: 1 }, combat: { armor_pen_pct: 15, raw_might_pct: 10 }, desc: "+10 Kualitas Senjata Berat & +15% Armor Crush / +10% Raw Might" },
+    DEX: { id: "perk_t3_dex", stat: "DEX", name: "Quicksilver Edge", forge: { speed_acc_budget_pct: 8 }, combat: { attack_speed_pct: 10, cdr_on_avoid_sec: 0.5 }, desc: "+8% Speed/Acc Tempa & +10% Attack Speed" },
+    CON: { id: "perk_t3_con", stat: "CON", name: "Unbreakable Crucible", forge: { conserve_bonus_pct: 50, fusion_safe_pct: 10 }, combat: { max_hp_pct: 15, mitigate_cap_pct: 60 }, desc: "-50% Bahan Hilang/-10% Gagal Fusi & +15% Max HP (Cap Mitigate 60%)" },
+    INT: { id: "perk_t3_int", stat: "INT", name: "Runic Overdrive", forge: { fusion_weight_bonus: 20, rune_safe_pct: 10 }, combat: { trigger_power_pct: 20, weakness_bonus_pct: 15 }, desc: "+20 Bobot Mode Fusi & +20% Trigger Mastery / +15% Weakness Exploit" },
+    WIS: { id: "perk_t3_wis", stat: "WIS", name: "Seeker's Eye", forge: { rare_trait_bonus_pct: 12 }, combat: { crit_chance_pct: 8, crit_dmg_pct: 25 }, desc: "+12% Peluang Trait Langka & +8% Crit Chance / +25% Crit Severity" },
+    CHA: { id: "perk_t3_cha", stat: "CHA", name: "Sovereign Seal", forge: { sell_price_pct: 20, apprentice_rate_pct: 15 }, combat: { enemy_debuff_pct: 10, self_buff_power_pct: 20 }, desc: "+20% Harga Jual/+15% Laju Murid & -10% Dmg/Acc Musuh" }
+  };
+
+  const SMITH_PERKS_T5 = {
+    "STR+DEX": { id: "perk_t5_str_dex", pair: "STR+DEX", stats: ["STR", "DEX"], name: "Venomed Blade", forge: { speed_acc_budget_pct: 10 }, combat: { skill_dmg_pct: 20, armor_pen_pct: 15 }, desc: "+20% Bleed/Poison DPS & -15% Armor Musuh" },
+    "STR+CON": { id: "perk_t5_str_con", pair: "STR+CON", stats: ["STR", "CON"], name: "Colossus Might", forge: { quality_bonus: 12 }, combat: { hp_to_might_pct: 15, dmg_reduction_pct: 12 }, desc: "+15% CON ke Raw Might & +12% Damage Reduction" },
+    "STR+INT": { id: "perk_t5_str_int", pair: "STR+INT", stats: ["STR", "INT"], name: "Spellforged Impact", forge: { fusion_weight_bonus: 25 }, combat: { skill_dmg_pct: 25, trigger_power_pct: 15 }, desc: "+25% Elemental-Physical Hybrid Dmg & +25 Bobot Fusi" },
+    "STR+WIS": { id: "perk_t5_str_wis", pair: "STR+WIS", stats: ["STR", "WIS"], name: "Executioner's Verdict", forge: { rare_trait_bonus_pct: 12 }, combat: { crit_dmg_pct: 35, armor_pen_pct: 20 }, desc: "+35% Crit Damage & +20% Armor Pen" },
+    "STR+CHA": { id: "perk_t5_str_cha", pair: "STR+CHA", stats: ["STR", "CHA"], name: "Warlord's Dreadblade", forge: { sell_price_pct: 20 }, combat: { skill_dmg_pct: 20, enemy_debuff_pct: 15 }, desc: "-15% Armor/Dmg Musuh & +20% Skill Active Damage" },
+    "DEX+CON": { id: "perk_t5_dex_con", pair: "DEX+CON", stats: ["DEX", "CON"], name: "Mirage Bastion", forge: { conserve_bonus_pct: 35 }, combat: { dmg_reduction_pct: 15, max_hp_pct: 12 }, desc: "Pulihkan HP saat Dodge/Parry & +15% Mitigate Shield" },
+    "DEX+INT": { id: "perk_t5_dex_int", pair: "DEX+INT", stats: ["DEX", "INT"], name: "Chrono Trigger", forge: { fusion_weight_bonus: 20 }, combat: { global_cdr_pct: 20, trigger_power_pct: 30 }, desc: "-20% Cooldown Seluruh Skill & +30% Weapon Trigger DPS" },
+    "DEX+WIS": { id: "perk_t5_dex_wis", pair: "DEX+WIS", stats: ["DEX", "WIS"], name: "Phantom Deadeye", forge: { speed_acc_budget_pct: 12 }, combat: { lock_95_acc: true, crit_dmg_pct: 25 }, desc: "Akurasi Terkunci 95% (Abaikan Dodge) & +25% Crit Damage" },
+    "DEX+CHA": { id: "perk_t5_dex_cha", pair: "DEX+CHA", stats: ["DEX", "CHA"], name: "Duelist's Encore", forge: { sell_price_pct: 15 }, combat: { attack_speed_pct: 18, skill_dmg_pct: 15 }, desc: "+18% Attack Speed & Double Strike setelah Skill Aktif" },
+    "CON+INT": { id: "perk_t5_con_int", pair: "CON+INT", stats: ["CON", "INT"], name: "Aegis of the Runelord", forge: { fusion_safe_pct: 15 }, combat: { dmg_reduction_pct: 15, skill_dmg_pct: 18 }, desc: "-15% Semua Damage Masuk & Pantulkan 30% sebagai Elemen Weak" },
+    "CON+WIS": { id: "perk_t5_con_wis", pair: "CON+WIS", stats: ["CON", "WIS"], name: "Immortal Foresight", forge: { quality_bonus: 15 }, combat: { max_hp_pct: 18, dmg_reduction_pct: 12 }, desc: "Regen 2% HP/dtk, Kebal Crit Lawan, & +15 Skor Kualitas Tempa" },
+    "CON+CHA": { id: "perk_t5_con_cha", pair: "CON+CHA", stats: ["CON", "CHA"], name: "Citadel of Command", forge: { apprentice_rate_pct: 20 }, combat: { max_hp_pct: 20, dmg_reduction_pct: 15 }, desc: "+20% Max HP, +15% Damage Reduction, & Counter Defense" },
+    "INT+WIS": { id: "perk_t5_int_wis", pair: "INT+WIS", stats: ["INT", "WIS"], name: "Omniscient Artificer", forge: { rare_trait_bonus_pct: 25 }, combat: { extra_macro_slot: 1, auto_match_weakness: true, weakness_bonus_pct: 30 }, desc: "+1 Slot Macro Ekstra, Auto-Weakness (+30% Elem), & +25% Trait Langka" },
+    "INT+CHA": { id: "perk_t5_int_cha", pair: "INT+CHA", stats: ["INT", "CHA"], name: "Sovereign Runecaster", forge: { fusion_safe_pct: 25, fusion_weight_bonus: 25 }, combat: { cross_mod_bonus_pct: 25, skill_dmg_pct: 22 }, desc: "+25% Cross-Stat Mod, Risiko Gagal Fusi 2%, & +22% Dmg Hibrida" },
+    "WIS+CHA": { id: "perk_t5_wis_cha", pair: "WIS+CHA", stats: ["WIS", "CHA"], name: "Grand Inquisitor's Grace", forge: { rare_trait_bonus_pct: 20 }, combat: { skill_dmg_pct: 25, crit_chance_pct: 10 }, desc: "Musuh Terima +25% Damage, +10% Crit Chance, & +25% Rare Drop" }
+  };
+
   /**
-   * 4. Evaluasi Smith Class (Total 5 Poin Tingkat / 5 Tier, Nama Kelas 1 Kata CD-3.02b, & Mazhab Barang A+C)
+   * 4. Evaluasi Smith Class (Total 5 Poin Tingkat / 5 Tier, Nama Kelas 1 Kata CD-3.02b, Mazhab Barang A+C, & 21 Perk Smith CD-3.03)
    */
   function evaluateSmithMastery(stats, smithConfig = {}) {
-    // Dukung format baru { tiers: { Weaponsmith: 3, Runesmith: 2 } } maupun format lama { primaryType, primaryRank }
     let tiers = { Weaponsmith: 0, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
     if (smithConfig.tiers) {
       for (const k of Object.keys(tiers)) {
@@ -190,7 +224,6 @@ export function createSkillEngine(skillData) {
       }
     }
 
-    // Batasi total anggaran maksimal 5 poin tier
     const activeEntries = Object.entries(tiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
     const totalPointsUsed = activeEntries.reduce((acc, [, v]) => acc + v, 0);
     const primaryType = activeEntries.length ? activeEntries[0][0] : "Weaponsmith";
@@ -199,7 +232,6 @@ export function createSkillEngine(skillData) {
     const secondaryRank = activeEntries.length > 1 ? activeEntries[1][1] : 0;
     const isSpecialistSmith = activeEntries.length === 1 && primaryRank === 5;
 
-    // Resolusi Nama Kelas 1 Kata (CD-3.02b)
     let singleWordClassName = "Apprentice";
     if (activeEntries.length === 1) {
       singleWordClassName = SINGLE_CLASS_NAMES[primaryType][Math.min(5, Math.max(1, primaryRank)) - 1];
@@ -217,14 +249,22 @@ export function createSkillEngine(skillData) {
 
     const pData = skillData.smith_types[primaryType] || skillData.smith_types.Weaponsmith;
     const craftBonusPct = primaryRank * 6 + (totalPointsUsed - primaryRank) * 3;
+    const classAffinityStats = SMITH_CLASS_AFFINITY[primaryType] || ["STR", "DEX"];
 
-    // Perk eligibility (CD-3.03: Tier 3 single stat >= 45 jika punya class >= 3; Tier 5 dual stat >= 75 eksklusif 5 poin murni)
+    // Evaluasi Kelayakan 21 Perk Smith (CD-3.03) + Bonus Afinitas +25% (x1.25)
     const eligibleSingleStatPerks = [];
     const eligibleHybridPairPerks = [];
+    const eligiblePerksT3Details = [];
+    const eligiblePerksT5Details = [];
 
     if (primaryRank >= 3) {
       for (const s of STATS) {
-        if ((stats[s] || 1) >= 45) eligibleSingleStatPerks.push(s);
+        if ((stats[s] || 1) >= 45) {
+          eligibleSingleStatPerks.push(s);
+          const pk = SMITH_PERKS_T3[s];
+          const hasAffinity = classAffinityStats.includes(s);
+          eligiblePerksT3Details.push({ ...pk, hasAffinity, affinityMult: hasAffinity ? 1.25 : 1.0 });
+        }
       }
     }
     if (isSpecialistSmith) {
@@ -232,13 +272,22 @@ export function createSkillEngine(skillData) {
         for (let j = i + 1; j < STATS.length; j++) {
           const s1 = STATS[i], s2 = STATS[j];
           if ((stats[s1] || 1) >= 75 && (stats[s2] || 1) >= 75) {
-            eligibleHybridPairPerks.push(`${s1}+${s2}`);
+            const pairKey = `${s1}+${s2}`;
+            eligibleHybridPairPerks.push(pairKey);
+            const pk = SMITH_PERKS_T5[pairKey];
+            const hasAffinity = classAffinityStats.includes(s1) || classAffinityStats.includes(s2);
+            eligiblePerksT5Details.push({ ...pk, hasAffinity, affinityMult: hasAffinity ? 1.25 : 1.0 });
           }
         }
       }
     }
 
-    // Fungsi pengecekan kecocokan pemakaian senjata/barang (CD-3.02 Opsi A+C)
+    // Pilih Perk Aktif (dari smithConfig.selectedPerkT3 / selectedPerkT5, atau otomatis pilih yang pertama yang layak)
+    const activePerkT3 = eligiblePerksT3Details.find(p => p.stat === smithConfig.selectedPerkT3 || p.id === smithConfig.selectedPerkT3)
+      || eligiblePerksT3Details[0] || null;
+    const activePerkT5 = eligiblePerksT5Details.find(p => p.pair === smithConfig.selectedPerkT5 || p.id === smithConfig.selectedPerkT5)
+      || eligiblePerksT5Details[0] || null;
+
     function checkWeaponCompatibility(weapon = {}) {
       const matchingClasses = [];
       if (weapon.tag === "Jauh") matchingClasses.push("Rangesmith");
@@ -276,9 +325,14 @@ export function createSkillEngine(skillData) {
       secondaryRank,
       isSpecialistSmith,
       craftBonusPct,
+      classAffinityStats,
       synergy: pData.skill_synergy,
       eligibleSingleStatPerks,
       eligibleHybridPairPerks,
+      eligiblePerksT3Details,
+      eligiblePerksT5Details,
+      activePerkT3,
+      activePerkT5,
       checkWeaponCompatibility
     };
   }
