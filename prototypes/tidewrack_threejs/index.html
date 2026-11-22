@@ -16,14 +16,14 @@
 
   <!-- Main HUD -->
   <div id="hud">
-    <!-- TOP ROW -->
+    <!-- TOP ROW (Strictly 2-column left/right — Target Frame is fixed-centered so it never shifts layout) -->
     <div class="hud-top">
-      <!-- Player Status Card -->
+      <!-- Top-Left: Player Status Card -->
       <div class="panel player-card hud-interactive">
         <div class="player-head">
-          <div>
-            <span class="player-title">Pandai Besi Tidewrack</span>
-            <span class="destiny-chip" id="hud-destiny" title="Kartu Destiny Aktif (Klik atau tekan [K])">🃏 Bladesmith</span>
+          <div class="player-id-wrap">
+            <span class="player-title">Pandai Besi</span>
+            <button class="destiny-chip" id="hud-destiny" title="Buka Tab Destiny [J]">🃏 Bladesmith</button>
           </div>
           <span class="lvl-chip" id="hud-lvl">Lv.1 • T1</span>
         </div>
@@ -39,50 +39,53 @@
         </div>
         <div class="meta-strip">
           <span>💰 <b id="hud-bronze">120 br</b></span>
-          <span>⚔️ <b id="hud-wpn">Palu Besi Tua (Dekat)</b></span>
-          <span>Mulia <b class="mulia" id="hud-mulia">0</b> • Kejam <b class="kejam" id="hud-kejam">0</b></span>
+          <span class="meta-wpn">⚔️ <b id="hud-wpn">Palu Besi Tua</b></span>
+          <span class="meta-moral">M:<b class="mulia" id="hud-mulia">0</b> K:<b class="kejam" id="hud-kejam">0</b></span>
         </div>
       </div>
 
-      <!-- SWTOR / RF Online Center Target Frame -->
-      <div class="panel target-frame hud-interactive" id="target-frame">
-        <div class="target-head">
-          <span class="target-name" id="target-name">Target</span>
-          <span class="lvl-chip" style="font-size:10px">Tab: Ganti</span>
-        </div>
-        <div class="target-meta" id="target-meta"></div>
-        <div class="bar-row" id="target-hp-row">
-          <span class="bar-label">HP</span>
-          <div class="bar-track"><div class="bar-fill hp" id="target-hp-fill" style="width:100%"></div></div>
-          <span class="bar-val" id="target-hp-val">35/35</span>
-        </div>
-        <div class="cast-box" id="target-cast-box">
-          <div class="cast-head">
-            <span id="target-cast-name">⚡ Static Surge — INTERRUPT!</span>
-          </div>
-          <div class="bar-track"><div class="bar-fill cast" id="target-cast-fill" style="width:0%"></div></div>
-        </div>
-      </div>
-
-      <!-- Top-Right: Active Node, Camera Switcher, Quality Preset & Telemetry -->
-      <div>
+      <!-- Top-Right: Active Node, Controls & Collapsible Quest Pill -->
+      <div class="top-right-col">
         <div class="panel node-card hud-interactive">
-          <div class="node-name" id="hud-node-name">Tidewrack Village</div>
-          <div class="node-sub" id="hud-node-sub">Saltgrave Coast • Kota Awal (Tier 1)</div>
+          <div class="node-head">
+            <div class="node-name" id="hud-node-name">Tidewrack Village</div>
+            <div class="node-sub" id="hud-node-sub">Saltgrave Coast • T1</div>
+          </div>
           <div class="ctrl-row">
-            <button class="chip-btn active" id="btn-cam">Kamera: Octopath HD-2D</button>
-            <button class="chip-btn" id="btn-quality">Oppo A54 Lite</button>
+            <button class="chip-btn active" id="btn-cam">📷 HD-2D</button>
+            <button class="chip-btn" id="btn-quality">⚡ Lite</button>
+            <button class="chip-btn" id="btn-quest-toggle" title="Buka/Tutup Sasaran Awal">✦ Misi <b id="quest-count-badge">0/4</b></button>
           </div>
           <div class="telemetry" id="hud-telemetry">60 FPS • Calls: 0 • Geo: 0 • Tex: 0</div>
         </div>
 
-        <div class="panel quest-tracker hud-interactive">
+        <div class="panel quest-tracker hud-interactive" id="quest-tracker">
           <div class="quest-tracker-title">✦ Sasaran Awal Lv.1</div>
           <div class="quest-item" id="q-1">• Bicara dengan Master Brann (!)</div>
           <div class="quest-item" id="q-2">• Tempa / latihan di Bengkel Tempa</div>
           <div class="quest-item" id="q-3">• Rekrut Kael sebagai Companion</div>
           <div class="quest-item" id="q-4">• Pindah ke Tidewrack Beach & kalahkan monster (0/3)</div>
         </div>
+      </div>
+    </div>
+
+    <!-- SWTOR / RF Online Fixed-Center Target Frame -->
+    <div class="panel target-frame hud-interactive" id="target-frame">
+      <div class="target-head">
+        <span class="target-name" id="target-name">Target</span>
+        <span class="lvl-chip" style="font-size:10px">Tab: Ganti</span>
+      </div>
+      <div class="target-meta" id="target-meta"></div>
+      <div class="bar-row" id="target-hp-row">
+        <span class="bar-label">HP</span>
+        <div class="bar-track"><div class="bar-fill hp" id="target-hp-fill" style="width:100%"></div></div>
+        <span class="bar-val" id="target-hp-val">35/35</span>
+      </div>
+      <div class="cast-box" id="target-cast-box">
+        <div class="cast-head">
+          <span id="target-cast-name">⚡ Static Surge — INTERRUPT!</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill cast" id="target-cast-fill" style="width:0%"></div></div>
       </div>
     </div>
 
@@ -93,18 +96,20 @@
         <div class="log-entries" id="log-entries"></div>
         <div class="dual-xp">
           <div class="xp-note">
-            <span>Dual XP (Naik Lv jika keduanya penuh)</span>
-            <span>CD-1.04</span>
+            <span>Dual XP</span>
+            <span id="hud-xp-hint">Penuh = Naik Lv</span>
           </div>
-          <div class="bar-row">
-            <span class="bar-label">BTL</span>
-            <div class="bar-track"><div class="bar-fill xp-b" id="hud-xpb-fill" style="width:0%"></div></div>
-            <span class="bar-val" id="hud-xpb-val">0/60</span>
-          </div>
-          <div class="bar-row" style="margin-bottom:0">
-            <span class="bar-label">SMT</span>
-            <div class="bar-track"><div class="bar-fill xp-s" id="hud-xps-fill" style="width:0%"></div></div>
-            <span class="bar-val" id="hud-xps-val">0/60</span>
+          <div class="xp-bars-grid">
+            <div class="bar-row" style="margin-bottom:0">
+              <span class="bar-label">BTL</span>
+              <div class="bar-track"><div class="bar-fill xp-b" id="hud-xpb-fill" style="width:0%"></div></div>
+              <span class="bar-val" id="hud-xpb-val">0/60</span>
+            </div>
+            <div class="bar-row" style="margin-bottom:0">
+              <span class="bar-label">SMT</span>
+              <div class="bar-track"><div class="bar-fill xp-s" id="hud-xps-fill" style="width:0%"></div></div>
+              <span class="bar-val" id="hud-xps-val">0/60</span>
+            </div>
           </div>
         </div>
       </div>
@@ -122,19 +127,19 @@
               <span class="skill-rank" id="wpn-skill-rank">Lv.1</span>
             </div>
             <span class="skill-name" id="wpn-skill-name">Heavy Chain</span>
-            <span class="skill-sub" id="wpn-skill-sub">Weapon Skill</span>
+            <span class="skill-sub" id="wpn-skill-sub">6.5d</span>
             <div class="skill-xp-bar"><div class="skill-xp-fill" id="wpn-skill-xp" style="width:0%"></div></div>
             <div class="gcd-mask" id="wpn-skill-gcd"></div>
             <div class="cd-mask" id="wpn-skill-cd"></div>
           </button>
           <div class="dock-side-btns">
-            <button class="chip-btn" id="btn-idle">💤 Idle: OFF</button>
-            <button class="chip-btn teal" id="btn-quick-portal">🌀 Portal</button>
+            <button class="chip-btn" id="btn-idle" title="Mode Idle Auto-Hunt & Latihan RF Mastery">💤 Idle</button>
+            <button class="chip-btn teal" id="btn-quick-portal" title="Buka Gerbang Pindah Node">🌀 Portal</button>
           </div>
         </div>
       </div>
 
-      <!-- Right: Quick Nav + Optional Touch D-Pad for Oppo A54 -->
+      <!-- Right: Separated Quick-Menu Tabs (Tipe Smith | Skill | Destiny | Inventory + VFX & D-Pad) -->
       <div class="right-dock">
         <div class="panel dpad hud-interactive" id="touch-dpad">
           <div></div><button class="dpad-btn" data-dx="0" data-dz="-1">▲</button><div></div>
@@ -142,10 +147,12 @@
           <div></div><button class="dpad-btn" data-dx="0" data-dz="1">▼</button><div></div>
         </div>
         <div class="panel quick-nav hud-interactive">
-          <button class="chip-btn active" id="btn-skill-destiny">🌳 Skill & Destiny</button>
-          <button class="chip-btn teal" id="btn-vfx-linker">🎨 VFX Linker</button>
-          <button class="chip-btn" id="btn-sheet">🛡️ Karakter</button>
-          <button class="chip-btn" id="btn-dpad-toggle">🎮 D-Pad</button>
+          <button class="chip-btn" id="btn-tab-smith" title="Tipe Smith & Alokasi 5 Poin [C]">🔨 Smith</button>
+          <button class="chip-btn active" id="btn-tab-skill" title="Pohon Skill, RF Mastery & Weapon [K]">⚔️ Skill</button>
+          <button class="chip-btn" id="btn-tab-destiny" title="29 Kartu Destiny & Jalur Ganda [J]">🃏 Destiny</button>
+          <button class="chip-btn" id="btn-tab-inventory" title="Tas Item & Senjata [I]">🎒 Tas</button>
+          <button class="chip-btn teal" id="btn-vfx-linker" title="VFX & Sprite Asset Linker">🎨 VFX</button>
+          <button class="chip-btn" id="btn-dpad-toggle" title="Tampilkan D-Pad Sentuh">🎮 D-Pad</button>
         </div>
       </div>
     </div>

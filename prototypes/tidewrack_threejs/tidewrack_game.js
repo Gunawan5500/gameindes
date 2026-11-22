@@ -332,8 +332,10 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.shadowMap.needsUpdate = true;
     vfx.setUltraQuality(isUltra);
-    document.getElementById('btn-quality').textContent = isUltra ? 'ROG Ultra' : 'Oppo A54 Lite';
-    document.getElementById('btn-quality').classList.toggle('active', isUltra);
+    const qBtn = document.getElementById('btn-quality');
+    qBtn.textContent = isUltra ? '✨ Ultra' : '⚡ Lite';
+    qBtn.title = isUltra ? 'Preset ROG GL553VD Ultra (Bayangan & DPR tinggi)' : 'Preset Oppo A54 Lite (Hemat RAM & Baterai)';
+    qBtn.classList.toggle('active', isUltra);
   }
 
   // --------------------------------------------------------------------------
@@ -2234,40 +2236,14 @@
     if (goVillage) goVillage.onclick = () => { closeModal(); switchNode('tidewrack_village', 'Tidewrack Village'); };
   }
 
-  // --- MODAL: KARAKTER & TAS ---
-  function openSheetModal() {
-    const p = state.player;
-    const w = getWeapon();
-    const build = state.v33Build || refreshBuildV33(true);
-    const card = build.activeDestinyCard;
-    const statsHtml = Object.entries(p.stats).map(([k, v]) => `<span class="tag"><b>${k}</b>: ${v}</span>`).join(' ');
-    const invHtml = Object.keys(MATERIAL_CATALOG).map(id => {
-      const m = MATERIAL_CATALOG[id];
-      return `<div class="item-card"><div class="item-title">${m.name} (x${p.inventory[id] || 0})</div><div class="item-desc">${m.rarity} • ${m.price} br • ${m.desc}</div></div>`;
-    }).join('');
-
-    openModal(`
-      <div class="modal-head">
-        <div>
-          <h2 class="modal-title">🛡️ Lembar Karakter — Lv.${p.level} ${p.smithClass}</h2>
-          <div class="modal-sub">Kartu Destiny: <b>${card ? card.displayName : p.smithClass}</b> • Macro Bar: ${build.equippedSkills.length}/${build.maxSlots} Slot + [W] • GCD ${state.gcdDuration}d</div>
-        </div>
-        <button class="close-btn" id="btn-close-modal">Tutup</button>
-      </div>
-      <div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px">${statsHtml}</div>
-      <div class="dialog-speech" style="margin-bottom:10px">
-        <b>Moral Conscience (WD-4.06):</b> Mulia ${p.mulia} | Kejam ${p.kejam}<br>
-        <b>Companion Murid:</b> ${state.companion.recruited ? `${state.companion.name} (Aktif — Loyalitas ${state.companion.loyalty}/100)` : 'Belum direkrut (Temui Kael di Tidewrack Village)'}<br>
-        <b>Kontrol Laptop:</b> WASD / Klik Tanah jalan • <b>[1–6]</b> Skill Class • <b>[Q]</b> Weapon Skill [W] • <b>[K]</b> Skill Tree & 29 Kartu Destiny • <b>[E]</b> Interaksi • <b>[Tab]</b> Ganti Target • Klik-Kanan putar kamera.<br>
-        <b>Kontrol HP:</b> Tap tanah/NPC/Musuh, tap tombol skill di bawah, atau aktifkan D-Pad!
-      </div>
-      <div class="item-grid">${invHtml}</div>
-    `);
-    document.getElementById('btn-close-modal').onclick = closeModal;
-  }
-
-  // --- MODAL CD v3.3: 5 POHON SMITH, RF MASTERY (Lv.1-GM), 29 KARTU DESTINY & WEAPON SKILL [W] ---
-  const v33Ui = { tab: 'tree', selectedClass: 'Weaponsmith', switchTargetId: null };
+  // --- MENU TERPISAH 4 TAB: TIPE SMITH | SKILL | DESTINY | INVENTORY ---
+  const menuUi = {
+    tab: 'smith',           // 'smith' | 'skill' | 'destiny' | 'inventory'
+    skillSub: 'Weaponsmith',// 'Weaponsmith' | 'Armorer' | 'Rangesmith' | 'Runesmith' | 'Reforger' | 'weapon'
+    destinyFilter: 'unlocked', // 'unlocked' | 'pure' | 'dual' | 'multi'
+    invFilter: 'all',       // 'all' | 'weapons' | 'materials'
+    switchTargetId: null
+  };
 
   function applyBuildPreset(name) {
     const p = state.player;
@@ -2277,172 +2253,261 @@
       p.activeDestinyId = null;
       p.stats.INT = 2;
       p.equippedSkillIds = ['wpn_t1_a'];
+      menuUi.skillSub = 'Weaponsmith';
     } else if (name === 'spellblade') {
       p.smithTiers = { Weaponsmith: 3, Armorer: 0, Rangesmith: 0, Runesmith: 2, Reforger: 0 };
       p.firstTakenClass = 'Weaponsmith';
       p.activeDestinyId = null;
       p.stats.INT = Math.max(p.stats.INT, 30);
       p.equippedSkillIds = ['wpn_t1_a', 'wpn_t2_a', 'wpn_t3_a', 'run_t1_a'];
+      menuUi.skillSub = 'Weaponsmith';
     } else if (name === 'archblade') {
       p.smithTiers = { Weaponsmith: 5, Armorer: 0, Rangesmith: 0, Runesmith: 0, Reforger: 0 };
       p.firstTakenClass = 'Weaponsmith';
       p.activeDestinyId = null;
       p.stats.INT = Math.max(p.stats.INT, 30);
       p.equippedSkillIds = ['wpn_t1_a', 'wpn_t2_a', 'wpn_t4_a', 'wpn_t5_a'];
+      menuUi.skillSub = 'Weaponsmith';
     } else if (name === 'polymath') {
       p.smithTiers = { Weaponsmith: 1, Armorer: 0, Rangesmith: 0, Runesmith: 2, Reforger: 2 };
       p.firstTakenClass = 'Runesmith';
       p.activeDestinyId = null;
       p.stats.INT = Math.max(p.stats.INT, 30);
       p.equippedSkillIds = ['run_t1_a', 'run_t2_a', 'ref_t1_a', 'ref_t2_a', 'wpn_t1_a'];
+      menuUi.skillSub = 'Runesmith';
     } else if (name === 'omnismith') {
       p.smithTiers = { Weaponsmith: 1, Armorer: 1, Rangesmith: 1, Runesmith: 1, Reforger: 1 };
       p.firstTakenClass = 'Weaponsmith';
       p.activeDestinyId = null;
       p.stats.INT = Math.max(p.stats.INT, 75);
       p.equippedSkillIds = ['wpn_t1_a', 'run_t1_a', 'ref_t1_a', 'rng_t1_a', 'arm_t1_a'];
+      menuUi.skillSub = 'Weaponsmith';
     }
-    v33Ui.switchTargetId = null;
+    menuUi.switchTargetId = null;
     refreshBuildV33();
     updateHUD();
-    addLog(`✦ Preset Build v3.3 aktif: ${state.player.smithClass} (${state.v33Build.equippedSkills.length}/${state.v33Build.maxSlots} slot + [W]).`, 'moral');
+    addLog(`✦ Preset Tipe Smith aktif: ${state.player.smithClass} (${state.v33Build.equippedSkills.length}/${state.v33Build.maxSlots} slot + [W]).`, 'moral');
   }
 
-  function openSkillDestinyModal(tab, cls) {
-    if (tab) v33Ui.tab = tab;
-    if (cls) v33Ui.selectedClass = cls;
+  function openMenuModal(tab, sub) {
+    if (tab) menuUi.tab = tab;
+    if (sub && menuUi.tab === 'skill') menuUi.skillSub = sub;
+    if (sub && menuUi.tab === 'destiny') menuUi.destinyFilter = sub;
+    if (sub && menuUi.tab === 'inventory') menuUi.invFilter = sub;
 
     const p = state.player;
+    const w = getWeapon();
     const build = refreshBuildV33(true);
     const totalPts = Object.values(p.smithTiers).reduce((a, b) => a + b, 0);
     const activeCard = build.activeDestinyCard;
     const unlockedIds = new Set(build.unlockedDestinyCards.map(c => c.id));
     const trialDone = state.quests.forgedOnce || state.quests.huntedCount >= 1;
 
+    let tabTitle = '';
+    let tabSub = '';
     let bodyHtml = '';
 
-    if (v33Ui.tab === 'tree') {
-      const ptsBar = SMITH_CLASSES.map(c => {
+    // =========================================================================
+    // TAB 1: TIPE SMITH (Alokasi 5 Poin Tier Smith, 5 Mazhab & Status Karakter)
+    // =========================================================================
+    if (menuUi.tab === 'smith') {
+      tabTitle = `🔨 Tipe Smith — ${p.smithClass}`;
+      tabSub = `Alokasi 5 Poin Tier Smith (Terpakai ${totalPts}/5) • Slot Macro: ${build.equippedSkills.length}/${build.maxSlots} + [W]`;
+
+      const smithCards = SMITH_CLASSES.map(c => {
+        const tree = skillData.smith_skill_trees[c];
         const val = p.smithTiers[c] || 0;
+        const rankLabel = val > 0 ? tree.class_progression[val - 1] : 'Belum diambil';
         return `
-          <div class="smith-pt-pill ${v33Ui.selectedClass === c ? 'active-cls' : ''}">
-            <button class="chip-btn ${v33Ui.selectedClass === c ? 'active' : ''}" data-pick-cls="${c}" style="padding:2px 6px">${c}</button>
-            <button class="mini-step-btn" data-pt-dec="${c}" ${val <= 0 || totalPts <= 1 ? 'disabled' : ''}>−</button>
-            <b style="min-width:16px;text-align:center;color:${val > 0 ? '#f6c368' : '#98a6b3'}">T${val}</b>
-            <button class="mini-step-btn" data-pt-inc="${c}" ${totalPts >= 5 || val >= 5 ? 'disabled' : ''}>+</button>
+          <div class="smith-class-card ${val > 0 ? 'invested' : ''}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                <b style="font-size:13px;color:${val > 0 ? '#f6c368' : '#eef1f4'}">${c}</b>
+                <span class="tag">${val > 0 ? 'T' + val + ' • ' + rankLabel : 'T0'}</span>
+              </div>
+              <div style="font-size:10.5px;color:#6ce0d4;margin-top:3px">Resource: <b>${tree.resource.name}</b></div>
+              <div style="font-size:10.5px;color:#98a6b3;margin-top:3px">${tree.theme}</div>
+            </div>
+            <div class="smith-step-row">
+              <div style="display:flex;align-items:center;gap:5px">
+                <button class="mini-step-btn" data-pt-dec="${c}" ${val <= 0 || totalPts <= 1 ? 'disabled' : ''}>−</button>
+                <b style="min-width:22px;text-align:center;color:${val > 0 ? '#f6c368' : '#98a6b3'}">T${val}</b>
+                <button class="mini-step-btn" data-pt-inc="${c}" ${totalPts >= 5 || val >= 5 ? 'disabled' : ''}>+</button>
+              </div>
+              <button class="chip-btn teal" data-jump-skill="${c}" style="padding:3px 7px;font-size:10.5px">Lihat Skill →</button>
+            </div>
           </div>
         `;
       }).join('');
 
-      const tree = skillData.smith_skill_trees[v33Ui.selectedClass];
-      const clsRank = p.smithTiers[v33Ui.selectedClass] || 0;
-      const isPure5 = totalPts === 5 && clsRank === 5;
-      const tierCards = tree.tiers.map(t => {
-        const sk = t.active_skill;
-        const cp = t.core_passive;
-        const unlocked = t.tier <= clsRank && (!t.pure_only || isPure5);
-        const mastery = skillEngine.getSkillMasteryStage(p.skillMastery[sk.id] || 0);
-        const isEquipped = p.equippedSkillIds.includes(sk.id);
-        const pickedMorphId = p.selectedMorphs[`${v33Ui.selectedClass}_T${t.tier}`] || t.morph_choices[0].id;
-
-        const morphBtns = t.morph_choices.map((m, idx) => {
-          const picked = mastery.morphUnlocked && pickedMorphId === m.id;
-          return `
-            <button class="morph-btn ${picked ? 'picked' : ''}" data-morph-key="${v33Ui.selectedClass}_T${t.tier}" data-morph-id="${m.id}" ${unlocked && mastery.morphUnlocked ? '' : 'disabled'}>
-              <div style="font-weight:700;color:${picked ? '#f6c368' : '#eef1f4'}">${idx + 1}. ${m.name}</div>
-              <div style="font-size:9.5px;color:#6ce0d4;margin:1px 0">${m.branch}${mastery.isGM && picked ? ' • ✦ GM 1.25×' : ''}</div>
-              <div>${m.desc}</div>
-            </button>
-          `;
-        }).join('');
-
-        return `
-          <div class="tree-tier-card ${unlocked ? 'unlocked' : 'locked-tier'}">
-            <div class="tier-head">
-              <div>
-                <span class="tag">T${t.tier} ${t.rank_label}</span>
-                <b style="font-size:13px;color:${unlocked ? '#f6c368' : '#98a6b3'};margin-left:4px">${sk.name}</b>
-                <span style="font-size:11px;color:#98a6b3"> • ${sk.role} • CD ${sk.cooldown_sec}d</span>
-              </div>
-              <div style="display:flex;gap:5px;align-items:center">
-                <span class="skill-rank ${mastery.isGM ? 'gm' : ''}">${mastery.label} (${mastery.xp}${mastery.nextLevelXpReq ? '/' + mastery.nextLevelXpReq : ' MAX'})</span>
-                ${unlocked ? `<button class="chip-btn" data-train-demo="${sk.id}" title="Tambah +60 XP RF Mastery untuk uji cepat">+60 XP</button>` : ''}
-                ${unlocked
-                  ? `<button class="chip-btn ${isEquipped ? 'active' : 'teal'}" data-toggle-equip="${sk.id}">${isEquipped ? '✓ Di Macro Bar' : '+ Pasang Bar'}</button>`
-                  : `<span class="tag">${t.pure_only ? '🔒 5 Poin Murni' : '🔒 Butuh ' + v33Ui.selectedClass + ' T' + t.tier}</span>`
-                }
-              </div>
-            </div>
-            <div style="font-size:11.5px;color:#dce4ec">${sk.desc}</div>
-            <div class="bar-track" style="height:5px;margin:5px 0"><div class="skill-xp-fill" style="width:${mastery.progressToNextPct}%"></div></div>
-            <div class="passive-box ${unlocked && mastery.corePassiveUnlocked ? 'open' : ''}">
-              <b>${unlocked && mastery.corePassiveUnlocked ? '✓ Core Passive:' : '🔒 Core Passive (Buka di Skill Lv.3):'}</b> <b>${cp.name}</b> — ${cp.desc}
-            </div>
-            <div style="font-size:10.5px;color:${unlocked && mastery.morphUnlocked ? '#f6c368' : '#98a6b3'};margin-top:4px">
-              ${unlocked && mastery.morphUnlocked ? '✦ Pilih 1 dari 3 Morph (SWTOR):' : '🔒 Pilihan Morph 1-dari-3 (Terbuka di Skill Lv.5, Puncak di GM):'}
-            </div>
-            <div class="morph-grid">${morphBtns}</div>
-          </div>
-        `;
-      }).join('');
+      const statsHtml = Object.entries(p.stats).map(([k, v]) => `<span class="tag"><b>${k}</b>: ${v}</span>`).join(' ');
 
       bodyHtml = `
         <div class="preset-strip">
-          <span style="font-size:11px;color:#98a6b3">Uji Cepat Build (5 Poin Smith):</span>
+          <span style="font-size:11px;color:#98a6b3">Preset Uji Build:</span>
           <button class="chip-btn" data-preset="starter">Lv.1 Pemula</button>
           <button class="chip-btn teal" data-preset="spellblade">Spellblade (3+2)</button>
           <button class="chip-btn" data-preset="archblade">Archblade (5 Murni)</button>
           <button class="chip-btn teal" data-preset="polymath">Polymath (+1 Slot)</button>
           <button class="chip-btn active" data-preset="omnismith">Omnismith (1×5)</button>
         </div>
-        <div class="smith-pts-bar">
-          <div style="width:100%;font-size:11px;color:#98a6b3;display:flex;justify-content:space-between">
-            <span>Alokasi 5 Poin Tier Smith (Terpakai: <b style="color:#f6c368">${totalPts}/5</b>)</span>
-            <span>Resource ${tree.smith_class}: <b style="color:#6ce0d4">${tree.resource.name}</b> • Slot Macro: <b>${build.equippedSkills.length}/${build.maxSlots}</b></span>
+        <div class="smith-class-grid">${smithCards}</div>
+        <div class="dialog-speech" style="margin-bottom:0">
+          <div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">
+            <b style="color:#f6c368;margin-right:4px">Status Lv.${p.level} (Tier ${p.tier}):</b> ${statsHtml}
           </div>
-          ${ptsBar}
+          <div style="font-size:11.5px;color:#dce4ec">
+            <b>Moral Conscience:</b> Mulia ${p.mulia} • Kejam ${p.kejam} &nbsp;|&nbsp;
+            <b>Companion:</b> ${state.companion.recruited ? `${state.companion.name} (Loyalitas ${state.companion.loyalty}/100)` : 'Belum direkrut'}
+          </div>
         </div>
-        ${tierCards}
       `;
-    } else if (v33Ui.tab === 'destiny') {
-      const switchTarget = v33Ui.switchTargetId && v33Ui.switchTargetId !== activeCard?.id
-        ? skillData.destiny_cards[v33Ui.switchTargetId]
+
+    // =========================================================================
+    // TAB 2: SKILL (Pohon Skill Per Class, RF Mastery Lv.1-GM, Morph & [W])
+    // =========================================================================
+    } else if (menuUi.tab === 'skill') {
+      tabTitle = `⚔️ Skill & RF Mastery (Lv.1 → GM)`;
+      tabSub = `Macro Bar Terpasang: ${build.equippedSkills.length}/${build.maxSlots} Slot Class + 1 Slot [W] • GCD Anti-Spam ${state.gcdDuration}d`;
+
+      const subPills = [
+        `<button class="chip-btn ${menuUi.skillSub === 'weapon' ? 'active' : 'teal'}" data-skill-sub="weapon">⚔️ [W] Senjata</button>`,
+        ...SMITH_CLASSES.map(c => {
+          const rank = p.smithTiers[c] || 0;
+          const active = menuUi.skillSub === c;
+          return `<button class="chip-btn ${active ? 'active' : ''}" data-skill-sub="${c}" style="${rank === 0 && !active ? 'opacity:0.6' : ''}">${c} (T${rank})</button>`;
+        })
+      ].join('');
+
+      if (menuUi.skillSub === 'weapon') {
+        const ws = build.weaponSkill;
+        bodyHtml = `
+          <div class="sub-pills">${subPills}</div>
+          <div class="destiny-hero">
+            <div style="font-size:11px;color:#6ce0d4">1 SLOT KHUSUS WEAPON SKILL [W] • HOTKEY [Q]</div>
+            <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#ffe066">⚔️ ${ws.name} <span class="skill-rank ${ws.mastery.isGM ? 'gm' : ''}">${ws.mastery.label}</span></div>
+            <div style="font-size:12px;color:#eef1f4;margin-top:4px">Senjata Terpasang: <b>${w.name}</b> (${w.stat} • ${w.mode} ${w.range}m • ${w.el})</div>
+            <div style="font-size:11.5px;color:#98a6b3;margin-top:4px">
+              Status: <b style="color:${ws.unlocked ? '#8fe3b8' : '#ff7c73'}">${ws.unlocked ? (ws.unlockedByOmnismith ? '✓ TERBUKA VIA OMNISMITH (Bebas 48 Senjata!)' : '✓ TERBUKA (' + ws.governing_smith + ' cocok)') : '🔒 TERKUNCI — Buka min. Tier 1 ' + ws.governing_smith + ' di Tab Tipe Smith atau Destiny Omnismith'}</b>
+            </div>
+            <div style="font-size:11.5px;color:#dce4ec;margin-top:4px">
+              Cooldown Efektif: <b>${ws.effectiveCooldownSec}d</b> • Multiplier: <b>${ws.effectiveMultiplier}×</b> • RF XP: <b>${ws.mastery.xp}${ws.mastery.nextLevelXpReq ? '/' + ws.mastery.nextLevelXpReq : ' (GM MAX)'}</b>
+            </div>
+            <div class="bar-track" style="height:6px;margin:7px 0"><div class="skill-xp-fill" style="width:${ws.mastery.progressToNextPct}%"></div></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+              <button class="btn-primary" id="btn-train-wpn-demo">+60 XP Latih Weapon Skill [W]</button>
+              <button class="chip-btn ${p.fastTraining ? 'active' : ''}" id="btn-toggle-fast-train">
+                ${p.fastTraining ? '⚡ Kecepatan Latih RF: Demo Cepat (12× XP)' : '🐢 Kecepatan Latih RF: Standar Asli (1× XP)'}
+              </button>
+            </div>
+          </div>
+          <div class="dialog-speech" style="margin-bottom:0">
+            <b>Aturan Anti-Spam (SWTOR × RF Classic):</b><br>
+            • <b>GCD ${state.gcdDuration} detik</b> berlaku lintas semua tombol setiap kali skill digunakan — jeda otomatis diisi oleh <b>Auto-Attack</b> senjata.<br>
+            • <b>Use-to-Level (Lv.1 → GM):</b> Pemakaian manual maupun <b>Mode Idle</b> menaikkan mastery ke <b>Lv.3 (Core Passive)</b>, <b>Lv.5 (Morph 1-dari-3)</b>, & <b>GM (+40% efektivitas, -10% CD, Puncak Morph 1,25×)</b>.
+          </div>
+        `;
+      } else {
+        const clsName = SMITH_CLASSES.includes(menuUi.skillSub) ? menuUi.skillSub : 'Weaponsmith';
+        const tree = skillData.smith_skill_trees[clsName];
+        const clsRank = p.smithTiers[clsName] || 0;
+        const isPure5 = totalPts === 5 && clsRank === 5;
+
+        const tierCards = tree.tiers.map(t => {
+          const sk = t.active_skill;
+          const cp = t.core_passive;
+          const unlocked = t.tier <= clsRank && (!t.pure_only || isPure5);
+          const mastery = skillEngine.getSkillMasteryStage(p.skillMastery[sk.id] || 0);
+          const isEquipped = p.equippedSkillIds.includes(sk.id);
+          const pickedMorphId = p.selectedMorphs[`${clsName}_T${t.tier}`] || t.morph_choices[0].id;
+
+          const morphBtns = t.morph_choices.map((m, idx) => {
+            const picked = mastery.morphUnlocked && pickedMorphId === m.id;
+            return `
+              <button class="morph-btn ${picked ? 'picked' : ''}" data-morph-key="${clsName}_T${t.tier}" data-morph-id="${m.id}" ${unlocked && mastery.morphUnlocked ? '' : 'disabled'}>
+                <div style="font-weight:700;color:${picked ? '#f6c368' : '#eef1f4'}">${idx + 1}. ${m.name}</div>
+                <div style="font-size:9.5px;color:#6ce0d4;margin:1px 0">${m.branch}${mastery.isGM && picked ? ' • ✦ GM 1.25×' : ''}</div>
+                <div>${m.desc}</div>
+              </button>
+            `;
+          }).join('');
+
+          return `
+            <div class="tree-tier-card ${unlocked ? 'unlocked' : 'locked-tier'}">
+              <div class="tier-head">
+                <div>
+                  <span class="tag">T${t.tier} ${t.rank_label}</span>
+                  <b style="font-size:13px;color:${unlocked ? '#f6c368' : '#98a6b3'};margin-left:4px">${sk.name}</b>
+                  <span style="font-size:11px;color:#98a6b3"> • ${sk.role} • CD ${sk.cooldown_sec}d</span>
+                </div>
+                <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+                  <span class="skill-rank ${mastery.isGM ? 'gm' : ''}">${mastery.label} (${mastery.xp}${mastery.nextLevelXpReq ? '/' + mastery.nextLevelXpReq : ' MAX'})</span>
+                  ${unlocked ? `<button class="chip-btn" data-train-demo="${sk.id}" title="Tambah +60 XP RF Mastery untuk uji cepat">+60 XP</button>` : ''}
+                  ${unlocked
+                    ? `<button class="chip-btn ${isEquipped ? 'active' : 'teal'}" data-toggle-equip="${sk.id}">${isEquipped ? '✓ Di Macro Bar' : '+ Pasang Bar'}</button>`
+                    : `<span class="tag">${t.pure_only ? '🔒 5 Poin Murni' : '🔒 Butuh ' + clsName + ' T' + t.tier}</span>`
+                  }
+                </div>
+              </div>
+              <div style="font-size:11.5px;color:#dce4ec">${sk.desc}</div>
+              <div class="bar-track" style="height:5px;margin:5px 0"><div class="skill-xp-fill" style="width:${mastery.progressToNextPct}%"></div></div>
+              <div class="passive-box ${unlocked && mastery.corePassiveUnlocked ? 'open' : ''}">
+                <b>${unlocked && mastery.corePassiveUnlocked ? '✓ Core Passive:' : '🔒 Core Passive (Buka di Skill Lv.3):'}</b> <b>${cp.name}</b> — ${cp.desc}
+              </div>
+              <div style="font-size:10.5px;color:${unlocked && mastery.morphUnlocked ? '#f6c368' : '#98a6b3'};margin-top:4px">
+                ${unlocked && mastery.morphUnlocked ? '✦ Pilih 1 dari 3 Morph (SWTOR):' : '🔒 Pilihan Morph 1-dari-3 (Terbuka di Skill Lv.5, Puncak di GM):'}
+              </div>
+              <div class="morph-grid">${morphBtns}</div>
+            </div>
+          `;
+        }).join('');
+
+        bodyHtml = `
+          <div class="sub-pills">${subPills}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;color:#98a6b3">
+            <span>Pohon <b style="color:#f6c368">${clsName} (Tier ${clsRank}/5)</b> • Resource: <b style="color:#6ce0d4">${tree.resource.name}</b></span>
+            <button class="chip-btn ${p.fastTraining ? 'active' : ''}" id="btn-toggle-fast-train">${p.fastTraining ? '⚡ Latih Demo 12×' : '🐢 Latih Asli 1×'}</button>
+          </div>
+          ${tierCards}
+        `;
+      }
+
+    // =========================================================================
+    // TAB 3: DESTINY (29 Kartu Destiny Kingdoms of Amalur & Jalur Ganda)
+    // =========================================================================
+    } else if (menuUi.tab === 'destiny') {
+      tabTitle = `🃏 Kartu Destiny (Kingdoms of Amalur × CD-3.02b)`;
+      tabSub = `Aktif: ${activeCard ? activeCard.displayName : '-'} • Koleksi Terbuka: ${build.unlockedDestinyCards.length}/29 Kartu`;
+
+      const switchTarget = menuUi.switchTargetId && menuUi.switchTargetId !== activeCard?.id
+        ? skillData.destiny_cards[menuUi.switchTargetId]
         : null;
       let switchBoxHtml = '';
       if (switchTarget) {
         const trialEval = skillEngine.evaluateDestinySwitch({
-          currentCardId: activeCard?.id,
-          targetCardId: switchTarget.id,
-          smithTiers: p.smithTiers,
-          firstTakenClass: p.firstTakenClass,
-          level: p.level,
-          method: 'trial',
-          trialCompleted: trialDone,
-          isFactionHostile: p.isFactionHostile,
-          playerBronze: p.bronze
+          currentCardId: activeCard?.id, targetCardId: switchTarget.id,
+          smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
+          level: p.level, method: 'trial', trialCompleted: trialDone,
+          isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
         });
         const goldEval = skillEngine.evaluateDestinySwitch({
-          currentCardId: activeCard?.id,
-          targetCardId: switchTarget.id,
-          smithTiers: p.smithTiers,
-          firstTakenClass: p.firstTakenClass,
-          level: p.level,
-          method: 'gold',
-          isFactionHostile: p.isFactionHostile,
-          playerBronze: p.bronze
+          currentCardId: activeCard?.id, targetCardId: switchTarget.id,
+          smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
+          level: p.level, method: 'gold',
+          isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
         });
         switchBoxHtml = `
           <div class="switch-box">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-              <b style="color:#f6c368">🔄 Konfirmasi Ganti Kartu Destiny → ${switchTarget.name || switchTarget.names_by_tier[0]}</b>
+              <b style="color:#f6c368">🔄 Ganti Kartu Destiny → ${switchTarget.name || switchTarget.names_by_tier[0]}</b>
               <button class="chip-btn" id="btn-cancel-switch">Batal</button>
             </div>
             <div style="font-size:11px;color:#98a6b3;margin-bottom:8px">
-              Aturan Jalur Ganda (CD-3.02b): Pilih Misi Forgemasters' Guild (Gratis) atau Bayar Instan (500br × Lv.${p.level} × T${p.tier}${p.isFactionHostile ? ' + 50% Shadow Syndicate!' : ''}).
+              Jalur Ganda: Misi Forgemasters' Guild (Gratis) atau Bayar Instan (500br × Lv.${p.level} × T${p.tier}${p.isFactionHostile ? ' + 50% Shadow Syndicate!' : ''}).
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:6px">
               <button class="btn-primary" id="btn-do-switch-trial" ${trialEval.allowed ? '' : 'disabled'}>
-                ${trialEval.allowed ? '✓ Jalur Misi Guild (GRATIS — Trial Terpenuhi!)' : (p.isFactionHostile ? '🔒 Misi Guild Diblokir (Status Hostile!)' : '🔒 Selesaikan 1 Tempa / 1 Kill Pantai dulu')}
+                ${trialEval.allowed ? '✓ Jalur Misi Guild (GRATIS — Trial Terpenuhi!)' : (p.isFactionHostile ? '🔒 Misi Guild Diblokir (Hostile!)' : '🔒 Selesaikan 1 Tempa / 1 Kill Pantai dulu')}
               </button>
               <button class="btn-secondary" id="btn-do-switch-gold" ${goldEval.allowed ? '' : 'disabled'}>
                 💰 Bayar via ${goldEval.broker}: ${goldEval.costBronze} br ${goldEval.allowed ? '(Cukup)' : '(Kurang ' + goldEval.shortfallBronze + ' br)'}
@@ -2453,122 +2518,178 @@
       }
 
       const allCards = Object.values(skillData.destiny_cards);
-      const renderGroup = (title, cards) => `
-        <div style="font-size:11.5px;font-weight:700;color:#f6c368;margin:10px 0 6px">${title}</div>
-        <div class="destiny-grid">
-          ${cards.map(c => {
-            const isUnlocked = unlockedIds.has(c.id);
-            const isActive = activeCard && activeCard.id === c.id;
-            const liveObj = build.unlockedDestinyCards.find(x => x.id === c.id);
-            const label = liveObj ? liveObj.displayName : (c.name || c.names_by_tier[4]);
-            const reqText = c.category === 'pure'
-              ? `${c.smith_class} T1–T5`
-              : (c.category === 'dual' ? `${c.primary} > ${c.secondary}` : `Min. ${c.min_classes} Smith Class`);
-            return `
-              <div class="destiny-card ${isActive ? 'active' : (isUnlocked ? 'unlocked' : 'locked')}">
-                <div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
-                    <b style="font-size:12.5px;color:${isActive ? '#ffe066' : (isUnlocked ? '#6ce0d4' : '#98a6b3')}">${label}</b>
-                    <span class="tag">${reqText}</span>
-                  </div>
-                  <div style="font-size:10.5px;color:#dce4ec;margin-top:4px"><b>${c.signature.name}:</b> ${c.signature.desc}</div>
-                </div>
-                <div>
-                  ${isActive
-                    ? `<button class="btn-secondary" disabled style="width:100%">★ Kartu Destiny Aktif</button>`
-                    : (isUnlocked
-                      ? `<button class="btn-primary" data-req-switch="${c.id}" style="width:100%">🔄 Ganti ke Kartu Ini...</button>`
-                      : `<span style="font-size:10px;color:#98a6b3">🔒 Belum memenuhi syarat sebaran poin</span>`)
-                  }
-                </div>
-              </div>
-            `;
-          }).join('')}
+      const filteredCards = menuUi.destinyFilter === 'unlocked'
+        ? allCards.filter(c => unlockedIds.has(c.id))
+        : allCards.filter(c => c.category === menuUi.destinyFilter);
+
+      const destinyFilters = `
+        <div class="sub-pills">
+          <button class="chip-btn ${menuUi.destinyFilter === 'unlocked' ? 'active' : ''}" data-dest-filter="unlocked">✦ Terbuka (${build.unlockedDestinyCards.length})</button>
+          <button class="chip-btn ${menuUi.destinyFilter === 'pure' ? 'active' : ''}" data-dest-filter="pure">Pure (5)</button>
+          <button class="chip-btn ${menuUi.destinyFilter === 'dual' ? 'active' : ''}" data-dest-filter="dual">Dual Berarah (20)</button>
+          <button class="chip-btn ${menuUi.destinyFilter === 'multi' ? 'active' : ''}" data-dest-filter="multi">Multi-Class (4)</button>
         </div>
       `;
+
+      const cardsHtml = filteredCards.map(c => {
+        const isUnlocked = unlockedIds.has(c.id);
+        const isActive = activeCard && activeCard.id === c.id;
+        const liveObj = build.unlockedDestinyCards.find(x => x.id === c.id);
+        const label = liveObj ? liveObj.displayName : (c.name || c.names_by_tier[4]);
+        const reqText = c.category === 'pure'
+          ? `${c.smith_class} T1–T5`
+          : (c.category === 'dual' ? `${c.primary} > ${c.secondary}` : `Min. ${c.min_classes} Class`);
+        return `
+          <div class="destiny-card ${isActive ? 'active' : (isUnlocked ? 'unlocked' : 'locked')}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px">
+                <b style="font-size:12.5px;color:${isActive ? '#ffe066' : (isUnlocked ? '#6ce0d4' : '#98a6b3')}">${label}</b>
+                <span class="tag">${reqText}</span>
+              </div>
+              <div style="font-size:10.5px;color:#dce4ec;margin-top:4px"><b>${c.signature.name}:</b> ${c.signature.desc}</div>
+            </div>
+            <div>
+              ${isActive
+                ? `<button class="btn-secondary" disabled style="width:100%">★ Kartu Aktif</button>`
+                : (isUnlocked
+                  ? `<button class="btn-primary" data-req-switch="${c.id}" style="width:100%">🔄 Ganti ke Kartu Ini</button>`
+                  : `<span style="font-size:10px;color:#98a6b3">🔒 Tambah poin di Tab Tipe Smith</span>`)
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
 
       bodyHtml = `
         <div class="destiny-hero">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
             <div>
-              <div style="font-size:11px;color:#6ce0d4">KARTU DESTINY AKTIF (KINGDOMS OF AMALUR × CD-3.02b)</div>
+              <div style="font-size:10.5px;color:#6ce0d4">KARTU DESTINY AKTIF</div>
               <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#ffe066">🃏 ${activeCard ? activeCard.displayName : '-'} <span class="tag">${activeCard ? activeCard.category.toUpperCase() : ''}</span></div>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
               <button class="chip-btn ${p.isFactionHostile ? 'active' : ''}" id="btn-toggle-hostile">
-                ${p.isFactionHostile ? '☠️ Guild Hostile (Syndicate +50%)' : '🏛️ Guild Ramah (Trial Aktif)'}
+                ${p.isFactionHostile ? '☠️ Guild Hostile (+50%)' : '🏛️ Guild Ramah'}
               </button>
-              <button class="chip-btn teal" id="btn-demo-gold">+2000 br (Dana Uji)</button>
+              <button class="chip-btn teal" id="btn-demo-gold">+2000 br</button>
             </div>
           </div>
           <div style="font-size:11.5px;color:#eef1f4;margin-top:6px">
             <b>Signature (${activeCard?.signature?.name || '-'}):</b> ${activeCard?.signature?.desc || '-'}
             ${activeCard && !activeCard.signatureActive ? ' <span style="color:#f6c368">(Aktif penuh mulai Tier 3)</span>' : ''}
           </div>
-          <div style="font-size:11px;color:#98a6b3;margin-top:4px">
-            Koleksi Terbuka: <b style="color:#6ce0d4">${build.unlockedDestinyCards.length}/29 Kartu</b> • Status Misi Trial: <b style="color:${trialDone ? '#8fe3b8' : '#f6c368'}">${trialDone ? '✓ Terpenuhi (Tempa / Patroli)' : 'Belum (Tempa 1 senjata / kalahkan 1 monster)'}</b> • Kas: <b>${p.bronze} br</b>
+          <div style="font-size:10.5px;color:#98a6b3;margin-top:4px">
+            Trial Guild: <b style="color:${trialDone ? '#8fe3b8' : '#f6c368'}">${trialDone ? '✓ Terpenuhi' : 'Belum (Tempa 1 senjata / 1 kill pantai)'}</b> • Kas: <b>${p.bronze} br</b>
           </div>
         </div>
         ${switchBoxHtml}
-        ${renderGroup('A. 5 Kartu Destiny Murni (Skala Tier 1–5)', allCards.filter(c => c.category === 'pure'))}
-        ${renderGroup('B. 20 Kartu Destiny Dual-Class Berarah', allCards.filter(c => c.category === 'dual'))}
-        ${renderGroup('C. 4 Kartu Destiny Multi-Class (3–5 Class)', allCards.filter(c => c.category === 'multi'))}
+        ${destinyFilters}
+        <div class="destiny-grid">${cardsHtml}</div>
       `;
+
+    // =========================================================================
+    // TAB 4: INVENTORY (Senjata Dimiliki + Bahan Material di Tas)
+    // =========================================================================
     } else {
-      const ws = build.weaponSkill;
-      const w = getWeapon();
+      tabTitle = `🎒 Inventory & Perlengkapan`;
+      tabSub = `Kas: ${p.bronze} br • Senjata Dimiliki: ${p.ownedWeapons.length}/${WEAPON_CATALOG.length} • Senjata Aktif: ${w.name}`;
+
+      const invPills = `
+        <div class="sub-pills">
+          <button class="chip-btn ${menuUi.invFilter === 'all' ? 'active' : ''}" data-inv-filter="all">Semua Item</button>
+          <button class="chip-btn ${menuUi.invFilter === 'weapons' ? 'active' : ''}" data-inv-filter="weapons">⚔️ Senjata (${p.ownedWeapons.length})</button>
+          <button class="chip-btn ${menuUi.invFilter === 'materials' ? 'active' : ''}" data-inv-filter="materials">🪨 Bahan Tempa</button>
+        </div>
+      `;
+
+      const ownedWeaponsHtml = p.ownedWeapons.map(wId => {
+        const wp = WEAPON_CATALOG.find(x => x.id === wId);
+        if (!wp) return '';
+        const isEq = p.equippedWeaponId === wp.id;
+        const compat = build.smith.checkWeaponCompatibility({
+          id: wp.weaponCatalogId, stat: wp.stat, tier: wp.tier, tag: wp.tag, trigger: wp.trigger
+        }, activeCard);
+        return `
+          <div class="item-card ${isEq ? 'equipped' : ''}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
+                <div class="item-title">${wp.name}</div>
+                <span class="tag">${wp.mode} ${wp.range}m</span>
+              </div>
+              <div class="item-desc" style="margin:3px 0">${wp.stat} • Dmg ${wp.dmg} • Crit +${wp.crit}% • ${wp.el}</div>
+              <div class="item-desc">Jurus [W]: <b style="color:${compat.triggerUnlocked ? '#6ce0d4' : '#ff7c73'}">${wp.trigger}${compat.triggerUnlocked ? '' : ' (🔒 ' + wp.smithClass + ' T1)'}</b></div>
+            </div>
+            ${isEq
+              ? `<button class="btn-secondary" disabled>✓ Sedang Dipakai</button>`
+              : `<button class="btn-primary" data-inv-equip="${wp.id}">⚔️ Pakai Senjata</button>`
+            }
+          </div>
+        `;
+      }).join('');
+
+      const matsHtml = Object.keys(MATERIAL_CATALOG).map(id => {
+        const m = MATERIAL_CATALOG[id];
+        const qty = p.inventory[id] || 0;
+        return `
+          <div class="item-card">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
+                <div class="item-title">${m.name}</div>
+                <span class="tag" style="color:${qty > 0 ? '#8fe3b8' : '#98a6b3'}">x${qty}</span>
+              </div>
+              <div class="item-desc" style="margin-top:3px">${m.rarity} • ${m.price} br • Elemen: ${m.el}</div>
+              <div class="item-desc" style="margin-top:3px">${m.desc}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const showWpn = menuUi.invFilter === 'all' || menuUi.invFilter === 'weapons';
+      const showMat = menuUi.invFilter === 'all' || menuUi.invFilter === 'materials';
+
       bodyHtml = `
-        <div class="destiny-hero">
-          <div style="font-size:11px;color:#6ce0d4">1 SLOT KHUSUS WEAPON SKILL [W] • HOTKEY [Q]</div>
-          <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;color:#ffe066">⚔️ ${ws.name} <span class="skill-rank ${ws.mastery.isGM ? 'gm' : ''}">${ws.mastery.label}</span></div>
-          <div style="font-size:12px;color:#eef1f4;margin-top:4px">Senjata Terpasang: <b>${w.name}</b> (${w.stat} • ${w.mode} ${w.range}m • ${w.el})</div>
-          <div style="font-size:11.5px;color:#98a6b3;margin-top:4px">
-            Status: <b style="color:${ws.unlocked ? '#8fe3b8' : '#ff7c73'}">${ws.unlocked ? (ws.unlockedByOmnismith ? '✓ TERBUKA VIA OMNISMITH (Bebas 48 Senjata!)' : '✓ TERBUKA (' + ws.governing_smith + ' cocok)') : '🔒 TERKUNCI — Butuh min. Tier 1 ' + ws.governing_smith + ' atau Destiny Omnismith'}</b>
+        ${invPills}
+        ${showWpn ? `<div class="inv-section-title"><span>⚔️ Senjata di Tas</span><span style="font-size:10.5px;color:#98a6b3">Tempa senjata baru di Bengkel Tempa</span></div><div class="item-grid">${ownedWeaponsHtml}</div>` : ''}
+        ${showMat ? `<div class="inv-section-title"><span>🪨 Bahan Material Tempa</span><span style="font-size:10.5px;color:#98a6b3">Didapat dari berburu & menambang</span></div><div class="item-grid">${matsHtml}</div>` : ''}
+        <details class="field-group" style="margin-top:12px">
+          <summary style="cursor:pointer;font-size:11px;font-weight:700;color:#f6c368">🎮 Panduan Kontrol Laptop & HP</summary>
+          <div style="font-size:11px;color:#dce4ec;margin-top:6px;line-height:1.5">
+            <b>Laptop:</b> WASD / Klik Tanah jalan • <b>[1–6]</b> Skill Class • <b>[Q]</b> Weapon Skill [W] • <b>[C]</b> Tipe Smith • <b>[K]</b> Skill • <b>[J]</b> Destiny • <b>[I]</b> Tas • <b>[E]</b> Interaksi • <b>[Tab]</b> Ganti Target • Klik-Kanan putar kamera.<br>
+            <b>HP Portrait:</b> Tap tanah/NPC/Musuh, tap tombol skill di bawah, atau nyalakan <b>🎮 D-Pad</b>!
           </div>
-          <div style="font-size:11.5px;color:#dce4ec;margin-top:4px">
-            Cooldown Efektif: <b>${ws.effectiveCooldownSec}d</b> • Multiplier Efektif: <b>${ws.effectiveMultiplier}×</b> • RF XP: <b>${ws.mastery.xp}${ws.mastery.nextLevelXpReq ? '/' + ws.mastery.nextLevelXpReq : ' (GM MAX)'}</b>
-          </div>
-          <div class="bar-track" style="height:6px;margin:7px 0"><div class="skill-xp-fill" style="width:${ws.mastery.progressToNextPct}%"></div></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-            <button class="btn-primary" id="btn-train-wpn-demo">+60 XP Latih Weapon Skill [W]</button>
-            <button class="chip-btn ${p.fastTraining ? 'active' : ''}" id="btn-toggle-fast-train">
-              ${p.fastTraining ? '⚡ Kecepatan Latih RF: Demo Cepat (12× XP)' : '🐢 Kecepatan Latih RF: Standar Asli (1× XP)'}
-            </button>
-          </div>
-        </div>
-        <div class="dialog-speech">
-          <b>Aturan Anti-Spam (SWTOR × RF Classic):</b><br>
-          • <b>Global Cooldown (GCD): ${state.gcdDuration} detik</b> berlaku lintas semua tombol setiap kali skill digunakan — jeda otomatis diisi oleh <b>Auto-Attack</b> senjata (DEX & Weapon Trigger tetap vital!).<br>
-          • <b>Use-to-Level (Lv.1 → GM):</b> Setiap skill yang digunakan secara manual maupun lewat <b>Mode Idle</b> menaikkan mastery hingga <b>GM (+40% efektivitas, -10% Cooldown, Puncak Morph 1.25×)</b>!
-        </div>
+        </details>
       `;
     }
 
     openModal(`
       <div class="modal-head">
         <div>
-          <h2 class="modal-title">🌳 Skill Tree Smith, RF Mastery & 29 Kartu Destiny (CD v3.3)</h2>
-          <div class="modal-sub">125 Node Class • RF Classic Lv.1–GM • 29 Kartu Destiny Amalur • 48 Weapon Skills [W] • GCD ${state.gcdDuration}d</div>
+          <h2 class="modal-title">${tabTitle}</h2>
+          <div class="modal-sub">${tabSub}</div>
         </div>
         <button class="close-btn" id="btn-close-modal">Tutup</button>
       </div>
       <div class="v33-tabs">
-        <button class="v33-tab-btn ${v33Ui.tab === 'tree' ? 'active' : ''}" data-v33tab="tree">🌳 5 Pohon Smith & Morph</button>
-        <button class="v33-tab-btn ${v33Ui.tab === 'destiny' ? 'active' : ''}" data-v33tab="destiny">🃏 29 Kartu Destiny (${build.unlockedDestinyCards.length})</button>
-        <button class="v33-tab-btn ${v33Ui.tab === 'weapon' ? 'active' : ''}" data-v33tab="weapon">⚔️ Weapon Skill [W] & GCD</button>
+        <button class="v33-tab-btn ${menuUi.tab === 'smith' ? 'active' : ''}" data-mtab="smith">🔨 Tipe Smith</button>
+        <button class="v33-tab-btn ${menuUi.tab === 'skill' ? 'active' : ''}" data-mtab="skill">⚔️ Skill</button>
+        <button class="v33-tab-btn ${menuUi.tab === 'destiny' ? 'active' : ''}" data-mtab="destiny">🃏 Destiny (${build.unlockedDestinyCards.length})</button>
+        <button class="v33-tab-btn ${menuUi.tab === 'inventory' ? 'active' : ''}" data-mtab="inventory">🎒 Inventory</button>
       </div>
       ${bodyHtml}
     `, true);
 
+    // Wire common tabs & close
     document.getElementById('btn-close-modal').onclick = closeModal;
-    document.querySelectorAll('[data-v33tab]').forEach(btn => {
-      btn.onclick = () => openSkillDestinyModal(btn.dataset.v33tab);
+    document.querySelectorAll('[data-mtab]').forEach(btn => {
+      btn.onclick = () => openMenuModal(btn.dataset.mtab);
     });
+
+    // Tab 1: Tipe Smith handlers
     document.querySelectorAll('[data-preset]').forEach(btn => {
-      btn.onclick = () => { applyBuildPreset(btn.dataset.preset); openSkillDestinyModal('tree'); };
+      btn.onclick = () => { applyBuildPreset(btn.dataset.preset); openMenuModal('smith'); };
     });
-    document.querySelectorAll('[data-pick-cls]').forEach(btn => {
-      btn.onclick = () => openSkillDestinyModal('tree', btn.dataset.pickCls);
+    document.querySelectorAll('[data-jump-skill]').forEach(btn => {
+      btn.onclick = () => openMenuModal('skill', btn.dataset.jumpSkill);
     });
     document.querySelectorAll('[data-pt-inc]').forEach(btn => {
       btn.onclick = () => {
@@ -2579,7 +2700,7 @@
           p.smithTiers[c] = (p.smithTiers[c] || 0) + 1;
           refreshBuildV33();
           updateHUD();
-          openSkillDestinyModal('tree', c);
+          openMenuModal('smith');
         }
       };
     });
@@ -2591,18 +2712,22 @@
           p.smithTiers[c] -= 1;
           refreshBuildV33();
           updateHUD();
-          openSkillDestinyModal('tree', c);
+          openMenuModal('smith');
         }
       };
     });
+
+    // Tab 2: Skill handlers
+    document.querySelectorAll('[data-skill-sub]').forEach(btn => {
+      btn.onclick = () => openMenuModal('skill', btn.dataset.skillSub);
+    });
     document.querySelectorAll('[data-train-demo]').forEach(btn => {
       btn.onclick = () => {
-        const sId = btn.dataset.trainDemo;
-        const res = skillEngine.trainSkillMastery(p.skillMastery, sId, 60, 1);
+        const res = skillEngine.trainSkillMastery(p.skillMastery, btn.dataset.trainDemo, 60, 1);
         p.skillMastery = res.masteryState;
         refreshBuildV33();
         updateHUD();
-        openSkillDestinyModal('tree');
+        openMenuModal('skill');
       };
     });
     document.querySelectorAll('[data-toggle-equip]').forEach(btn => {
@@ -2617,7 +2742,7 @@
         }
         refreshBuildV33();
         updateHUD();
-        openSkillDestinyModal('tree');
+        openMenuModal('skill');
       };
     });
     document.querySelectorAll('[data-morph-id]').forEach(btn => {
@@ -2625,42 +2750,55 @@
         p.selectedMorphs[btn.dataset.morphKey] = btn.dataset.morphId;
         refreshBuildV33();
         updateHUD();
-        openSkillDestinyModal('tree');
+        openMenuModal('skill');
       };
     });
+    const trainWpn = document.getElementById('btn-train-wpn-demo');
+    if (trainWpn) trainWpn.onclick = () => {
+      const res = skillEngine.trainSkillMastery(p.skillMastery, build.weaponSkill.id, 60, 1);
+      p.skillMastery = res.masteryState;
+      refreshBuildV33();
+      updateHUD();
+      openMenuModal('skill', 'weapon');
+    };
+    const toggleFast = document.getElementById('btn-toggle-fast-train');
+    if (toggleFast) toggleFast.onclick = () => { p.fastTraining = !p.fastTraining; openMenuModal('skill'); };
 
-    // Destiny Tab Actions
+    // Tab 3: Destiny handlers
+    document.querySelectorAll('[data-dest-filter]').forEach(btn => {
+      btn.onclick = () => openMenuModal('destiny', btn.dataset.destFilter);
+    });
     const toggleHostile = document.getElementById('btn-toggle-hostile');
-    if (toggleHostile) toggleHostile.onclick = () => { p.isFactionHostile = !p.isFactionHostile; openSkillDestinyModal('destiny'); };
+    if (toggleHostile) toggleHostile.onclick = () => { p.isFactionHostile = !p.isFactionHostile; openMenuModal('destiny'); };
     const demoGold = document.getElementById('btn-demo-gold');
-    if (demoGold) demoGold.onclick = () => { p.bronze += 2000; updateHUD(); openSkillDestinyModal('destiny'); };
+    if (demoGold) demoGold.onclick = () => { p.bronze += 2000; updateHUD(); openMenuModal('destiny'); };
     const cancelSw = document.getElementById('btn-cancel-switch');
-    if (cancelSw) cancelSw.onclick = () => { v33Ui.switchTargetId = null; openSkillDestinyModal('destiny'); };
+    if (cancelSw) cancelSw.onclick = () => { menuUi.switchTargetId = null; openMenuModal('destiny'); };
     document.querySelectorAll('[data-req-switch]').forEach(btn => {
-      btn.onclick = () => { v33Ui.switchTargetId = btn.dataset.reqSwitch; openSkillDestinyModal('destiny'); };
+      btn.onclick = () => { menuUi.switchTargetId = btn.dataset.reqSwitch; openMenuModal('destiny'); };
     });
     const doTrial = document.getElementById('btn-do-switch-trial');
     if (doTrial) doTrial.onclick = () => {
       const res = skillEngine.evaluateDestinySwitch({
-        currentCardId: activeCard?.id, targetCardId: v33Ui.switchTargetId,
+        currentCardId: activeCard?.id, targetCardId: menuUi.switchTargetId,
         smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
         level: p.level, method: 'trial', trialCompleted: trialDone,
         isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
       });
       if (res.allowed) {
         p.activeDestinyId = res.newActiveDestinyId;
-        v33Ui.switchTargetId = null;
+        menuUi.switchTargetId = null;
         refreshBuildV33();
         updateHUD();
         vfx.playVFX('levelup_pillar', state.pos);
         addLog(`🃏 Ganti Kartu Destiny via Misi ${res.broker} (GRATIS) → ${res.newActiveDestinyName}!`, 'moral');
-        openSkillDestinyModal('destiny');
+        openMenuModal('destiny');
       }
     };
     const doGold = document.getElementById('btn-do-switch-gold');
     if (doGold) doGold.onclick = () => {
       const res = skillEngine.evaluateDestinySwitch({
-        currentCardId: activeCard?.id, targetCardId: v33Ui.switchTargetId,
+        currentCardId: activeCard?.id, targetCardId: menuUi.switchTargetId,
         smithTiers: p.smithTiers, firstTakenClass: p.firstTakenClass,
         level: p.level, method: 'gold',
         isFactionHostile: p.isFactionHostile, playerBronze: p.bronze
@@ -2668,26 +2806,30 @@
       if (res.allowed) {
         p.bronze = res.remainingBronze;
         p.activeDestinyId = res.newActiveDestinyId;
-        v33Ui.switchTargetId = null;
+        menuUi.switchTargetId = null;
         refreshBuildV33();
         updateHUD();
         vfx.playVFX('aura_light', state.pos);
         addLog(`🃏 Ganti Kartu Destiny via ${res.broker} (-${res.costBronze} br) → ${res.newActiveDestinyName}!`, 'moral');
-        openSkillDestinyModal('destiny');
+        openMenuModal('destiny');
       }
     };
 
-    // Weapon Tab Actions
-    const trainWpn = document.getElementById('btn-train-wpn-demo');
-    if (trainWpn) trainWpn.onclick = () => {
-      const res = skillEngine.trainSkillMastery(p.skillMastery, build.weaponSkill.id, 60, 1);
-      p.skillMastery = res.masteryState;
-      refreshBuildV33();
-      updateHUD();
-      openSkillDestinyModal('weapon');
-    };
-    const toggleFast = document.getElementById('btn-toggle-fast-train');
-    if (toggleFast) toggleFast.onclick = () => { p.fastTraining = !p.fastTraining; openSkillDestinyModal('weapon'); };
+    // Tab 4: Inventory handlers
+    document.querySelectorAll('[data-inv-filter]').forEach(btn => {
+      btn.onclick = () => openMenuModal('inventory', btn.dataset.invFilter);
+    });
+    document.querySelectorAll('[data-inv-equip]').forEach(btn => {
+      btn.onclick = () => {
+        p.equippedWeaponId = btn.dataset.invEquip;
+        refreshHeroSprite();
+        refreshBuildV33();
+        updateHUD();
+        const nw = getWeapon();
+        addLog(`⚔️ Memakai ${nw.name} dari Tas ([W] ${nw.trigger}).`, 'sys');
+        openMenuModal('inventory');
+      };
+    });
   }
 
   // --------------------------------------------------------------------------
@@ -2710,7 +2852,10 @@
     keys[k] = true;
     if (k >= '1' && k <= '6') triggerSkill(Number(k) - 1);
     if (k === 'q') triggerWeaponSkill();
-    if (k === 'k') openSkillDestinyModal('tree');
+    if (k === 'c') openMenuModal('smith');
+    if (k === 'k') openMenuModal('skill');
+    if (k === 'j') openMenuModal('destiny');
+    if (k === 'i') openMenuModal('inventory');
     if (k === 'e' || k === ' ') {
       if (state.nearestInteractable) interactWith(state.nearestInteractable);
       else if (state.targetEntity) interactWith(state.targetEntity);
@@ -2848,10 +2993,10 @@
     for (let i = 0; i < build.maxSlots; i++) {
       const sk = build.equippedSkills[i];
       if (sk) {
-        const shortSub = sk.role.includes('Buff') ? 'Buff RF'
-          : (sk.interrupts_cast ? 'Interrupt!'
+        const shortSub = sk.role.includes('Buff') ? 'Buff'
+          : (sk.interrupts_cast ? 'Int!'
             : (sk.consumes_resource ? 'Burst'
-              : (sk.tier === 5 ? 'Apex Ult' : 'Opener')));
+              : (sk.tier === 5 ? 'Ult' : 'Open')));
         html.push(`
           <button class="skill-slot" id="skill-slot-${i}" title="${sk.name} (${sk.smithClass} T${sk.tier}, ${sk.mastery.label}) — ${sk.desc}">
             <div class="skill-top-row">
@@ -2867,7 +3012,7 @@
         `);
       } else {
         html.push(`
-          <button class="skill-slot empty-slot" id="skill-slot-${i}" data-open-tree="1" title="Slot kosong — klik [K] untuk alokasi Poin Smith & pasang skill">
+          <button class="skill-slot empty-slot" id="skill-slot-${i}" data-open-skill="1" title="Slot kosong — klik [K] untuk pasang skill">
             <span>[${i + 1}]<br>+ Skill</span>
           </button>
         `);
@@ -2877,7 +3022,7 @@
     for (let i = 0; i < build.maxSlots; i++) {
       const el = document.getElementById('skill-slot-' + i);
       if (!el) continue;
-      if (el.dataset.openTree) el.onclick = () => openSkillDestinyModal('tree');
+      if (el.dataset.openSkill) el.onclick = () => openMenuModal('skill');
       else el.onclick = () => triggerSkill(i);
     }
   }
@@ -2946,7 +3091,7 @@
     document.getElementById('hud-stam-fill').style.width = Math.round((p.stamina / p.maxStamina) * 100) + '%';
     document.getElementById('hud-stam-val').textContent = `${p.stamina}/${p.maxStamina}`;
     document.getElementById('hud-bronze').textContent = `${p.bronze} br`;
-    document.getElementById('hud-wpn').textContent = `${w.name} (${w.mode})`;
+    document.getElementById('hud-wpn').textContent = w.name;
     document.getElementById('hud-mulia').textContent = p.mulia;
     document.getElementById('hud-kejam').textContent = p.kejam;
 
@@ -2959,22 +3104,25 @@
     // Smith Resources, RF Class Buff, Destiny Signature & GCD Pills
     const procStrip = document.getElementById('proc-strip');
     const pills = [];
-    if (p.resources.forge_heat > 0) pills.push(`<span class="buff-pill">🔥 Forge Heat ${p.resources.forge_heat}</span>`);
-    if (p.resources.bastion_guard > 0) pills.push(`<span class="buff-pill">🛡️ Bastion Guard ${p.resources.bastion_guard}</span>`);
-    if (p.resources.hunters_mark > 0) pills.push(`<span class="buff-pill">🎯 Hunter's Mark ${p.resources.hunters_mark}</span>`);
-    if (p.resources.elemental_charge > 0) pills.push(`<span class="buff-pill">✨ Elem Charge ${p.resources.elemental_charge}/3</span>`);
+    if (p.resources.forge_heat > 0) pills.push(`<span class="buff-pill">🔥 Heat ${p.resources.forge_heat}</span>`);
+    if (p.resources.bastion_guard > 0) pills.push(`<span class="buff-pill">🛡️ Guard ${p.resources.bastion_guard}</span>`);
+    if (p.resources.hunters_mark > 0) pills.push(`<span class="buff-pill">🎯 Mark ${p.resources.hunters_mark}</span>`);
+    if (p.resources.elemental_charge > 0) pills.push(`<span class="buff-pill">✨ Charge ${p.resources.elemental_charge}/3</span>`);
     if (p.resources.overclock > 0) pills.push(`<span class="buff-pill">⚙️ Overclock ${p.resources.overclock}</span>`);
     if (state.activeClassBuffTimer > 0) pills.push(`<span class="buff-pill companion">⚡ ${state.activeClassBuffName} ${state.activeClassBuffTimer.toFixed(0)}d</span>`);
-    if (state.runeMarkActive) pills.push(`<span class="buff-pill destiny">✦ Rune Mark Siap!</span>`);
-    if (state.arcaneEdgeTimer > 0) pills.push(`<span class="buff-pill destiny">✦ Arcane Edge ${state.arcaneEdgeTimer.toFixed(1)}d</span>`);
-    if (state.recentClasses.length > 0 && card?.id === 'Omnismith') pills.push(`<span class="buff-pill destiny">✦ Omni-Chain ${state.recentClasses.length}/3</span>`);
+    if (state.runeMarkActive) pills.push(`<span class="buff-pill destiny">✦ Rune Mark!</span>`);
+    if (state.arcaneEdgeTimer > 0) pills.push(`<span class="buff-pill destiny">✦ Arcane ${state.arcaneEdgeTimer.toFixed(1)}d</span>`);
+    if (state.recentClasses.length > 0 && card?.id === 'Omnismith') pills.push(`<span class="buff-pill destiny">✦ Omni ${state.recentClasses.length}/3</span>`);
     if (state.gcdRemaining > 0) pills.push(`<span class="buff-pill gcd-pill">⏱ GCD ${state.gcdRemaining.toFixed(1)}d</span>`);
     if (state.companion.recruited) pills.push(`<span class="buff-pill companion">🛡️ Kael (${state.companion.loyalty})</span>`);
-    if (state.idleMode) pills.push(`<span class="buff-pill companion">💤 Idle ON</span>`);
+    if (state.idleMode) pills.push(`<span class="buff-pill companion">💤 Idle</span>`);
     procStrip.innerHTML = pills.join('');
 
-    // Quest Tracker
+    // Quest Tracker + Collapsible Counter Badge
     const q = state.quests;
+    const doneCount = (q.talkedBrann ? 1 : 0) + (q.forgedOnce ? 1 : 0) + (q.recruitedKael ? 1 : 0) + (q.huntedCount >= q.huntedGoal ? 1 : 0);
+    const qBadge = document.getElementById('quest-count-badge');
+    if (qBadge) qBadge.textContent = `${doneCount}/4`;
     document.getElementById('q-1').className = 'quest-item ' + (q.talkedBrann ? 'done' : '');
     document.getElementById('q-2').className = 'quest-item ' + (q.forgedOnce ? 'done' : '');
     document.getElementById('q-3').className = 'quest-item ' + (q.recruitedKael ? 'done' : '');
@@ -3024,7 +3172,7 @@
       document.getElementById('wpn-skill-name').textContent = ws.name;
       document.getElementById('wpn-skill-sub').textContent = ws.unlocked
         ? `${ws.effectiveCooldownSec}d${ws.unlockedByOmnismith ? ' • Omni' : ''}`
-        : `🔒 ${ws.governing_smith} T1`;
+        : `🔒 ${ws.governing_smith}`;
       const wsRankEl = document.getElementById('wpn-skill-rank');
       wsRankEl.textContent = wsMastery.label;
       wsRankEl.classList.toggle('gm', wsMastery.isGM);
@@ -3045,10 +3193,19 @@
     updateTargetFrame();
   }
 
-  // Wire HUD Buttons
+  // Wire HUD Buttons (4 Separated Tabs + Weapon Skill + Quest Toggle + Controls)
   document.getElementById('weapon-skill-slot').onclick = () => triggerWeaponSkill();
-  document.getElementById('btn-skill-destiny').onclick = () => openSkillDestinyModal('tree');
-  document.getElementById('hud-destiny').onclick = () => openSkillDestinyModal('destiny');
+  document.getElementById('btn-tab-smith').onclick = () => openMenuModal('smith');
+  document.getElementById('btn-tab-skill').onclick = () => openMenuModal('skill');
+  document.getElementById('btn-tab-destiny').onclick = () => openMenuModal('destiny');
+  document.getElementById('btn-tab-inventory').onclick = () => openMenuModal('inventory');
+  document.getElementById('hud-destiny').onclick = () => openMenuModal('destiny');
+
+  document.getElementById('btn-quest-toggle').onclick = () => {
+    const qt = document.getElementById('quest-tracker');
+    const isOpen = qt.classList.toggle('open');
+    document.getElementById('btn-quest-toggle').classList.toggle('active', isOpen);
+  };
 
   document.getElementById('context-prompt').onclick = () => {
     if (state.nearestInteractable) interactWith(state.nearestInteractable);
@@ -3056,10 +3213,11 @@
 
   document.getElementById('btn-cam').onclick = () => {
     const modes = ['octopath', 'diablo', 'swtor'];
-    const labels = { octopath: 'Kamera: Octopath HD-2D', diablo: 'Kamera: 2.5D Diablo', swtor: 'Kamera: 3D SWTOR' };
+    const labels = { octopath: '📷 HD-2D', diablo: '📷 Diablo', swtor: '📷 SWTOR' };
+    const fullNames = { octopath: 'Octopath HD-2D', diablo: '2.5D Diablo', swtor: '3D SWTOR' };
     state.cameraMode = modes[(modes.indexOf(state.cameraMode) + 1) % modes.length];
     document.getElementById('btn-cam').textContent = labels[state.cameraMode];
-    addLog(`Sudut kamera diganti ke ${labels[state.cameraMode]}.`, 'sys');
+    addLog(`Sudut kamera diganti ke ${fullNames[state.cameraMode]}.`, 'sys');
   };
 
   document.getElementById('btn-quality').onclick = () => {
@@ -3071,7 +3229,7 @@
   document.getElementById('btn-idle').onclick = () => {
     state.idleMode = !state.idleMode;
     document.getElementById('btn-idle').classList.toggle('active', state.idleMode);
-    document.getElementById('btn-idle').textContent = state.idleMode ? '💤 Idle: ON' : '💤 Idle: OFF';
+    document.getElementById('btn-idle').textContent = state.idleMode ? '💤 ON' : '💤 Idle';
     addLog(state.idleMode ? 'Mode Idle aktif (Auto-Hunt + Latihan RF Mastery Lv.1-GM otomatis!).' : 'Mode Idle dimatikan (Kendali Manual).', 'sys');
     updateHUD();
   };
@@ -3082,7 +3240,6 @@
     document.getElementById('btn-dpad-toggle').classList.toggle('active', state.showDpad);
   };
 
-  document.getElementById('btn-sheet').onclick = openSheetModal;
   document.getElementById('btn-quick-portal').onclick = () => {
     const p = nodeEntities.find(e => e.kind === 'portal');
     openPortalModal(p);
@@ -3829,7 +3986,7 @@
   buildTidewrackVillage();
   playerActor.position.copy(state.pos);
   updateHUD();
-  addLog('Selamat datang di Tidewrack Village (CD v3.3)! Klik "🌳 Skill & Destiny" [K] untuk uji 5 Pohon Smith, RF Mastery Lv.1-GM, & 29 Kartu Destiny, atau [Q] untuk Weapon Skill [W]!', 'sys');
+  addLog('Selamat datang di Tidewrack Village (CD v3.3)! Menu sudah dipisah: 🔨 Smith [C], ⚔️ Skill [K], 🃏 Destiny [J], & 🎒 Tas [I]. Tekan [Q] untuk Weapon Skill [W]!', 'sys');
 
   requestAnimationFrame(tick);
 })();
