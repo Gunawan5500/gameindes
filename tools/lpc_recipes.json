@@ -1,0 +1,209 @@
+{
+  "version": "1.0",
+  "description": "Katalog resep deterministik Dual-Tier (Tahap 1 Pre-Bake HP Oppo A54 + Tahap 2 Mini-Pack Laptop) untuk Universal-LPC-Spritesheet-Character-Generator.",
+  "grid": {
+    "frame_width": 64,
+    "frame_height": 64,
+    "frames_per_strip": 5,
+    "animations": {
+      "spellcast": { "up": 0, "left": 1, "down": 2, "right": 3 },
+      "thrust":    { "up": 4, "left": 5, "down": 6, "right": 7 },
+      "walk":      { "up": 8, "left": 9, "down": 10, "right": 11 },
+      "slash":     { "up": 12, "left": 13, "down": 14, "right": 15 },
+      "shoot":     { "up": 16, "left": 17, "down": 18, "right": 19 }
+    }
+  },
+  "stage1_characters": [
+    {
+      "id": "hero_smith",
+      "name": "Hero Battle-Smith",
+      "category": "hero",
+      "direction": "right",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/hero_smith_5f.webp",
+      "out_portrait": "app/assets/ui/avatar_hero.webp",
+      "layers": [
+        ["body/bodies/male/light.png", "body/male/light.png"],
+        ["legs/pants/male/charcoal.png", "legs/armour/plate/male/steel.png"],
+        ["feet/boots/male/brown.png", "feet/shoes/male/brown.png"],
+        ["torso/armour/plate/male/steel.png", "torso/chain/mail/male/gray.png", "torso/clothes/longsleeve/male/brown.png"],
+        ["torso/aprons/apron/male/brown.png", "torso/waist/belt_leather/male/brown.png"],
+        ["hair/short/male/brown.png", "hair/plain/male/brown.png"],
+        ["weapon/blunt/warhammer/universal/warhammer.png", "weapon/sword/longsword/universal/longsword.png"]
+      ]
+    },
+    {
+      "id": "apprentice_kael",
+      "name": "Kael (Weaponsmith)",
+      "seed_match": "kael",
+      "category": "apprentice",
+      "direction": "right",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/apprentice_kael_5f.webp",
+      "out_portrait": "app/assets/ui/portraits/portrait_kael.webp",
+      "layers": [
+        ["body/bodies/male/olive.png", "body/male/tanned.png", "body/bodies/male/light.png"],
+        ["legs/pants/male/navy.png", "legs/pants/male/black.png"],
+        ["torso/armour/leather/male/brown.png", "torso/clothes/longsleeve/male/red.png"],
+        ["hair/messy1/male/black.png", "hair/short/male/black.png"],
+        ["weapon/sword/longsword/universal/longsword.png"]
+      ]
+    },
+    {
+      "id": "apprentice_lyra",
+      "name": "Lyra (Runesmith)",
+      "seed_match": "lyra",
+      "category": "apprentice",
+      "direction": "right",
+      "animation": "spellcast",
+      "out_sprite": "app/assets/sprites/apprentice_lyra_5f.webp",
+      "out_portrait": "app/assets/ui/portraits/portrait_lyra.webp",
+      "layers": [
+        ["body/bodies/female/light.png", "body/female/light.png"],
+        ["legs/skirts/plain/female/blue.png", "legs/pants/female/blue.png"],
+        ["torso/clothes/robes/female/blue.png", "torso/clothes/longsleeve/female/blue.png"],
+        ["hair/long/female/blonde.png", "hair/long/female/gold.png"],
+        ["weapon/magic/staff/universal/staff.png", "weapon/polearm/staff/universal/staff.png"]
+      ]
+    },
+    {
+      "id": "apprentice_garrick",
+      "name": "Garrick (Armorer)",
+      "seed_match": "garrick",
+      "category": "apprentice",
+      "direction": "right",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/apprentice_garrick_5f.webp",
+      "out_portrait": "app/assets/ui/portraits/portrait_garrick.webp",
+      "layers": [
+        ["body/bodies/muscular/tanned.png", "body/bodies/male/tanned.png", "body/male/tanned.png"],
+        ["legs/armour/plate/male/steel.png", "legs/pants/male/charcoal.png"],
+        ["torso/armour/plate/male/steel.png", "torso/armour/plate/male/iron.png"],
+        ["beards/beard/male/brown.png", "facial/beard/male/brown.png"],
+        ["hair/bald/male/brown.png", "hair/short/male/brown.png"]
+      ]
+    },
+    {
+      "id": "apprentice_vesper",
+      "name": "Vesper (Rangesmith)",
+      "seed_match": "vesper",
+      "category": "apprentice",
+      "direction": "right",
+      "animation": "shoot",
+      "out_sprite": "app/assets/sprites/apprentice_vesper_5f.webp",
+      "out_portrait": "app/assets/ui/portraits/portrait_vesper.webp",
+      "layers": [
+        ["body/bodies/female/olive.png", "body/bodies/female/light.png"],
+        ["legs/pants/female/green.png", "legs/pants/female/brown.png"],
+        ["torso/clothes/tunic/female/green.png", "torso/armour/leather/female/brown.png"],
+        ["hat/hood/female/green.png", "hair/ponytail/female/black.png"],
+        ["weapon/ranged/bow/normal/universal/bow.png"]
+      ]
+    },
+    {
+      "id": "apprentice_thorne",
+      "name": "Thorne (Reforger)",
+      "seed_match": "thorne",
+      "category": "apprentice",
+      "direction": "right",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/apprentice_thorne_5f.webp",
+      "out_portrait": "app/assets/ui/portraits/portrait_thorne.webp",
+      "layers": [
+        ["body/bodies/male/brown.png", "body/bodies/male/tanned.png"],
+        ["legs/pants/male/brown.png", "legs/pants/male/black.png"],
+        ["torso/clothes/vest/male/maroon.png", "torso/clothes/longsleeve/male/maroon.png"],
+        ["hair/short/male/gray.png", "hair/short/male/white.png"],
+        ["weapon/blunt/mace/universal/mace.png", "weapon/blunt/warhammer/universal/warhammer.png"]
+      ]
+    },
+    {
+      "id": "enemy_humanoid",
+      "name": "Bandit / Raider / Cultist (LPC)",
+      "category": "monster_lpc",
+      "direction": "left",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/enemy_humanoid_5f.webp",
+      "out_portrait": null,
+      "layers": [
+        ["body/bodies/male/tanned.png", "body/male/tanned.png"],
+        ["legs/pants/male/black.png"],
+        ["torso/armour/leather/male/black.png", "torso/clothes/longsleeve/male/maroon.png"],
+        ["hat/hood/male/black.png", "hat/bandana/male/red.png"],
+        ["weapon/sword/dagger/universal/dagger.png", "weapon/sword/scimitar/universal/scimitar.png"]
+      ]
+    },
+    {
+      "id": "enemy_undead",
+      "name": "Skeleton / Revenant / Lich (LPC)",
+      "category": "monster_lpc",
+      "direction": "left",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/enemy_undead_5f.webp",
+      "out_portrait": null,
+      "layers": [
+        ["body/bodies/skeleton/skeleton.png", "body/skeleton/skeleton.png", "body/bodies/male/zombie.png"],
+        ["torso/clothes/robes/male/purple.png", "torso/clothes/robes/male/black.png"],
+        ["hat/hood/male/purple.png", "hat/hood/male/black.png"],
+        ["weapon/polearm/scythe/universal/scythe.png", "weapon/sword/longsword/universal/longsword.png"]
+      ]
+    },
+    {
+      "id": "enemy_orc",
+      "name": "Orc / Goblin / Lizardfolk (LPC)",
+      "category": "monster_lpc",
+      "direction": "left",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/enemy_orc_5f.webp",
+      "out_portrait": null,
+      "layers": [
+        ["body/bodies/male/orc.png", "body/male/orc.png", "body/bodies/male/green.png"],
+        ["legs/pants/male/brown.png"],
+        ["torso/armour/leather/male/brown.png"],
+        ["weapon/blunt/axe/universal/axe.png", "weapon/polearm/halberd/universal/halberd.png"]
+      ]
+    },
+    {
+      "id": "boss_humanoid",
+      "name": "Dark Warlord / Boss Humanoid (LPC)",
+      "category": "boss_lpc",
+      "direction": "left",
+      "animation": "slash",
+      "out_sprite": "app/assets/sprites/boss_humanoid_5f.webp",
+      "out_portrait": null,
+      "layers": [
+        ["body/bodies/muscular/light.png", "body/bodies/male/light.png"],
+        ["legs/armour/plate/male/black.png", "legs/armour/plate/male/steel.png"],
+        ["torso/armour/plate/male/black.png", "torso/armour/plate/male/gold.png"],
+        ["cape/solid/male/red.png", "cape/tattered/male/red.png"],
+        ["hat/helmet/barbarian/male/iron.png", "hat/crown/male/gold.png"],
+        ["weapon/sword/greatsword/universal/greatsword.png", "weapon/sword/longsword/universal/longsword.png"]
+      ]
+    }
+  ],
+  "stage2_mini_pack": {
+    "out_dir": "app/assets/lpc_parts",
+    "manifest_file": "app/assets/lpc_parts/manifest_lpc_parts.json",
+    "slots": {
+      "body": [
+        { "id": "light",  "patterns": ["body/bodies/male/light.png", "body/male/light.png"] },
+        { "id": "olive",  "patterns": ["body/bodies/male/olive.png", "body/male/tanned.png"] },
+        { "id": "brown",  "patterns": ["body/bodies/male/brown.png", "body/male/dark.png"] },
+        { "id": "orc",    "patterns": ["body/bodies/male/orc.png", "body/male/orc.png"] },
+        { "id": "skel",   "patterns": ["body/bodies/skeleton/skeleton.png", "body/skeleton/skeleton.png"] }
+      ],
+      "torso": [
+        { "id": "steel",   "patterns": ["torso/armour/plate/male/steel.png"] },
+        { "id": "leather", "patterns": ["torso/armour/leather/male/brown.png"] },
+        { "id": "robe",    "patterns": ["torso/clothes/robes/male/blue.png"] },
+        { "id": "maroon",  "patterns": ["torso/clothes/longsleeve/male/maroon.png"] }
+      ],
+      "hair": [
+        { "id": "short_brown", "patterns": ["hair/short/male/brown.png"] },
+        { "id": "short_black", "patterns": ["hair/short/male/black.png"] },
+        { "id": "long_blonde", "patterns": ["hair/long/female/blonde.png", "hair/long/male/blonde.png"] },
+        { "id": "hood_black",  "patterns": ["hat/hood/male/black.png"] }
+      ]
+    }
+  }
+}

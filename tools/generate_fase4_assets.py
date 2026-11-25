@@ -500,13 +500,88 @@ def generate_audio():
     return sizes
 
 
+def generate_lpc_slot_defaults():
+    """Bangkitkan fallback .webp ringan untuk slot LPC (5 Murid AI Seed + Orc + Boss Humanoid).
+    Saat user menjalankan tools/lpc_pipeline.py --mode stage1, file-file ini otomatis diganti hasil LPC asli.
+    """
+    out_portraits = os.path.join(OUT_UI, "portraits")
+    os.makedirs(out_portraits, exist_ok=True)
+    sizes = {}
+
+    # 5 Murid AI Seed portraits (96x96 .webp)
+    apprentices = [
+        ("portrait_kael.webp",    (224, 178, 146), (30, 41, 59),   (153, 27, 27),  (251, 191, 36)),  # Weaponsmith
+        ("portrait_lyra.webp",    (246, 212, 184), (250, 204, 21), (29, 78, 216),  (56, 189, 248)),  # Runesmith
+        ("portrait_garrick.webp", (214, 165, 130), (120, 53, 15),  (71, 85, 105),  (226, 232, 240)), # Armorer
+        ("portrait_vesper.webp",  (230, 192, 160), (20, 83, 45),   (22, 101, 52),  (74, 222, 128)),  # Rangesmith
+        ("portrait_thorne.webp",  (176, 126, 94),  (148, 163, 184),(127, 29, 29),  (245, 158, 11)),  # Reforger
+    ]
+    for fname, skin, hair, tunic, accent in apprentices:
+        im = Image.new("RGBA", (96, 96), (14, 22, 34, 255))
+        d = ImageDraw.Draw(im, "RGBA")
+        for y in range(96):
+            c = int(16 + (y / 96) * 20)
+            d.line([(0, y), (96, y)], fill=(c, c + 10, c + 24, 255))
+        # Shoulders
+        d.pieslice([10, 56, 86, 122], 180, 360, fill=tunic + (255,), outline=accent + (255,))
+        # Head
+        d.ellipse([26, 18, 70, 62], fill=skin + (255,), outline=(15, 23, 42, 255))
+        # Hair / Hood
+        d.pieslice([22, 12, 74, 54], 180, 360, fill=hair + (255,), outline=(15, 23, 42, 255))
+        # Eyes
+        d.rectangle([36, 40, 42, 45], fill=(15, 23, 42, 255))
+        d.rectangle([54, 40, 60, 45], fill=accent + (255,))
+        # Emblem
+        d.ellipse([43, 72, 53, 82], fill=accent + (255,))
+        d.rounded_rectangle([2, 2, 93, 93], radius=14, outline=accent + (210,), width=3)
+        sizes[fname] = save_webp(im, os.path.join(out_portraits, fname), quality=82)
+
+    # Orc / Goblin 5-frame sprite (320x64 .webp)
+    orc_sheet = Image.new("RGBA", (320, 64), (0, 0, 0, 0))
+    for f in range(5):
+        d = ImageDraw.Draw(orc_sheet, "RGBA")
+        ox = f * 64
+        lunge = [0, 2, -4, -8, -2][f]
+        bob = [0, -1, -2, 1, 0][f]
+        cx, cy = ox + 34 + lunge, 48 + bob
+        draw_shadow(d, ox + 34 + lunge // 2, 56, 15, 4)
+        d.rectangle([cx - 7, cy - 8, cx - 2, cy + 5], fill=(63, 98, 18, 255), outline=(15, 23, 42, 255))
+        d.rectangle([cx + 2, cy - 8, cx + 7, cy + 5], fill=(54, 83, 20, 255), outline=(15, 23, 42, 255))
+        d.rounded_rectangle([cx - 10, cy - 25, cx + 10, cy - 7], radius=3, fill=(120, 53, 15, 255), outline=(15, 23, 42, 255))
+        d.ellipse([cx - 8, cy - 38, cx + 8, cy - 23], fill=(101, 163, 13, 255), outline=(15, 23, 42, 255))
+        # Tusks & eyes
+        d.rectangle([cx - 5, cy - 31, cx - 2, cy - 29], fill=(244, 63, 94, 255))
+        d.polygon([(cx - 6, cy - 25), (cx - 8, cy - 29), (cx - 4, cy - 25)], fill=(248, 250, 252, 255))
+        # Cleaver axe
+        ang = [2.5, 1.3, 2.0, 3.05, 2.75][f]
+        hx, hy = cx - 7, cy - 16
+        tx, ty = int(hx + math.cos(ang) * 19), int(hy + math.sin(ang) * 19)
+        d.line([hx, hy, tx, ty], fill=(146, 64, 14, 255), width=3)
+        d.ellipse([tx - 5, ty - 5, tx + 5, ty + 5], fill=(203, 213, 225, 255), outline=(15, 23, 42, 255))
+    sizes["enemy_orc_5f.webp"] = save_webp(orc_sheet, os.path.join(OUT_SPRITES, "enemy_orc_5f.webp"), quality=84)
+
+    # Humanoid Warlord Boss 5-frame sprite (320x64 .webp)
+    hb_sheet = Image.new("RGBA", (320, 64), (0, 0, 0, 0))
+    for f in range(5):
+        draw_boss_frame(hb_sheet, f * 64, f)
+    sizes["boss_humanoid_5f.webp"] = save_webp(hb_sheet, os.path.join(OUT_SPRITES, "boss_humanoid_5f.webp"), quality=84)
+
+    return sizes
+
+
 if __name__ == "__main__":
     sp = generate_sprites()
     ui = generate_ui_assets()
     au = generate_audio()
-    total = sum(sp.values()) + sum(ui.values()) + sum(au.values())
-    print("Generated Fase 4 Assets:")
-    for group_name, d in [("Sprites (.webp 5-frame)", sp), ("UI/Banners (.webp)", ui), ("Audio (.ogg)", au)]:
+    lpc_def = generate_lpc_slot_defaults()
+    total = sum(sp.values()) + sum(ui.values()) + sum(au.values()) + sum(lpc_def.values())
+    print("Generated Fase 4 + LPC Default Slot Assets:")
+    for group_name, d in [
+        ("Sprites (.webp 5-frame)", sp),
+        ("UI/Banners (.webp)", ui),
+        ("Audio (.ogg)", au),
+        ("LPC Slot Defaults (5 Murid + Orc + Boss Humanoid)", lpc_def),
+    ]:
         print(f"  {group_name}:")
         for k, v in d.items():
             print(f"    - {k}: {v/1024:.2f} KB")

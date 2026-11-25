@@ -52,13 +52,16 @@
       return `
         <div class="card ${a.isCompanion ? "warm" : branchLoc ? "teal" : ""}">
           <div class="card-head">
-            <div>
-              <div class="card-title">
-                👤 ${esc(name)}
-                <span class="badge">${esc(prof.smithClass)}</span>
-              </div>
-              <div class="card-sub">
-                Latar: <b>${esc(prof.background)}</b> • Mazhab: <b>${esc(prof.primarySmithType)}</b> • Destiny: <b>${esc(prof.destinyCard)}</b>
+            <div style="display:flex;align-items:center;gap:9px;min-width:0">
+              ${global.BSRPG_ASSETS ? global.BSRPG_ASSETS.renderDualTierPortraitHtml(a.seed, name, 42) : ""}
+              <div style="min-width:0">
+                <div class="card-title">
+                  ${esc(name)}
+                  <span class="badge">${esc(prof.smithClass)}</span>
+                </div>
+                <div class="card-sub">
+                  Latar: <b>${esc(prof.background)}</b> • Mazhab: <b>${esc(prof.primarySmithType)}</b> • Destiny: <b>${esc(prof.destinyCard)}</b>
+                </div>
               </div>
             </div>
             ${statusBadge}
