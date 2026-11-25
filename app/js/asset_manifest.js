@@ -19,6 +19,8 @@
     ui_forge_anvil: "assets/ui/forge_anvil.webp",
     ui_banner_wilds: "assets/ui/banner_wilds.webp",
     ui_banner_boss: "assets/ui/banner_boss_arena.webp",
+    ui_map_world: "assets/ui/map_world.webp",
+    ui_map_city: "assets/ui/map_city.webp",
     portrait_kael: "assets/ui/portraits/portrait_kael.webp",
     portrait_lyra: "assets/ui/portraits/portrait_lyra.webp",
     portrait_garrick: "assets/ui/portraits/portrait_garrick.webp",

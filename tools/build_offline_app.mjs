@@ -48,6 +48,8 @@ function collectInlineAssets() {
     ui_forge_anvil: toDataUri("assets/ui/forge_anvil.webp", "image/webp"),
     ui_banner_wilds: toDataUri("assets/ui/banner_wilds.webp", "image/webp"),
     ui_banner_boss: toDataUri("assets/ui/banner_boss_arena.webp", "image/webp"),
+    ui_map_world: toDataUri("assets/ui/map_world.webp", "image/webp"),
+    ui_map_city: toDataUri("assets/ui/map_city.webp", "image/webp"),
     portrait_kael: toDataUri("assets/ui/portraits/portrait_kael.webp", "image/webp"),
     portrait_lyra: toDataUri("assets/ui/portraits/portrait_lyra.webp", "image/webp"),
     portrait_garrick: toDataUri("assets/ui/portraits/portrait_garrick.webp", "image/webp"),

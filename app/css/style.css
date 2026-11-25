@@ -1647,4 +1647,128 @@ body.mode-lite .modal-box {
   }
 }
 
+/* ==========================================================================
+   PETA BERGAMBAR INTERAKTIF 2-LAPISAN (WORLD MAP + FFT CITY/VILLAGE MAP)
+   ========================================================================== */
+.imap-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.imap-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #35506b;
+  background: #0b131c;
+  user-select: none;
+}
+
+.imap-canvas.world-ratio {
+  aspect-ratio: 1 / 1;
+  max-width: 540px;
+}
+
+.imap-canvas.city-ratio {
+  aspect-ratio: 4 / 3;
+  max-width: 680px;
+}
+
+.imap-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imap-routes-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.imap-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1.5px solid #cbd5e1;
+  background: rgba(11, 18, 28, 0.88);
+  color: #f8fafc;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+  z-index: 2;
+}
+
+.imap-pin:hover {
+  border-color: var(--amber-hi);
+  z-index: 5;
+}
+
+.imap-pin.selected {
+  border-color: var(--sky);
+  background: #0c4a6e;
+  z-index: 6;
+}
+
+.imap-pin.here {
+  border-color: var(--amber-hi);
+  background: #92400e;
+  color: #fef3c7;
+  z-index: 7;
+}
+
+.imap-pin.contested {
+  border-color: #fb7185;
+}
+
+.imap-pin.city-node {
+  padding: 4px 8px;
+  font-size: 10.5px;
+  border-color: var(--amber-hi);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.imap-pin-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sky);
+  flex-shrink: 0;
+}
+
+.imap-pin.here .imap-pin-dot {
+  background: #fde047;
+}
+
+.imap-pin.contested .imap-pin-dot {
+  background: #fb7185;
+}
+
+@media (max-width: 699px) {
+  .imap-pin {
+    padding: 2px 5px;
+    font-size: 9px;
+  }
+  .imap-pin.city-node {
+    padding: 3px 6px;
+    font-size: 9.5px;
+  }
+}
+
+
 

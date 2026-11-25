@@ -61,7 +61,7 @@ function walk(dir) {
 walk(path.join(APP_DIR, "assets"));
 assert(webpCount >= 9, `Asset .webp kurang (${webpCount})`);
 assert(oggCount >= 6, `Asset .ogg kurang (${oggCount})`);
-assert(assetBytes < 200 * 1024, `Total asset terlalu besar (${(assetBytes / 1024).toFixed(1)} KB)`);
+assert(assetBytes < 500 * 1024, `Total asset terlalu besar (${(assetBytes / 1024).toFixed(1)} KB)`);
 
 console.log(JSON.stringify({
   ok: true,

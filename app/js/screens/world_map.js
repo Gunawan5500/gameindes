@@ -10,6 +10,8 @@
 
   const state = {
     subTab: "routes",     // "routes" | "ecosystem" | "dungeons"
+    mapLayer: "world",    // "world" | "city"
+    selectedAreaId: null,
     tierFilter: "ALL",
     ecoView: "levels",    // "levels" | "bosses" | "bestiary"
     zoneFilter: "ALL",
@@ -20,6 +22,55 @@
     showSengketaLegend: false,
     contestedPopupLocId: null
   };
+
+  // Koordinat geografis 16 Area (persentase responsif terhadap app/assets/ui/map_world.webp)
+  const WORLD_AREA_COORDS = {
+    crownfrost_isle:        { x: 56, y: 10, short: "Crownfrost" },
+    hollowbarrow_highlands: { x: 72, y: 19, short: "Hollowbarrow" },
+    hollowfrost_range:      { x: 47, y: 22, short: "Hollowfrost" },
+    frostpine_taiga:        { x: 33, y: 22, short: "Frostpine" },
+    briarfall_marches:      { x: 18, y: 24, short: "Briarfall" },
+    emberwaste:             { x: 82, y: 31, short: "Emberwaste" },
+    elderwake_grove:        { x: 22, y: 36, short: "Elderwake" },
+    wyrmspine_mountains:    { x: 48, y: 38, short: "Wyrmspine" },
+    ashwind_steppe:         { x: 68, y: 40, short: "Ashwind" },
+    rustleaf_weald:         { x: 26, y: 49, short: "Rustleaf" },
+    greymoor_downs:         { x: 38, y: 53, short: "Greymoor" },
+    blackmere_fens:         { x: 67, y: 59, short: "Blackmere" },
+    bonethorn_peninsula:    { x: 14, y: 61, short: "Bonethorn" },
+    saltgrave_coast:        { x: 37, y: 66, short: "Saltgrave" },
+    wraithtide_isles:       { x: 84, y: 71, short: "Wraithtide" },
+    cinderwatch_isles:      { x: 60, y: 81, short: "Cinderwatch" }
+  };
+
+  const WORLD_ROUTES = [
+    ["saltgrave_coast", "greymoor_downs"],
+    ["saltgrave_coast", "bonethorn_peninsula"],
+    ["saltgrave_coast", "blackmere_fens"],
+    ["greymoor_downs", "rustleaf_weald"],
+    ["greymoor_downs", "wyrmspine_mountains"],
+    ["rustleaf_weald", "elderwake_grove"],
+    ["elderwake_grove", "briarfall_marches"],
+    ["elderwake_grove", "frostpine_taiga"],
+    ["frostpine_taiga", "hollowfrost_range"],
+    ["hollowfrost_range", "crownfrost_isle"],
+    ["wyrmspine_mountains", "hollowfrost_range"],
+    ["wyrmspine_mountains", "ashwind_steppe"],
+    ["ashwind_steppe", "blackmere_fens"],
+    ["ashwind_steppe", "emberwaste"],
+    ["ashwind_steppe", "hollowbarrow_highlands"],
+    ["blackmere_fens", "cinderwatch_isles"],
+    ["blackmere_fens", "wraithtide_isles"]
+  ];
+
+  // Titik interaktif pada Peta Kota/Desa bergaya Final Fantasy Tactics (map_city.webp)
+  const CITY_LANDMARKS = [
+    { id: "forge",  x: 24, y: 58, label: "🔥 Bengkel Tempa",     action: "route", target: "forge" },
+    { id: "market", x: 56, y: 50, label: "⚖️ Pasar S&D",         action: "route", target: "market" },
+    { id: "shop",   x: 74, y: 25, label: "🏪 Balai Murid & Inn", action: "route", target: "shop" },
+    { id: "battle", x: 34, y: 19, label: "⚔️ Patroli & Dungeon", action: "route", target: "battle" },
+    { id: "world",  x: 76, y: 76, label: "⚓ Pelabuhan (World)",  action: "world", target: "world" }
+  ];
 
   const SETTLEMENT_ICONS = {
     "Village": "🏘️",
@@ -34,6 +85,126 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function renderVisualMapCard(snap, areas, locsByArea) {
+    const curLoc = snap.location;
+    const Assets = global.BSRPG_ASSETS;
+    const worldUrl = Assets ? Assets.get("ui_map_world") : "";
+    const cityUrl = Assets ? Assets.get("ui_map_city") : "";
+    const activeAreaId = state.selectedAreaId || curLoc?.area_id || "saltgrave_coast";
+    const selArea = areas.find(a => a.area_id === activeAreaId) || areas[0];
+    const selAreaLocs = locsByArea[activeAreaId] || [];
+
+    const layerSwitchHtml = `
+      <div class="sub-tabs-grid" style="margin-bottom:8px">
+        <button class="sub-tab-btn ${state.mapLayer === "world" ? "active" : ""}" data-imap-layer="world">🗺️ 1. World Map (16 Area)</button>
+        <button class="sub-tab-btn ${state.mapLayer === "city" ? "active" : ""}" data-imap-layer="city">🏘️ 2. City / Village Map (Gaya FFT)</button>
+      </div>
+    `;
+
+    if (state.mapLayer === "city") {
+      const cityPinsHtml = CITY_LANDMARKS.map(lm => `
+        <button type="button" class="imap-pin city-node" style="left:${lm.x}%;top:${lm.y}%"
+          data-city-pin-action="${lm.action}" data-city-pin-target="${lm.target}">
+          ${lm.label}
+        </button>
+      `).join("");
+
+      const townChipsHtml = selAreaLocs.map(l => {
+        const isHere = curLoc?.location_id === l.location_id;
+        return isHere
+          ? `<span class="badge ok">📍 ${esc(l.location_name)} (${esc(l.settlement_type)})</span>`
+          : `<button type="button" class="chip-btn" data-travel-loc="${esc(l.location_id)}">🚶 ${esc(l.location_name)}</button>`;
+      }).join("");
+
+      return `
+        <div class="card warm imap-shell">
+          <div class="card-head">
+            <div>
+              <div class="card-title">🏘️ Peta Kota / Desa — ${esc(curLoc?.location_name || "-")}</div>
+              <div class="card-sub">Gaya ilustratif Final Fantasy Tactics • Klik bangunan untuk langsung masuk fitur, atau klik ⚓ Pelabuhan ke World Map.</div>
+            </div>
+            <span class="badge ok">${esc(curLoc?.settlement_type || "Village")}</span>
+          </div>
+          ${layerSwitchHtml}
+          <div class="imap-canvas city-ratio" data-imap="city">
+            ${cityUrl ? `<img src="${cityUrl}" alt="Peta Kota" class="imap-bg" />` : ""}
+            ${cityPinsHtml}
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:10.5px;color:var(--muted)">Kota/Desa di ${esc(selArea?.area_name || "-")}:</span>
+            ${townChipsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // Lapisan 1: World Map (16 Area Pins + SVG Route Lines)
+    const linesSvg = WORLD_ROUTES.map(([aId, bId]) => {
+      const ca = WORLD_AREA_COORDS[aId];
+      const cb = WORLD_AREA_COORDS[bId];
+      if (!ca || !cb) return "";
+      return `<line x1="${ca.x}%" y1="${ca.y}%" x2="${cb.x}%" y2="${cb.y}%" stroke="rgba(251,191,36,0.45)" stroke-width="1.6" stroke-dasharray="4 3" />`;
+    }).join("");
+
+    const pinsHtml = areas.map(a => {
+      const c = WORLD_AREA_COORDS[a.area_id];
+      if (!c) return "";
+      const aLocs = locsByArea[a.area_id] || [];
+      const isHere = curLoc?.area_id === a.area_id;
+      const isSel = activeAreaId === a.area_id;
+      const hasContested = aLocs.some(l => l.is_contested_enclave === "Y");
+      const cls = [
+        "imap-pin",
+        isHere ? "here" : "",
+        isSel && !isHere ? "selected" : "",
+        hasContested ? "contested" : ""
+      ].filter(Boolean).join(" ");
+      return `
+        <button type="button" class="${cls}" style="left:${c.x}%;top:${c.y}%" data-world-pin="${esc(a.area_id)}" title="${esc(a.area_name)} (Tier ${a.tier})">
+          <span class="imap-pin-dot"></span>
+          <span>T${esc(a.tier)} ${esc(c.short)}${hasContested ? " ⚔️" : ""}</span>
+        </button>
+      `;
+    }).join("");
+
+    const selTownBtns = selAreaLocs.map(l => {
+      const isHere = curLoc?.location_id === l.location_id;
+      return isHere
+        ? `<button type="button" class="btn btn-primary btn-xs" data-imap-layer="city">🏘️ Masuk Peta ${esc(l.location_name)}</button>`
+        : `<button type="button" class="btn btn-secondary btn-xs" data-travel-loc="${esc(l.location_id)}">🚶 Ke ${esc(l.location_name)}</button>`;
+    }).join("");
+
+    return `
+      <div class="card imap-shell">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🗺️ Peta Dunia Interaktif (16 Area &amp; 77 Kota)</div>
+            <div class="card-sub">Klik titik Area di peta untuk melihat rute kota, sengketa ⚔️, atau masuk ke Peta Kota/Desa.</div>
+          </div>
+          <span class="badge ok">📍 ${esc(curLoc?.area_name || "-")}</span>
+        </div>
+        ${layerSwitchHtml}
+        <div class="imap-canvas world-ratio" data-imap="world">
+          ${worldUrl ? `<img src="${worldUrl}" alt="Peta Dunia" class="imap-bg" />` : ""}
+          <svg class="imap-routes-svg" aria-hidden="true">${linesSvg}</svg>
+          ${pinsHtml}
+        </div>
+        ${selArea ? `
+          <div class="card warm" style="padding:8px 10px">
+            <div class="card-head">
+              <div>
+                <div class="card-title" style="font-size:12px">📍 ${esc(selArea.area_name)} <span class="badge">Tier ${esc(selArea.tier)} • Lv.${esc(selArea.outdoor_level_range)}</span></div>
+                <div class="card-sub">${esc(selArea.biome_type)} • Faksi: <b>${esc(selArea.faction_name)}</b> • ${selAreaLocs.length} Permukiman</div>
+              </div>
+              <button type="button" class="btn btn-primary btn-xs" data-inspect-area="${esc(selArea.area_id)}">👹 Level &amp; Boss</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${selTownBtns}</div>
+          </div>
+        ` : ""}
+      </div>
+    `;
   }
 
   function renderRoutesSubTab(snap) {
@@ -137,6 +308,8 @@
     }).join("");
 
     return `
+      ${renderVisualMapCard(snap, areas, locsByArea)}
+
       <div class="card teal" style="margin-bottom:8px">
         <div class="card-head">
           <div>
@@ -443,10 +616,43 @@
       };
     });
 
+    container.querySelectorAll("[data-imap-layer]").forEach(btn => {
+      btn.onclick = () => {
+        if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+        state.mapLayer = btn.getAttribute("data-imap-layer");
+        render(container, Bridge.getSnapshot(), callbacks);
+      };
+    });
+
+    container.querySelectorAll("[data-world-pin]").forEach(btn => {
+      btn.onclick = () => {
+        if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+        const areaId = btn.getAttribute("data-world-pin");
+        state.selectedAreaId = areaId;
+        render(container, Bridge.getSnapshot(), callbacks);
+      };
+    });
+
+    container.querySelectorAll("[data-city-pin-action]").forEach(btn => {
+      btn.onclick = () => {
+        if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+        const act = btn.getAttribute("data-city-pin-action");
+        const tgt = btn.getAttribute("data-city-pin-target");
+        if (act === "world") {
+          state.mapLayer = "world";
+          render(container, Bridge.getSnapshot(), callbacks);
+        } else if (act === "route") {
+          goToRoute(tgt);
+        }
+      };
+    });
+
     container.querySelectorAll("[data-travel-loc]").forEach(btn => {
       btn.onclick = async () => {
         const res = await Bridge.travelToLocation(btn.getAttribute("data-travel-loc"));
         if (!res.ok) return showToast(`⚠ ${res.reason}`);
+        if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+        state.selectedAreaId = res.loc.area_id;
         showToast(`🚶 Tiba di ${res.loc.location_name} (${res.loc.area_name}, Tier ${res.loc.tier})!`);
       };
     });
