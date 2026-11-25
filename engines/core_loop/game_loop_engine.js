@@ -15,7 +15,6 @@
  * 4. Narrative Moral Issue Engine (engines/issue_engine/issue_engine.js):
  *    - 36 Templat Berslot + Twist Deterministik per Seed Save, Conscience Alignment, & Loyalitas Murid (±1)
  */
-
 import {
   createSkillEngine,
   getTierForLevel,
@@ -197,8 +196,83 @@ export class UnifiedBetaGameLoop {
         activeIssue: null,
         resolvedHistory: [],
         eventLogs: []
+      },
+      huntState: {
+        rngCounter: 1,
+        regionPatrolHours: {},
+        areaPatrolHours: {},
+        defeatedMiniBossIds: [],
+        bossCooldownUntilDay: {}
       }
     };
+  }
+
+  _ensureHuntState() {
+    if (!this.state.huntState || typeof this.state.huntState !== "object") {
+      this.state.huntState = {
+        rngCounter: 1,
+        regionPatrolHours: {},
+        areaPatrolHours: {},
+        defeatedMiniBossIds: [],
+        bossCooldownUntilDay: {}
+      };
+    }
+    const hs = this.state.huntState;
+    if (!Number.isFinite(hs.rngCounter)) hs.rngCounter = 1;
+    if (!hs.regionPatrolHours) hs.regionPatrolHours = {};
+    if (!hs.areaPatrolHours) hs.areaPatrolHours = {};
+    if (!Array.isArray(hs.defeatedMiniBossIds)) hs.defeatedMiniBossIds = [];
+    if (!hs.bossCooldownUntilDay) hs.bossCooldownUntilDay = {};
+    return hs;
+  }
+
+  _nextHuntRng() {
+    const hs = this._ensureHuntState();
+    let h = 2166136261 >>> 0;
+    const str = `${this.state.saveSeed || "BSRPG"}:${this.state.calendar.day}:${hs.rngCounter++}`;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return ((h >>> 0) % 100000) / 100000;
+  }
+
+  _rollMonsterDrops(monster, rollsCount = 1, effectiveDropMult = 1.0) {
+    const materialsLooted = {};
+    const trophiesFound = [];
+    if (!monster || rollsCount <= 0) return { materialsLooted, trophiesFound };
+
+    const mult = Math.max(0.05, Math.min(1.6, effectiveDropMult || 1.0));
+    const drops = Array.isArray(monster.drops) ? monster.drops : [];
+    const invMats = this.state.inventory.materials || (this.state.inventory.materials = {});
+
+    for (let r = 0; r < rollsCount; r++) {
+      for (const entry of drops) {
+        const [itemId, baseChance, minQ = 1, maxQ = 1] = entry;
+        if (!itemId) continue;
+        const chance = Math.min(1.0, Number(baseChance || 0) * mult);
+        if (this._nextHuntRng() <= chance) {
+          const span = Math.max(0, Number(maxQ) - Number(minQ));
+          const qty = Number(minQ) + (span > 0 ? Math.floor(this._nextHuntRng() * (span + 1)) : 0);
+          if (qty <= 0) continue;
+          if (String(itemId).startsWith("MAT-")) {
+            invMats[itemId] = Math.min(9999, (invMats[itemId] || 0) + qty);
+            materialsLooted[itemId] = (materialsLooted[itemId] || 0) + qty;
+          } else if (trophiesFound.length < 6) {
+            trophiesFound.push({ name: String(itemId), qty });
+          }
+        }
+      }
+
+      if (monster.uniq && monster.uniq.name) {
+        const uChance = Math.min(0.5, Number(monster.uniq.ch || 0) * mult);
+        if (this._nextHuntRng() <= uChance && trophiesFound.length < 6) {
+          trophiesFound.push({ name: `✦ ${monster.uniq.name}`, qty: 1, isUnique: true });
+        }
+      }
+    }
+
+    return { materialsLooted, trophiesFound };
   }
 
   _log(msg) {
@@ -254,10 +328,20 @@ export class UnifiedBetaGameLoop {
    * 1. CORE IDLE TICK (Opsi A: mendukung live tick 0.1 jam maupun Offline Cap 8 jam CD-7.01)
    * Patokan Kalender WD (CD-1.06): 60 jam idle = 1 tahun (360 hari) -> 1 jam idle = 6 hari in-game.
    */
-  advanceIdleHours({ hours = 4, mode = "Battle", targetMonster = null, autoAlternateBars = false }) {
+  advanceIdleHours({
+    hours = 4,
+    mode = "Battle",
+    targetMonster = null,
+    levelPool = null,
+    regionMiniBoss = null,
+    areaId = null,
+    regionId = null,
+    autoAlternateBars = false
+  }) {
     const effectiveHours = Math.min(8, Math.max(0.1, hours)); // Offline cap 8 jam (CD-7.01)
     const p = this.state.player;
     const eq = this.state.equipment;
+    const hs = this._ensureHuntState();
     const subStats = this.skillEngine.computeSubStats(p.stats, p.focusSubStats).byId;
 
     // Cek apakah pemain lumpuh karena Kutukan Gate (CD-7.01)
@@ -275,8 +359,20 @@ export class UnifiedBetaGameLoop {
       };
     }
 
-    // Monster default sesuai level/tier
-    const defaultMonster = targetMonster || {
+    // Jika mode Konsep 2 (levelPool tersedia), acak monster representatif & rentetan encounter dari kolam level tersebut
+    const validPool = Array.isArray(levelPool) && levelPool.length > 0 ? levelPool : null;
+    const regularsInPool = validPool ? validPool.filter(m => m.type === "Reguler") : [];
+    const specialsInPool = validPool ? validPool.filter(m => m.type === "Reguler Khusus") : [];
+
+    const pickFromLevelPool = () => {
+      if (!validPool) return null;
+      const rollSpecial = specialsInPool.length > 0 && this._nextHuntRng() < 0.10;
+      const bucket = rollSpecial ? specialsInPool : (regularsInPool.length > 0 ? regularsInPool : validPool);
+      const idx = Math.floor(this._nextHuntRng() * bucket.length);
+      return bucket[Math.min(bucket.length - 1, idx)];
+    };
+
+    const defaultMonster = (validPool ? pickFromLevelPool() : targetMonster) || {
       name: `Tier-${p.unlockedGateTier} Patrol Brute`,
       lvl: p.level,
       role: "Brute",
@@ -294,9 +390,13 @@ export class UnifiedBetaGameLoop {
       loadout: p.loadout,
       smithConfig: {
         tiers: p.smithTiers,
+        firstTakenClass: p.firstTakenClass,
+        activeDestinyId: p.activeDestinyId,
         selectedPerkT3: p.selectedPerkT3,
         selectedPerkT5: p.selectedPerkT5
       },
+      skillMasteryState: p.skillMasteryState || null,
+      activeDestinyId: p.activeDestinyId || null,
       weapon: eq.weapon,
       armorClass: eq.armorClass,
       armorElement: eq.armorElement,
@@ -326,9 +426,9 @@ export class UnifiedBetaGameLoop {
     let smithXpGained = 0;
     let bronzeEarned = 0;
     let levelsGained = 0;
+    const battleHoursActive = autoAlternateBars ? activeHours * 0.5 : (mode === "Battle" ? activeHours : 0);
 
     if (autoAlternateBars) {
-      // Simulasi sesi seimbang (50% waktu Battle, 50% waktu Smith + sinergi muatan buff silang & kontribusi 5 murid di bengkel)
       const hBattle = activeHours * 0.5;
       const hSmith = activeHours * 0.5;
       const workshopSynergyMult = 1.22;
@@ -346,6 +446,105 @@ export class UnifiedBetaGameLoop {
       p.xp.crossBuffBattleToSmithPct = 0;
       const bargainMult = 1 + (subStats.cha_trade_bargain?.value || 0) / 100;
       bronzeEarned += Math.round(activeHours * 180 * p.unlockedGateTier * bargainMult);
+    }
+
+    // Roll Pertemuan Kolam Monster per Level + Drop Material ke Tas + Peluang Sergapan Mini Boss (8%/jam)
+    const encounteredMonsters = [];
+    const materialsLooted = {};
+    const trophiesFound = [];
+    let miniBossAmbush = null;
+
+    const mergeDrops = (dropRes) => {
+      for (const [mId, q] of Object.entries(dropRes.materialsLooted || {})) {
+        materialsLooted[mId] = (materialsLooted[mId] || 0) + q;
+      }
+      for (const tr of (dropRes.trophiesFound || [])) {
+        if (trophiesFound.length < 8) trophiesFound.push(tr);
+      }
+    };
+
+    if (battleHoursActive > 0) {
+      if (regionId) {
+        hs.regionPatrolHours[regionId] = +((hs.regionPatrolHours[regionId] || 0) + battleHoursActive).toFixed(2);
+      }
+      if (areaId) {
+        hs.areaPatrolHours[areaId] = +((hs.areaPatrolHours[areaId] || 0) + battleHoursActive).toFixed(2);
+      }
+
+      const encounterRolls = Math.max(1, Math.round(battleHoursActive * 3));
+      if (validPool) {
+        const countById = {};
+        for (let i = 0; i < encounterRolls; i++) {
+          const m = pickFromLevelPool();
+          if (!m) continue;
+          if (!countById[m.id]) {
+            countById[m.id] = { id: m.id, name: m.name, type: m.type, lvl: m.lvl, count: 0 };
+          }
+          countById[m.id].count += 1;
+          mergeDrops(this._rollMonsterDrops(m, 1, antiFarm.effectiveDropMult));
+        }
+        encounteredMonsters.push(...Object.values(countById));
+      } else if (targetMonster && Array.isArray(targetMonster.drops)) {
+        encounteredMonsters.push({
+          id: targetMonster.id || "target",
+          name: targetMonster.name,
+          type: targetMonster.type || "Reguler",
+          lvl: targetMonster.lvl,
+          count: encounterRolls
+        });
+        mergeDrops(this._rollMonsterDrops(targetMonster, encounterRolls, antiFarm.effectiveDropMult));
+      }
+
+      // Peluang kecil Mini Boss menyergap di Mode Idle (~8% per jam efektif Battle, hanya jika belum kena cooldown)
+      if (regionMiniBoss && regionMiniBoss.id) {
+        const cdUntil = hs.bossCooldownUntilDay[regionMiniBoss.id] || 0;
+        if (this.state.calendar.day >= cdUntil) {
+          const ambushProb = 1 - Math.pow(1 - 0.08, battleHoursActive);
+          if (this._nextHuntRng() < ambushProb) {
+            const mbSim = this.skillEngine.simulateBattle({
+              level: p.level,
+              stats: p.stats,
+              focusSubStats: p.focusSubStats,
+              selectedUtilities: p.selectedUtilities,
+              loadout: p.loadout,
+              smithConfig: {
+                tiers: p.smithTiers,
+                firstTakenClass: p.firstTakenClass,
+                activeDestinyId: p.activeDestinyId,
+                selectedPerkT3: p.selectedPerkT3,
+                selectedPerkT5: p.selectedPerkT5
+              },
+              skillMasteryState: p.skillMasteryState || null,
+              activeDestinyId: p.activeDestinyId || null,
+              weapon: eq.weapon,
+              armorClass: eq.armorClass,
+              armorElement: eq.armorElement,
+              armorSlotsSameElement: eq.armorSlotsSameElement,
+              apprenticeSeed: comp?.seed || null,
+              apprenticeSkill: comp?.effectiveSkill || 50,
+              apprenticeTrials: comp?.passedTrials || 0,
+              wdEnemy: regionMiniBoss,
+              maxSeconds: 90
+            });
+            const mbWon = mbSim.metrics.killsPerHpBar >= 1.0;
+            if (mbWon) {
+              const bonusBr = Math.round(220 * p.unlockedGateTier);
+              const bonusXp = Math.round(hourlyCap * 0.35);
+              bronzeEarned += bonusBr;
+              battleXpGained += bonusXp;
+              mergeDrops(this._rollMonsterDrops(regionMiniBoss, 1, Math.max(1.0, mbSim.antiFarmSummary.effectiveDropMult)));
+              if (!hs.defeatedMiniBossIds.includes(regionMiniBoss.id)) {
+                hs.defeatedMiniBossIds.push(regionMiniBoss.id);
+              }
+              this._log(`⚡ SERGAPAN IDLE! ${regionMiniBoss.name} (Lv.${regionMiniBoss.lvl}) muncul & berhasil dikalahkan (+${formatCurrency(bonusBr)})!`);
+              miniBossAmbush = { triggered: true, won: true, name: regionMiniBoss.name, lvl: regionMiniBoss.lvl, bonusBr, bonusXp };
+            } else {
+              this._log(`⚡ SERGAPAN IDLE! ${regionMiniBoss.name} (Lv.${regionMiniBoss.lvl}) menyergap namun karakter terpukul mundur (${mbSim.metrics.killsPerHpBar}x).`);
+              miniBossAmbush = { triggered: true, won: false, name: regionMiniBoss.name, lvl: regionMiniBoss.lvl, killsPerHpBar: mbSim.metrics.killsPerHpBar };
+            }
+          }
+        }
+      }
     }
 
     p.xp.battle += battleXpGained;
@@ -386,7 +585,6 @@ export class UnifiedBetaGameLoop {
         p.unspentStatPoints += 2;
         levelsGained += 1;
       } else {
-        // Jika salah satu bar sudah penuh tapi satunya belum, kelebihan bar yang penuh mengisi muatan buff silang (CD-1.05)
         if (p.xp.battle > quota) {
           const overflow = p.xp.battle - quota;
           p.xp.battle = quota;
@@ -449,7 +647,168 @@ export class UnifiedBetaGameLoop {
       newLevel: p.level,
       bronzeEarned,
       branchIncomeBr,
-      combatMetrics: sim.metrics
+      combatMetrics: sim.metrics,
+      encounteredMonsters,
+      materialsLooted,
+      trophiesFound,
+      miniBossAmbush
+    };
+  }
+
+  /**
+   * 1b. PANGGIL MISI BURUAN MINI BOSS ATAU MISI EKSPEDISI BOSS AREA (DENGAN COOLDOWN & DUEL HP OPSI 3)
+   */
+  challengeBossMission({ bossMonster, areaId = null, regionId = null, requiredHighMiniBossId = null }) {
+    if (!bossMonster || !bossMonster.id) {
+      return { ok: false, reason: "Target Boss tidak valid." };
+    }
+    const p = this.state.player;
+    const eq = this.state.equipment;
+    const cal = this.state.calendar;
+    const hs = this._ensureHuntState();
+    const isAreaBoss = bossMonster.type === "Boss";
+
+    // Cek Kutukan Gate lumpuh
+    const subStats = this.skillEngine.computeSubStats(p.stats, p.focusSubStats).byId;
+    const curseStatus = this.skillEngine.computeGateCurseAndRest({
+      level: p.level,
+      gateTier: p.curses.highestGateTierCursed,
+      activeCurseStacks: p.curses.activeStacks,
+      atOwnWorkshopOrBranch: true,
+      conCurseResistPct: subStats.con_curse_resist?.value || 0
+    });
+    if (curseStatus.isIncapacitated) {
+      return { ok: false, reason: "Karakter lumpuh oleh Kutukan Gate! Lakukan Long Rest terlebih dahulu." };
+    }
+
+    // Cek Cooldown Anti-Farming
+    const cdUntil = hs.bossCooldownUntilDay[bossMonster.id] || 0;
+    if (cal.day < cdUntil) {
+      return {
+        ok: false,
+        reason: `${bossMonster.name} sedang Cooldown Respawn ${cdUntil - cal.day} hari kalender lagi (selesai di Hari ${cdUntil}).`
+      };
+    }
+
+    // Cek Syarat Misi Panggil
+    if (isAreaBoss) {
+      const areaHours = hs.areaPatrolHours[areaId] || 0;
+      if (areaHours < 3.0) {
+        return {
+          ok: false,
+          reason: `Syarat Misi Ekspedisi Boss belum terpenuhi: butuh Jejak Patroli Area 3.0 jam (saat ini ${areaHours.toFixed(1)} jam).`
+        };
+      }
+      if (requiredHighMiniBossId && !hs.defeatedMiniBossIds.includes(requiredHighMiniBossId)) {
+        return {
+          ok: false,
+          reason: "Syarat Misi Ekspedisi Boss belum terpenuhi: kalahkan Mini Boss wilayah Tinggi di area ini terlebih dahulu!"
+        };
+      }
+    } else {
+      const regHours = hs.regionPatrolHours[regionId] || 0;
+      if (regHours < 2.0) {
+        return {
+          ok: false,
+          reason: `Syarat Misi Buruan Wilayah belum terpenuhi: butuh Jejak Patroli Wilayah 2.0 jam (saat ini ${regHours.toFixed(1)} jam).`
+        };
+      }
+    }
+
+    if (p.stamina.current < 15) {
+      return { ok: false, reason: "Stamina tidak cukup untuk Misi Boss (butuh minimal 15 STM)." };
+    }
+    p.stamina.current = +(p.stamina.current - 15).toFixed(1);
+
+    const comp = this.getActiveCompanion();
+    const sim = this.skillEngine.simulateBattle({
+      level: p.level,
+      stats: p.stats,
+      focusSubStats: p.focusSubStats,
+      selectedUtilities: p.selectedUtilities,
+      loadout: p.loadout,
+      smithConfig: {
+        tiers: p.smithTiers,
+        firstTakenClass: p.firstTakenClass,
+        activeDestinyId: p.activeDestinyId,
+        selectedPerkT3: p.selectedPerkT3,
+        selectedPerkT5: p.selectedPerkT5
+      },
+      skillMasteryState: p.skillMasteryState || null,
+      activeDestinyId: p.activeDestinyId || null,
+      weapon: eq.weapon,
+      armorClass: eq.armorClass,
+      armorElement: eq.armorElement,
+      armorSlotsSameElement: eq.armorSlotsSameElement,
+      apprenticeSeed: comp?.seed || null,
+      apprenticeSkill: comp?.effectiveSkill || 55,
+      apprenticeTrials: comp?.passedTrials || 0,
+      wdEnemy: bossMonster,
+      maxSeconds: 120
+    });
+
+    const kph = sim.metrics.killsPerHpBar;
+    const won = kph >= 1.0;
+    const playerMaxHp = sim.playerSummary.maxPlayerHp;
+    const bossMaxHp = sim.monsterSummary.hp;
+
+    // Majukan waktu misi 1 hari kalender (~0.17 jam)
+    cal.totalIdleHours = +(cal.totalIdleHours + 1 / 6).toFixed(2);
+    cal.day = 1 + Math.floor(cal.totalIdleHours * 6);
+    cal.year = 1 + Math.floor((cal.day - 1) / 360);
+    cal.season = SEASONS[Math.floor(((cal.day - 1) % 360) / 90)];
+    cal.nowMs += 600 * 1000;
+    this.sndEngine.worldState.day = cal.day;
+    this.sndEngine.worldState.season = cal.season;
+
+    let playerEndHp = 0;
+    let bossEndHp = 0;
+    let bronzeReward = 0;
+    let xpReward = 0;
+    let drops = { materialsLooted: {}, trophiesFound: [] };
+    const cooldownDays = won ? (isAreaBoss ? 18 : 6) : (isAreaBoss ? 6 : 3);
+    const cooldownUntilDay = cal.day + cooldownDays;
+    hs.bossCooldownUntilDay[bossMonster.id] = cooldownUntilDay;
+
+    if (won) {
+      bossEndHp = 0;
+      playerEndHp = Math.max(1, Math.round(playerMaxHp * (1 - 1 / Math.max(1.04, kph))));
+      const tierMult = Math.max(1, Math.ceil(bossMonster.lvl / 30));
+      bronzeReward = Math.round((isAreaBoss ? 750 : 300) * tierMult);
+      xpReward = Math.round(getHourlyXpCapForLevel(p.level) * (isAreaBoss ? 0.9 : 0.45) * sim.antiFarmSummary.xpMult);
+      p.bronze += bronzeReward;
+      p.xp.battle += xpReward;
+      drops = this._rollMonsterDrops(bossMonster, 1, Math.max(1.0, sim.antiFarmSummary.effectiveDropMult));
+      if (!isAreaBoss && !hs.defeatedMiniBossIds.includes(bossMonster.id)) {
+        hs.defeatedMiniBossIds.push(bossMonster.id);
+      }
+      this._log(`🏆 MISI BOSS TUNTAS! Mengalahkan ${bossMonster.name} (Lv.${bossMonster.lvl}) — Sisa HP ${playerEndHp}/${playerMaxHp}, +${formatCurrency(bronzeReward)}, Cooldown ${cooldownDays} hari.`);
+    } else {
+      playerEndHp = 0;
+      bossEndHp = Math.max(1, Math.round(bossMaxHp * (1 - Math.min(0.98, kph))));
+      this._log(`☠ MISI BOSS GAGAL! Tumbang melawan ${bossMonster.name} (Sisa HP Boss ${bossEndHp}/${bossMaxHp}). Cooldown pemulihan ${cooldownDays} hari.`);
+    }
+
+    return {
+      ok: true,
+      won,
+      bossName: bossMonster.name,
+      bossType: bossMonster.type,
+      bossLvl: bossMonster.lvl,
+      duelHp: {
+        playerMaxHp,
+        playerEndHp,
+        bossMaxHp,
+        bossEndHp
+      },
+      bronzeReward,
+      xpReward,
+      materialsLooted: drops.materialsLooted,
+      trophiesFound: drops.trophiesFound,
+      cooldownDays,
+      cooldownUntilDay,
+      combatMetrics: sim.metrics,
+      combatLogSample: (sim.combatLogSample || []).slice(0, 10)
     };
   }
 
@@ -544,7 +903,13 @@ export class UnifiedBetaGameLoop {
       maxSeconds: 120
     });
 
-    const won = forceWin || sim.metrics.killsPerHpBar >= 1.0;
+    const kph = sim.metrics.killsPerHpBar;
+    const won = forceWin || kph >= 1.0;
+    const playerMaxHp = sim.playerSummary.maxPlayerHp;
+    const bossMaxHp = sim.monsterSummary.hp;
+    const duelHp = won
+      ? { playerMaxHp, playerEndHp: Math.max(1, Math.round(playerMaxHp * (1 - 1 / Math.max(1.04, kph)))), bossMaxHp, bossEndHp: 0 }
+      : { playerMaxHp, playerEndHp: 0, bossMaxHp, bossEndHp: Math.max(1, Math.round(bossMaxHp * (1 - Math.min(0.98, kph)))) };
 
     if (!won) {
       // Kalah Gate = +1 Kutukan Gate (-4 * Tier_Gate per stat, CD-7.01)
@@ -559,7 +924,7 @@ export class UnifiedBetaGameLoop {
         conCurseResistPct: subStats.con_curse_resist?.value || 0
       });
       this._log(`Kalah melawan ${gateBoss.name}! Terkena Kutukan Gate Tier ${gateTier} (${curseInfo.maxStatDebuffPerCurse} stat, total debuff ${curseInfo.currentTotalDebuff}/${curseInfo.incapacitateThreshold}).`);
-      return { won: false, curseInfo, combatMetrics: sim.metrics };
+      return { won: false, bossName: gateBoss.name, bossLvl: gateBossLevel, duelHp, curseInfo, combatMetrics: sim.metrics, combatLogSample: (sim.combatLogSample || []).slice(0, 10) };
     }
 
     // Menang Gate: Buka Tier berikutnya (hingga Tier 5) & +1 Poin Smith Class (CD-3.01: total 5 poin di Tier 5)
@@ -575,10 +940,14 @@ export class UnifiedBetaGameLoop {
     this._log(`LULUS GATE TIER ${gateTier} (${gateBoss.name})! Cap Stat naik ke ${p.unlockedGateTier * 30}, Gelar Smith Class: ${mastery.singleWordClassName}.`);
     return {
       won: true,
+      bossName: gateBoss.name,
+      bossLvl: gateBossLevel,
+      duelHp,
       newUnlockedGateTier: p.unlockedGateTier,
       newStatCap: p.unlockedGateTier * 30,
       smithClass: mastery.singleWordClassName,
-      combatMetrics: sim.metrics
+      combatMetrics: sim.metrics,
+      combatLogSample: (sim.combatLogSample || []).slice(0, 10)
     };
   }
 

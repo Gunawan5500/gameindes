@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Battle-Smith RPG — Offline App (Fase 4)</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Toast Notifikasi Global (Aktif di Window Awal maupun Gameplay) -->
+  <div id="toast" class="hidden" role="status"></div>
+
+  <!-- WINDOW AWAL (Title Screen & Pembuatan Karakter — sebelum masuk Gameplay) -->
+  <section id="window-start" class="thin-scroll"></section>
+
+  <div id="app-shell" class="hidden">
+
+    <!-- ================================================================= -->
+    <!-- 1. TOP BAR: ATAS KIRI (PEMAIN) | TENGAH (DUNIA) | ATAS KANAN      -->
+    <!-- ================================================================= -->
+    <header class="top-bar">
+      <!-- Atas Kiri: Icon + Frame Kutukan, Nama, Kelas Smith, & Stamina (Opsi 3: HP tampil khusus saat Duel Boss) -->
+      <section id="hud-zone-tl" class="hud-panel player-card scale-tl">
+        <button id="btn-avatar" class="avatar-frame" title="Buka Karakter & Stat [I]">
+          <img id="hud-avatar-img" class="avatar-img" alt="Hero" />
+          <span id="hud-lv-badge" class="avatar-lv-badge">1</span>
+          <span id="hud-curse-badge" class="avatar-curse-badge hidden">☠ 0</span>
+        </button>
+        <div class="player-info">
+          <div class="player-head-row">
+            <span id="hud-player-name" class="player-name">Alden</span>
+            <span id="hud-smith-class" class="smith-chip">Bladesmith</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-lbl stm">STM</span>
+            <div class="bar-track"><div id="hud-stm-fill" class="bar-fill stm" style="width:100%"></div></div>
+            <span id="hud-stm-val" class="bar-val">115/115</span>
+          </div>
+          <div id="hud-sub-meta" style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            Lv.1 • Cap Stat 30 • Duel HP di Misi Boss
+          </div>
+        </div>
+      </section>
+
+      <!-- Strip Tengah: Kas, Kalender & Pengaturan -->
+      <section class="hud-panel world-strip">
+        <div id="hud-bronze" class="bronze-txt">50s 0br</div>
+        <div id="hud-calendar" class="cal-txt">Thn 1 • Hari 1 (Spring)</div>
+        <div class="world-strip-actions">
+          <button id="btn-open-settings" class="chip-btn" title="Ukuran UI Dinamis & Save">⚙️ UI &amp; Save</button>
+          <button id="btn-toggle-portrait" class="chip-btn teal" title="Uji tampilan HP Oppo A54 Portrait">📱 HP Portrait</button>
+        </div>
+      </section>
+
+      <!-- Atas Kanan: Map, Quest Bar, Companion Readiness/STM -->
+      <section id="hud-zone-tr" class="hud-panel top-right-card scale-tr">
+        <div class="right-head-row">
+          <button id="btn-hud-map" class="map-btn" title="Buka Peta Dunia">🗺️ Tidewrack Village</button>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button id="btn-hud-quest" class="chip-btn warm">📜 Misi</button>
+            <button id="btn-hud-settings-sm" class="chip-btn" title="Ukuran UI & Save">⚙️</button>
+          </div>
+        </div>
+        <div class="comp-row">
+          <span id="hud-comp-name" class="comp-name">⚔️ Kael</span>
+          <div class="bar-track" title="Stamina / Kesiapan Companion"><div id="hud-comp-stm-fill" class="bar-fill stm" style="width:100%"></div></div>
+        </div>
+      </section>
+    </header>
+
+    <!-- Strip Ringkas Khusus Mode HP Portrait (Kas, Kalender & Kembali ke Laptop) -->
+    <div class="portrait-subbar">
+      <span id="hud-bronze-sm" class="bronze-txt" style="font-size:11.5px">50s 0br</span>
+      <span id="hud-calendar-sm" class="cal-txt">Thn 1 • Hari 1 (Spring)</span>
+      <button id="btn-exit-portrait" class="chip-btn teal hidden" style="padding:2px 6px;font-size:10px">💻 Laptop</button>
+    </div>
+
+    <!-- Quest Drawer Ringkas (Bisa Dilipat) -->
+    <aside id="quest-drawer" class="hud-panel quest-drawer hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="color:var(--amber-hi);font-size:12px">📜 Ringkasan Misi &amp; Gate</strong>
+        <button id="btn-close-quest" class="chip-btn">✕</button>
+      </div>
+      <div id="quest-drawer-body" style="font-size:11.5px;color:#cbd5e1;display:flex;flex-direction:column;gap:5px"></div>
+    </aside>
+
+    <!-- ================================================================= -->
+    <!-- 2. PANGGUNG TENGAH: BAR ISTIRAHAT GLOBAL (POIN 6) + NAVIGASI TAB  -->
+    <!-- ================================================================= -->
+    <main class="center-stage">
+      <!-- Poin 6: Bar Global di Atas Semua Tab untuk Long Rest & Alokasi Poin Stat -->
+      <div id="global-action-bar" class="global-action-bar">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <button id="btn-global-rest" class="chip-btn teal" title="Pulihkan Stamina 100% & bersihkan Kutukan Gate dari tab mana pun">
+            🏕️ Istirahat / Long Rest (STM 100%)
+          </button>
+          <button id="btn-global-stat" class="chip-btn warm hidden" title="Alokasikan poin Stat yang belum terpakai">
+            ⬆ +0 Poin Stat!
+          </button>
+        </div>
+        <span id="global-loc-hint" class="global-loc-hint">📍 Tidewrack Village</span>
+      </div>
+
+      <nav id="mw-nav" class="mw-nav thin-scroll" aria-label="Menu Utama">
+        <button class="mw-tab active" data-route="battle">⚔️ Misi &amp; Idle</button>
+        <button class="mw-tab" data-route="class">🌳 Class &amp; Skill</button>
+        <button class="mw-tab" data-route="forge">🔥 Bengkel</button>
+        <button class="mw-tab" data-route="market">⚖️ Pasar S&amp;D</button>
+        <button class="mw-tab" data-route="shop">🏪 Cabang &amp; Murid</button>
+        <button class="mw-tab" data-route="map">🗺️ Peta Dunia</button>
+        <button class="mw-tab" data-route="issue" id="tab-issue-btn">📜 Isu Moral</button>
+      </nav>
+
+      <section id="stage-body" class="stage-body thin-scroll"></section>
+    </main>
+
+    <!-- ================================================================= -->
+    <!-- 3. BOTTOM BAR: BAWAH KIRI (ITEM [I]) + BAWAH TENGAH (SKILL & EXP) -->
+    <!-- ================================================================= -->
+    <footer class="bottom-bar">
+      <button id="btn-item-trigger" class="item-trigger-btn" title="Buka Karakter & Tas Item [I]">
+        <span style="font-size:16px;line-height:1">🎒</span>
+        <span>Item <small style="opacity:0.8;font-family:monospace">[I]</small></span>
+      </button>
+
+      <div id="hud-zone-bm" class="bottom-middle-dock scale-bm">
+        <div id="hud-skill-bar" class="skill-loadout-strip thin-scroll" title="Opsi A: Skill Loadout Otomatis (% Bonus Berbasis Stat)"></div>
+
+        <div class="xp-dock">
+          <div class="bar-row">
+            <span class="bar-lbl xpb">BTL</span>
+            <div class="bar-track"><div id="hud-xpb-fill" class="bar-fill xpb" style="width:0%"></div></div>
+            <span id="hud-xpb-val" class="bar-val">0/60</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-lbl xps">SMT</span>
+            <div class="bar-track"><div id="hud-xps-fill" class="bar-fill xps" style="width:0%"></div></div>
+            <span id="hud-xps-val" class="bar-val">0/60</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 1: KARAKTER & TAS ITEM TERPADU (Shortcut [I] / Bawah Kiri)    -->
+  <!-- =================================================================== -->
+  <div id="modal-item" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <strong style="color:var(--sky);font-size:14px">🎒 Karakter &amp; Tas Item Terpadu</strong>
+          <span id="item-modal-meta" style="font-size:11px;color:var(--muted);margin-left:8px"></span>
+        </div>
+        <button id="btn-close-item" class="chip-btn">✕ Tutup [Esc]</button>
+      </div>
+      <div id="item-modal-body" class="char-item-grid"></div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 2: PENGATURAN UKURAN UI DINAMIS & SAVE/LOAD (< 15 KB)         -->
+  <!-- =================================================================== -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:560px">
+      <div class="modal-head">
+        <strong style="color:var(--amber-hi);font-size:14px">⚙️ Ukuran UI Dinamis &amp; Save Offline</strong>
+        <button id="btn-close-settings" class="chip-btn">✕ Tutup</button>
+      </div>
+      <div style="padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:12px" class="thin-scroll">
+        <!-- Skala HUD Dinamis -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Ukuran HUD Dinamis (Tersimpan Offline)</div>
+              <div class="card-sub">Menggunakan skala GPU ringan agar bebas lag di Oppo A54.</div>
+            </div>
+            <button id="btn-reset-scale" class="chip-btn">↺ Reset 100%</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span>Semua HUD</span>
+              <input id="set-scale-global" type="range" min="75" max="125" step="5" value="100" style="flex:1" />
+              <strong id="lbl-scale-global" style="width:40px;text-align:right">100%</strong>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span>Atas Kiri (Pemain)</span>
+              <input id="set-scale-tl" type="range" min="75" max="125" step="5" value="100" style="flex:1" />
+              <strong id="lbl-scale-tl" style="width:40px;text-align:right">100%</strong>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span>Atas Kanan (Map/Comp)</span>
+              <input id="set-scale-tr" type="range" min="75" max="125" step="5" value="100" style="flex:1" />
+              <strong id="lbl-scale-tr" style="width:40px;text-align:right">100%</strong>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span>Bawah Tengah (Skill/XP)</span>
+              <input id="set-scale-bm" type="range" min="75" max="125" step="5" value="100" style="flex:1" />
+              <strong id="lbl-scale-bm" style="width:40px;text-align:right">100%</strong>
+            </label>
+          </div>
+        </div>
+
+        <!-- Fase 4: Audio & Efek Suara Offline (.ogg) -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">🔊 Audio &amp; Efek Suara (SFX .ogg Offline)</div>
+              <div class="card-sub">Tersimpan di localStorage, aman terhadap kebijakan autoplay browser.</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button id="btn-audio-mute" class="chip-btn teal">🔊 Aktif</button>
+              <button id="btn-audio-test" class="chip-btn warm">🔨 Uji SFX</button>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px">
+            <span>Volume SFX</span>
+            <input id="set-audio-vol" type="range" min="0" max="100" step="5" value="65" style="flex:1" />
+            <strong id="lbl-audio-vol" style="width:40px;text-align:right">65%</strong>
+          </label>
+        </div>
+
+        <!-- Sparse Save / Load (< 15 KB) & Menu Awal -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Cadangan Save Sparse JSON</div>
+              <div class="card-sub">Ukuran saat ini: <b id="save-size-label" style="color:var(--teal-hi)">0 KB</b> (Target &lt; 15 KB)</div>
+            </div>
+            <button id="btn-reset-save" class="chip-btn danger">🗑️ Hapus Save</button>
+          </div>
+          <textarea id="save-json-box" rows="4" class="thin-scroll" style="width:100%;background:#0a1017;border:1px solid var(--border);border-radius:8px;padding:7px;font-family:monospace;font-size:10.5px;resize:vertical" placeholder="Klik Ekspor untuk melihat teks Save, atau tempel JSON Save lalu klik Impor..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="btn-export-save" class="btn btn-secondary">📤 Ekspor Save</button>
+              <button id="btn-import-save" class="btn btn-primary">📥 Impor Save</button>
+            </div>
+            <button id="btn-go-start-window" class="btn btn-secondary">🏠 Menu Awal / Buat Baru</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 3: LONG REST & PEMULIHAN KUTUKAN GLOBAL (POIN 6 — CD-7.03)    -->
+  <!-- =================================================================== -->
+  <div id="modal-rest" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:520px">
+      <div class="modal-head">
+        <strong style="color:var(--teal-hi);font-size:14px">🏕️ Istirahat Panjang (Long Rest &amp; Pemulihan)</strong>
+        <button id="btn-close-rest" class="chip-btn">✕ Tutup [Esc]</button>
+      </div>
+      <div id="rest-modal-body" style="padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px" class="thin-scroll"></div>
+    </div>
+  </div>
+
+  <!-- 100% Offline Local Scripts (Tanpa CDN) -->
+  <script src="dist/backend_bundle.js"></script>
+  <script src="js/asset_manifest.js"></script>
+  <script src="js/audio_manager.js"></script>
+  <script src="js/backend_bridge.js"></script>
+  <script src="js/screens/title_wizard.js"></script>
+  <script src="js/screens/class_skill.js"></script>
+  <script src="js/screens/world_map.js"></script>
+  <script src="js/screens/idle_patrol.js"></script>
+  <script src="js/screens/forge.js"></script>
+  <script src="js/screens/market.js"></script>
+  <script src="js/screens/guild.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
