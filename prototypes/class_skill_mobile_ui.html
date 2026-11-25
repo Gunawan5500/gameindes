@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Battle-Smith RPG — Class &amp; Skill (Dark-Fantasy Mobile UI)</title>
+<style>
+  :root {
+    --bg: #120f0d;
+    --bg-elev: #1b1714;
+    --card: #211c17;
+    --card-hi: #2b231b;
+    --iron-border: #4a4036;
+    --bronze-border: #8c693e;
+    --gold: #e0a94f;
+    --gold-hi: #f6cf7f;
+    --steel: #5ba4cf;
+    --steel-bg: #172430;
+    --crimson: #b52b3b;
+    --emerald: #34b37e;
+    --text: #f0e8dc;
+    --muted: #a6998a;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+
+  .app {
+    max-width: 760px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #171310 0%, #100d0b 100%);
+  }
+
+  /* =====================================================================
+     1. TOP UTILITY BAR (ISTIRAHAT, POIN STAT, & DRAWER SEKUNDER POJOK ATAS)
+     ===================================================================== */
+  .top-utility {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: linear-gradient(180deg, #241d17 0%, #171310 100%);
+    border-bottom: 1.5px solid var(--bronze-border);
+  }
+
+  .top-left-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .metal-pill {
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--iron-border);
+    background: linear-gradient(180deg, #2d241c 0%, #1b1612 100%);
+    color: var(--text);
+    font-size: 11.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .metal-pill.rest-warn {
+    border-color: #9e3535;
+    background: linear-gradient(180deg, #3a1a1a 0%, #221010 100%);
+    color: #ffd0c8;
+  }
+
+  .metal-pill.gold {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #423019 0%, #241a0e 100%);
+    color: var(--gold-hi);
+  }
+
+  .icon-btn {
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--bronze-border);
+    background: linear-gradient(180deg, #30251c 0%, #1c1612 100%);
+    color: var(--gold-hi);
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--crimson);
+    border: 1.5px solid #ffd5da;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* =====================================================================
+     2. NAVIGASI UTAMA: 5 TAB INTI (MUAT 100% DI 360px TANPA TERPOTONG)
+     ===================================================================== */
+  .main-nav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px 8px;
+    background: #15120f;
+    border-bottom: 1.5px solid #382f27;
+  }
+
+  .nav-tab {
+    min-height: 44px;
+    padding: 4px 2px;
+    border-radius: 8px;
+    border: 1.5px solid #3f362d;
+    background: linear-gradient(180deg, #25201b 0%, #181411 100%);
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    line-height: 1.1;
+  }
+
+  .nav-tab .tab-ic { font-size: 14px; line-height: 1; }
+
+  .nav-tab.active {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #4b371d 0%, #271c10 100%);
+    color: var(--gold-hi);
+  }
+
+  /* =====================================================================
+     3. SUB-TAB CLASS & SKILL (4 TAB BERSIH, >= 44px SENTUH)
+     ===================================================================== */
+  .sub-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 8px 10px 4px;
+  }
+
+  .sub-tab {
+    min-height: 44px;
+    padding: 4px 4px;
+    border-radius: 8px;
+    border: 1.5px solid #3e3730;
+    background: linear-gradient(180deg, #25211d 0%, #181512 100%);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .sub-tab.active {
+    border-color: var(--steel);
+    background: linear-gradient(180deg, #1d394f 0%, #13212e 100%);
+    color: #d7f0ff;
+  }
+
+  /* =====================================================================
+     4. KONTEN UTAMA & PANEL DARK-FANTASY METALLIC
+     ===================================================================== */
+  .content {
+    flex: 1;
+    padding: 8px 10px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, #241e19 0%, #181411 100%);
+    border: 1.5px solid var(--iron-border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .panel.gold-rim {
+    border-color: var(--bronze-border);
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .panel-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--gold-hi);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .panel-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .chip-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #143326;
+    border: 1px solid var(--emerald);
+    color: #9bf3c9;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .chip-budget {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #2c2115;
+    border: 1px solid var(--gold);
+    color: var(--gold-hi);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* =====================================================================
+     5. COLLAPSIBLE INTERACTIVE NODE TREE (T1 -> T5)
+     ===================================================================== */
+  .collapse-trigger {
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--bronze-border);
+    background: linear-gradient(180deg, #2d241b 0%, #1d1712 100%);
+    color: var(--gold-hi);
+    font-size: 12.5px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mazhab-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .mazhab-btn {
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1.5px solid #493f35;
+    background: linear-gradient(180deg, #27211c 0%, #181411 100%);
+    color: #d6cabd;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .mazhab-btn.active {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #4b341b 0%, #281b0e 100%);
+    color: var(--gold-hi);
+  }
+
+  /* Horizontal Visual Node Stepper (T1 - T5) */
+  .node-tree-wrap {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px 2px 4px;
+  }
+
+  .node-tree-track {
+    position: absolute;
+    top: 30px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, #5c4b39 100%);
+    z-index: 0;
+  }
+
+  .evo-node {
+    position: relative;
+    z-index: 1;
+    min-width: 44px;
+    min-height: 62px;
+    padding: 4px 2px;
+    border-radius: 10px;
+    border: 1.5px solid #594a3b;
+    background: linear-gradient(180deg, #2a231d 0%, #181411 100%);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+  }
+
+  .evo-node.unlocked {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #4a351c 0%, #24190d 100%);
+    color: var(--gold-hi);
+  }
+
+  .evo-node .node-tier {
+    font-size: 10.5px;
+    font-weight: 900;
+    color: var(--gold-hi);
+  }
+
+  .evo-node .node-name {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .evo-node .node-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid #8c7762;
+    background: #1a1612;
+  }
+
+  .evo-node.unlocked .node-dot {
+    border-color: #fff3c4;
+    background: var(--gold);
+  }
+
+  /* =====================================================================
+     6. KARTU 5 TIPE SMITH + RESOURCE BAR + KONTROL MENYATU (>= 44x44px)
+     ===================================================================== */
+  .smith-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .smith-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .smith-card {
+    background: linear-gradient(180deg, #231e19 0%, #161310 100%);
+    border: 1.5px solid #4a423a;
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .smith-card.active-gold {
+    background: linear-gradient(180deg, #362617 0%, #1a140f 100%);
+    border-color: var(--gold);
+  }
+
+  .smith-card.active-steel {
+    background: linear-gradient(180deg, #1b2c3b 0%, #131b23 100%);
+    border-color: var(--steel);
+  }
+
+  .smith-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .smith-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tier-shield {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bronze-border);
+    background: #18130f;
+    color: var(--gold-hi);
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* Informative Resource Bar */
+  .res-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .res-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+  }
+
+  .res-name { font-weight: 700; color: #e2d5c4; }
+  .res-num { font-family: ui-monospace, monospace; font-weight: 800; color: var(--gold-hi); }
+
+  .res-track {
+    height: 10px;
+    border-radius: 999px;
+    background: #100d0b;
+    border: 1px solid #41382f;
+    overflow: hidden;
+  }
+
+  .res-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .res-fill.heat   { background: linear-gradient(90deg, #b8321a 0%, #f59e0b 100%); }
+  .res-fill.guard  { background: linear-gradient(90deg, #1d5b8c 0%, #56ccf2 100%); }
+  .res-fill.draw   { background: linear-gradient(90deg, #1f7a53 0%, #4ade80 100%); }
+  .res-fill.rune   { background: linear-gradient(90deg, #5b3296 0%, #c084fc 100%); }
+  .res-fill.temper { background: linear-gradient(90deg, #9a441a 0%, #fbbf24 100%); }
+
+  .smith-meta {
+    font-size: 11.5px;
+    color: #c8bdb0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Kesatuan Kontrol: [-] [T1] [+] [Un-fuse] [Skill ->] semua >= 44x44px */
+  .smith-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .stepper-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-touch {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1.5px solid #594b3d;
+    background: linear-gradient(180deg, #322921 0%, #1d1814 100%);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .btn-touch:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  .btn-touch.step {
+    padding: 0;
+    font-size: 18px;
+  }
+
+  .btn-touch.gold {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #593e1e 0%, #2d1e0e 100%);
+    color: var(--gold-hi);
+  }
+
+  .btn-touch.unfuse {
+    border-color: var(--emerald);
+    background: linear-gradient(180deg, #174130 0%, #0e261c 100%);
+    color: #a7f3d0;
+    font-size: 11.5px;
+  }
+
+  .tier-readout {
+    min-width: 30px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--gold-hi);
+  }
+
+  /* =====================================================================
+     7. BOTTOM-SHEET MODAL (NODE DETAIL & DRAWER SEKUNDER)
+     ===================================================================== */
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 6, 5, 0.78);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .sheet-backdrop.hidden { display: none; }
+
+  .sheet-box {
+    width: 100%;
+    max-width: 520px;
+    max-height: 82dvh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #272019 0%, #171310 100%);
+    border-top: 2px solid var(--gold);
+    border-left: 1.5px solid var(--bronze-border);
+    border-right: 1.5px solid var(--bronze-border);
+    border-radius: 16px 16px 0 0;
+    padding: 14px 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sheet-handle {
+    width: 42px;
+    height: 4px;
+    border-radius: 999px;
+    background: #6c5a47;
+    margin: 0 auto 2px;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    max-width: 92vw;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: #2b2116;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-hi);
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 60;
+    text-align: center;
+  }
+
+  .toast.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 1. TOP UTILITY BAR + DRAWER SEKUNDER (ISU MORAL & CABANG) -->
+  <header class="top-utility">
+    <div class="top-left-group">
+      <button id="btn-rest" class="metal-pill rest-warn" title="Istirahat Panjang">
+        🏕️ <span id="lbl-stm">STM 45/115</span>
+      </button>
+      <button id="btn-stat-shortcut" class="metal-pill gold" title="Alokasi Poin Stat">
+        ⬆ +<span id="lbl-stat-pts">2</span> Stat
+      </button>
+    </div>
+    <button id="btn-open-drawer" class="icon-btn" title="Isu Moral &amp; Cabang Murid" aria-label="Menu Sekunder">
+      📜
+      <span id="lbl-moral-badge" class="notif-badge">1</span>
+    </button>
+  </header>
+
+  <!-- 2. NAVIGASI UTAMA: 5 TAB INTI MUAT 100% DI 360px -->
+  <nav id="main-nav" class="main-nav" aria-label="Navigasi Utama">
+    <button class="nav-tab" data-tab="misi"><span class="tab-ic">⚔️</span><span>Misi</span></button>
+    <button class="nav-tab active" data-tab="class"><span class="tab-ic">🌳</span><span>Class</span></button>
+    <button class="nav-tab" data-tab="bengkel"><span class="tab-ic">🔥</span><span>Bengkel</span></button>
+    <button class="nav-tab" data-tab="pasar"><span class="tab-ic">⚖️</span><span>Pasar</span></button>
+    <button class="nav-tab" data-tab="peta"><span class="tab-ic">🗺️</span><span>Peta</span></button>
+  </nav>
+
+  <!-- 3. SUB-TAB KHUSUS CLASS & SKILL -->
+  <div id="class-subnav" class="sub-nav">
+    <button class="sub-tab active" data-sub="smith">Tipe Smith</button>
+    <button class="sub-tab" data-sub="skill">Skill &amp; Bar</button>
+    <button class="sub-tab" data-sub="destiny">Destiny (1)</button>
+    <button class="sub-tab" data-sub="stat">Stat &amp; Perk</button>
+  </div>
+
+  <!-- 4. AREA KONTEN -->
+  <main id="stage" class="content"></main>
+</div>
+
+<!-- BOTTOM-SHEET MODAL (DETAIL NODE EVOLUSI & DRAWER SEKUNDER) -->
+<div id="sheet-backdrop" class="sheet-backdrop hidden" role="dialog" aria-modal="true">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div id="sheet-body"></div>
+    <button id="btn-close-sheet" class="btn-touch" style="width:100%">✕ Tutup</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const SMITH_CLASSES = [
+    {
+      id: "weaponsmith",
+      name: "Weaponsmith",
+      icon: "⚔️",
+      theme: "active-gold",
+      resName: "Forge Heat",
+      resClass: "heat",
+      resBase: 40,
+      resPerTier: 15,
+      comp: "Bilah Senjata Dekat & Battle-Harness",
+      stats: "STR/DEX • WIS • CHA",
+      nodes: [
+        { t: 1, title: "Bladesmith",  skill: "Tempered Cleave",       cd: "4d", desc: "Tebasan baja panas +135% Dmg & +15 Forge Heat." },
+        { t: 2, title: "Edgewright",  skill: "Anvil's Fury",          cd: "6d", desc: "2× tebasan beruntun, peluang Crit +12%." },
+        { t: 3, title: "Warmonger",   skill: "Pommel Sunder",         cd: "8d", desc: "Menghancurkan armor musuh -20% DEF selama 8d." },
+        { t: 4, title: "Vanquisher",  skill: "Molten Sever",          cd: "10d", desc: "Tebasan api tempa 210% Dmg + Burn 3 tick." },
+        { t: 5, title: "Archblade",   skill: "Cataclysmic Anvil Fall",cd: "16d", desc: "Hantaman pamungkas 320% Dmg + stun Boss 1 giliran." }
+      ],
+      hybrids: [
+        { with: "Armorer",    name: "Vanguard",   req: "T1 Weaponsmith + T1 Armorer",   bonus: "+10% Dmg & +10% DEF" },
+        { with: "Rangesmith", name: "Skirmisher", req: "T1 Weaponsmith + T1 Rangesmith",bonus: "+12% Crit & Kecepatan" },
+        { with: "Runesmith",  name: "Spellblade", req: "T1 Weaponsmith + T1 Runesmith", bonus: "+15% Elemental Trigger" },
+        { with: "Reforger",   name: "Hellforger", req: "T1 Weaponsmith + T1 Reforger",  bonus: "+18% Bonus Enhance +N" }
+      ]
+    },
+    {
+      id: "armorer",
+      name: "Armorer",
+      icon: "🛡️",
+      theme: "active-steel",
+      resName: "Bastion Guard",
+      resClass: "guard",
+      resBase: 30,
+      resPerTier: 14,
+      comp: "Pelat, Perisai & Sistem Armor Trigger",
+      stats: "CON • STR • Armor Berat",
+      nodes: [
+        { t: 1, title: "Platesmith",  skill: "Iron Bulwark",     cd: "6d", desc: "Perisai baja menahan 25% kerusakan selama 6d." },
+        { t: 2, title: "Shieldwright",skill: "Shield Bash",      cd: "5d", desc: "Hantaman perisai 120% Dmg + +20 Bastion Guard." },
+        { t: 3, title: "Bulwark",     skill: "Tempered Aegis",   cd: "9d", desc: "Memantulkan 18% Dmg musuh & +15% HP Max." },
+        { t: 4, title: "Juggernaut",  skill: "Citadel Stance",   cd: "12d", desc: "Kebal knockback & regen 8% HP saat duel Boss." },
+        { t: 5, title: "Aegismaster", skill: "Unbreakable Anvil",cd: "18d", desc: "Barrier 45% Max HP + bonus tempa Armor +15%." }
+      ],
+      hybrids: [
+        { with: "Weaponsmith", name: "Vanguard",  req: "T1 Armorer + T1 Weaponsmith", bonus: "+10% Dmg & +10% DEF" },
+        { with: "Runesmith",   name: "Runeguard", req: "T1 Armorer + T1 Runesmith",   bonus: "+15% Resist Elemen" }
+      ]
+    },
+    {
+      id: "rangesmith",
+      name: "Rangesmith",
+      icon: "🏹",
+      theme: "active-gold",
+      resName: "Focus Draw",
+      resClass: "draw",
+      resBase: 25,
+      resPerTier: 15,
+      comp: "Busur Komposit, Panah & Trigger Jarak",
+      stats: "DEX • WIS • Akurasi",
+      nodes: [
+        { t: 1, title: "Bowyer",      skill: "Piercing Bolt",   cd: "4d", desc: "Tembakan presisi 130% Dmg menembus 15% DEF." },
+        { t: 2, title: "Fletcher",    skill: "Twin Volley",     cd: "6d", desc: "2 panah cepat +10% Crit." },
+        { t: 3, title: "Deadeye",     skill: "Hawkeye Mark",    cd: "8d", desc: "Menandai titik lemah Boss (+20% Dmg 8d)." },
+        { t: 4, title: "Siegesmith",  skill: "Ballista Shot",   cd: "11d", desc: "Tembakan berat 240% Dmg." },
+        { t: 5, title: "Stormbow",    skill: "Tempest Rain",    cd: "16d", desc: "Hujan panah elemen 300% Dmg." }
+      ],
+      hybrids: [
+        { with: "Weaponsmith", name: "Skirmisher", req: "T1 Rangesmith + T1 Weaponsmith", bonus: "+12% Crit & Kecepatan" }
+      ]
+    },
+    {
+      id: "runesmith",
+      name: "Runesmith",
+      icon: "🔮",
+      theme: "active-steel",
+      resName: "Rune Charge",
+      resClass: "rune",
+      resBase: 35,
+      resPerTier: 13,
+      comp: "Inti Elemen, Fusi Hibrida & Staf",
+      stats: "INT • WIS • Trigger Elemen",
+      nodes: [
+        { t: 1, title: "Runecarver",  skill: "Runic Bolt",      cd: "4d", desc: "Sinar elemen 135% Dmg sesuai inti senjata." },
+        { t: 2, title: "Sigilwright", skill: "Arcane Attune",   cd: "7d", desc: "+20% peluang Fusi Inti Kedua & Trigger." },
+        { t: 3, title: "Elemancer",   skill: "Dual Resonance",  cd: "9d", desc: "Ledakan elemen ganda 195% Dmg." },
+        { t: 4, title: "Archweaver",  skill: "Aether Surge",    cd: "12d", desc: "Memulihkan +30 Rune Charge & +25% Skill Dmg." },
+        { t: 5, title: "Mythweaver",  skill: "Astral Crucible", cd: "18d", desc: "Badai rune 330% Dmg + buff fusi permanen." }
+      ],
+      hybrids: [
+        { with: "Weaponsmith", name: "Spellblade", req: "T1 Runesmith + T1 Weaponsmith", bonus: "+15% Elemental Trigger" }
+      ]
+    },
+    {
+      id: "reforger",
+      name: "Reforger",
+      icon: "🔨",
+      theme: "active-gold",
+      resName: "Temper Flux",
+      resClass: "temper",
+      resBase: 30,
+      resPerTier: 14,
+      comp: "Enhance +N, Salvage & Tempa Ulang",
+      stats: "CHA • STR • INT",
+      nodes: [
+        { t: 1, title: "Tinker",      skill: "Shatter Strike",  cd: "5d", desc: "Pukulan palu +125% Dmg & +10% peluang salvage." },
+        { t: 2, title: "Temperer",    skill: "Quench Burst",    cd: "7d", desc: "Uap tempa memperlambat serangan musuh 15%." },
+        { t: 3, title: "Reclaimer",   skill: "Alloy Overdrive", cd: "9d", desc: "Meningkatkan bonus senjata +N sebesar +25% sementara." },
+        { t: 4, title: "Masterforge", skill: "Crucible Nova",   cd: "12d", desc: "Ledakan paron 230% Dmg + aman Checkpoint Enhance." },
+        { t: 5, title: "Worldsmith",  skill: "Genesis Hammer",  cd: "18d", desc: "Pukulan legendaris 310% Dmg & +12% kualitas Masterwork." }
+      ],
+      hybrids: [
+        { with: "Weaponsmith", name: "Hellforger", req: "T1 Reforger + T1 Weaponsmith", bonus: "+18% Bonus Enhance +N" }
+      ]
+    }
+  ];
+
+  const state = {
+    mainTab: "class",
+    subTab: "smith",
+    stm: 45,
+    stmMax: 115,
+    unspentStatPts: 2,
+    moralPending: 1,
+    totalGateBudget: 3,
+    freeUnfuseLeft: 1,
+    previewMazhabId: "weaponsmith",
+    evoCollapsed: true, // Progressive Disclosure: default terlipat agar 5 kartu Smith langsung terlihat!
+    tiers: {
+      weaponsmith: 1,
+      armorer: 0,
+      rangesmith: 0,
+      runesmith: 0,
+      reforger: 0
+    }
+  };
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.add("hidden"), 2300);
+  }
+
+  function usedPoints() {
+    return Object.values(state.tiers).reduce((a, b) => a + b, 0);
+  }
+
+  function activeClassLabel() {
+    const entries = Object.entries(state.tiers).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    if (!entries.length) return "Novice Smith";
+    const [topId, topTier] = entries[0];
+    const cls = SMITH_CLASSES.find(c => c.id === topId);
+    const node = cls.nodes[Math.min(topTier, 5) - 1];
+    return entries.length > 1 ? `${node.title} (Hibrida)` : node.title;
+  }
+
+  function openSheet(html) {
+    document.getElementById("sheet-body").innerHTML = html;
+    document.getElementById("sheet-backdrop").classList.remove("hidden");
+  }
+
+  function closeSheet() {
+    document.getElementById("sheet-backdrop").classList.add("hidden");
+  }
+
+  function openNodeDetail(clsId, tierNum) {
+    const cls = SMITH_CLASSES.find(c => c.id === clsId);
+    const node = cls.nodes.find(n => n.t === tierNum);
+    const currentT = state.tiers[clsId] || 0;
+    const unlocked = currentT >= tierNum;
+    const hybridsHtml = cls.hybrids.map(h => `
+      <div style="padding:7px 9px;border-radius:8px;background:#15120f;border:1px solid #3c342b;font-size:11.5px">
+        <strong style="color:var(--steel)">${h.name}</strong> <span style="color:var(--muted)">(${h.req})</span>
+        <div style="color:#d6cabd;margin-top:2px">✨ ${h.bonus}</div>
+      </div>
+    `).join("");
+
+    openSheet(`
+      <div class="panel-head">
+        <div class="panel-title">${cls.icon} T${node.t} ${node.title}</div>
+        <span class="${unlocked ? "chip-ok" : "chip-budget"}">${unlocked ? "✓ Terbuka" : `Butuh ${cls.name} T${node.t}`}</span>
+      </div>
+      <div style="padding:9px 11px;border-radius:8px;background:#1a1510;border:1px solid var(--bronze-border)">
+        <div style="font-weight:800;color:var(--gold-hi);font-size:12.5px">⚔️ Jurus Terbuka: ${node.skill} <span style="color:var(--muted);font-weight:600">(CD ${node.cd})</span></div>
+        <div style="font-size:12px;color:var(--text);margin-top:4px">${node.desc}</div>
+      </div>
+      <div style="font-size:12px;font-weight:800;color:var(--steel)">🔀 Cabang Hibrida dari ${cls.name}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">${hybridsHtml}</div>
+    `);
+  }
+
+  function openSecondaryDrawer() {
+    openSheet(`
+      <div class="panel-title">📜 Menu Sekunder &amp; Notifikasi</div>
+      <div class="panel gold-rim">
+        <div class="panel-head">
+          <strong style="color:#fda4af">📜 Isu Moral Menunggu (${state.moralPending})</strong>
+          <span class="chip-budget">Tidewrack Village</span>
+        </div>
+        <div class="panel-sub">Pedagang setempat meminta Anda menempa pedang murah untuk milisi perbatasan di tengah sengketa faksi.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn-touch gold" id="btn-moral-accept" style="flex:1">⚖️ Terima (Idealism +1)</button>
+          <button class="btn-touch" id="btn-moral-reject" style="flex:1">🪙 Minta Bayaran +30%</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">🏪 Cabang &amp; 5 Murid AI Seed</div>
+        <div class="panel-sub">Companion aktif: <b>Kael (Bladesmith)</b> • 0 Cabang Bengkel aktif.</div>
+        <button class="btn-touch" id="btn-goto-murid" style="width:100%">Kelola 5 Murid &amp; Cabang →</button>
+      </div>
+    `);
+    const acc = document.getElementById("btn-moral-accept");
+    const rej = document.getElementById("btn-moral-reject");
+    const goM = document.getElementById("btn-goto-murid");
+    if (acc) acc.onclick = () => { state.moralPending = 0; closeSheet(); render(); showToast("⚖️ Isu Moral diputuskan (Idealism +1)!"); };
+    if (rej) rej.onclick = () => { state.moralPending = 0; closeSheet(); render(); showToast("🪙 Negosiasi berhasil (+30% bayaran)!"); };
+    if (goM) goM.onclick = () => { closeSheet(); showToast("🏪 Membuka ringkasan 5 Murid & Cabang..."); };
+  }
+
+  function renderSmithSubTab() {
+    const used = usedPoints();
+    const remain = state.totalGateBudget - used;
+    const prevCls = SMITH_CLASSES.find(c => c.id === state.previewMazhabId) || SMITH_CLASSES[0];
+    const prevTier = state.tiers[prevCls.id] || 0;
+
+    const mazhabBtns = SMITH_CLASSES.map(c => `
+      <button class="mazhab-btn ${c.id === prevCls.id ? "active" : ""}" data-preview-mazhab="${c.id}">
+        ${c.icon} ${c.name}
+      </button>
+    `).join("");
+
+    const nodesHtml = prevCls.nodes.map(n => `
+      <button class="evo-node ${prevTier >= n.t ? "unlocked" : ""}" data-node-cls="${prevCls.id}" data-node-t="${n.t}" title="Tap untuk detail T${n.t} ${n.title}">
+        <span class="node-tier">T${n.t}</span>
+        <span class="node-dot"></span>
+        <span class="node-name">${n.title}</span>
+      </button>
+    `).join("");
+
+    const cardsHtml = SMITH_CLASSES.map(c => {
+      const t = state.tiers[c.id] || 0;
+      const resVal = Math.min(100, c.resBase + t * c.resPerTier);
+      const isAct = t > 0;
+      return `
+        <article class="smith-card ${isAct ? c.theme : ""}">
+          <div class="smith-head">
+            <div class="smith-title">${c.icon} ${c.name}</div>
+            <span class="tier-shield">Tier ${t}/5</span>
+          </div>
+
+          <div class="res-block">
+            <div class="res-label-row">
+              <span class="res-name">${c.resName}</span>
+              <span class="res-num">${resVal} / 100</span>
+            </div>
+            <div class="res-track">
+              <div class="res-fill ${c.resClass}" style="width:${resVal}%"></div>
+            </div>
+          </div>
+
+          <div class="smith-meta">
+            <div>• <b>Tempa:</b> ${c.comp}</div>
+            <div>• <b>Naungan:</b> ${c.stats}</div>
+          </div>
+
+          <div class="smith-controls">
+            <div class="stepper-group">
+              <button class="btn-touch step" data-dec="${c.id}" ${t <= 0 ? "disabled" : ""} aria-label="Kurangi Tier ${c.name}">−</button>
+              <span class="tier-readout">T${t}</span>
+              <button class="btn-touch step gold" data-inc="${c.id}" ${remain <= 0 || t >= 5 ? "disabled" : ""} aria-label="Tambah Tier ${c.name}">+</button>
+              ${isAct ? `<button class="btn-touch unfuse" data-unfuse="${c.id}" title="Tarik poin kelas ini">♻️ Un-fuse</button>` : ""}
+            </div>
+            <button class="btn-touch ${isAct ? "gold" : ""}" data-open-skill="${c.id}">Skill →</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    return `
+      <!-- RINGKASAN KELAS AKTIF -->
+      <section class="panel gold-rim">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">🔨 Kelas Aktif: ${activeClassLabel()}</div>
+            <div class="panel-sub">Bonus Tempa: <b style="color:var(--gold-hi)">+${used * 6}%</b> • Free Un-fuse: <b>${state.freeUnfuseLeft}×</b></div>
+          </div>
+          <span class="chip-budget">Poin Gate: ${used}/${state.totalGateBudget} (Sisa ${remain})</span>
+        </div>
+        <div><span class="chip-ok">✓ Senjata Aktif Cocok (+6% Mastery &amp; Jurus [W] Aktif)</span></div>
+      </section>
+
+      <!-- PROGRESSIVE DISCLOSURE: COLLAPSIBLE INTERACTIVE NODE TREE -->
+      <section class="panel">
+        <button id="btn-toggle-evo" class="collapse-trigger" aria-expanded="${!state.evoCollapsed}">
+          <span>🌳 Peta Evolusi Kelas (${prevCls.name} T1→T5)</span>
+          <span>${state.evoCollapsed ? "▸ Buka Peta" : "▾ Lipat"}</span>
+        </button>
+        ${!state.evoCollapsed ? `
+          <div class="mazhab-pills">${mazhabBtns}</div>
+          <div class="panel-sub">Tap node <b>T1–T5</b> di bawah untuk melihat detail jurus &amp; syarat cabang hibrida:</div>
+          <div class="node-tree-wrap">
+            <div class="node-tree-track"></div>
+            ${nodesHtml}
+          </div>
+        ` : ""}
+      </section>
+
+      <!-- 5 KARTU TIPE SMITH LANGSUNG TERLIHAT -->
+      <section class="smith-grid">${cardsHtml}</section>
+    `;
+  }
+
+  function renderStage() {
+    const stage = document.getElementById("stage");
+    const subNav = document.getElementById("class-subnav");
+    subNav.style.display = state.mainTab === "class" ? "grid" : "none";
+
+    if (state.mainTab !== "class") {
+      const titles = {
+        misi: "⚔️ Misi & Patroli Idle",
+        bengkel: "🔥 Bengkel Tempa (63 Resep)",
+        pasar: "⚖️ Pasar S&D Regional (77 Kota)",
+        peta: "🗺️ Peta Dunia & Kota Interaktif"
+      };
+      stage.innerHTML = `
+        <section class="panel gold-rim">
+          <div class="panel-title">${titles[state.mainTab]}</div>
+          <div class="panel-sub">Tab prototipe aktif — kembali ke tab <b>🌳 Class</b> untuk menguji Interactive Node Tree, Alokasi Poin Tier, Un-fuse, dan Resource Bar.</div>
+          <button class="btn-touch gold" id="btn-back-class" style="width:100%">← Kembali ke Class &amp; Skill</button>
+        </section>
+      `;
+      document.getElementById("btn-back-class").onclick = () => { state.mainTab = "class"; render(); };
+      return;
+    }
+
+    if (state.subTab === "smith") {
+      stage.innerHTML = renderSmithSubTab();
+      bindSmithEvents();
+    } else if (state.subTab === "skill") {
+      const activeNodes = SMITH_CLASSES.flatMap(c => c.nodes.slice(0, state.tiers[c.id] || 0).map(n => ({ ...n, cls: c.name, icon: c.icon })));
+      stage.innerHTML = `
+        <section class="panel gold-rim">
+          <div class="panel-title">⚔️ Skill Terbuka (${activeNodes.length})</div>
+          ${activeNodes.length ? activeNodes.map(n => `
+            <div style="padding:8px 10px;border-radius:8px;background:#16120f;border:1px solid var(--bronze-border)">
+              <strong style="color:var(--gold-hi)">${n.icon} ${n.skill}</strong> <span style="color:var(--muted);font-size:11px">(${n.cls} T${n.t} • CD ${n.cd})</span>
+              <div style="font-size:11.5px;color:#d6cabd;margin-top:2px">${n.desc}</div>
+            </div>
+          `).join("") : `<div class="panel-sub">Belum ada poin Tier ditanam. Kembali ke tab <b>Tipe Smith</b> untuk menanam poin.</div>`}
+        </section>
+      `;
+    } else if (state.subTab === "destiny") {
+      stage.innerHTML = `
+        <section class="panel gold-rim">
+          <div class="panel-title">🃏 Kartu Destiny Aktif (1/29)</div>
+          <div class="panel-sub"><b>Bladesmith's Oath:</b> +8% Damage Senjata Dekat &amp; +6% Kualitas Tempa Bilah.</div>
+        </section>
+      `;
+    } else {
+      stage.innerHTML = `
+        <section class="panel gold-rim">
+          <div class="panel-title">📊 Stat &amp; Perk (${state.unspentStatPts} Poin Tersedia)</div>
+          <div class="panel-sub">Tap tombol di bawah untuk menguji alokasi poin stat ergonomis (44×44px).</div>
+          <button class="btn-touch gold" id="btn-spend-stat" ${state.unspentStatPts <= 0 ? "disabled" : ""}>⬆ +1 STR (Sisa ${state.unspentStatPts})</button>
+        </section>
+      `;
+      const b = document.getElementById("btn-spend-stat");
+      if (b) b.onclick = () => { if (state.unspentStatPts > 0) { state.unspentStatPts--; render(); showToast("⬆ +1 STR ditambahkan!"); } };
+    }
+  }
+
+  function bindSmithEvents() {
+    const tog = document.getElementById("btn-toggle-evo");
+    if (tog) tog.onclick = () => { state.evoCollapsed = !state.evoCollapsed; render(); };
+
+    document.querySelectorAll("[data-preview-mazhab]").forEach(b => {
+      b.onclick = () => { state.previewMazhabId = b.dataset.previewMazhab; render(); };
+    });
+
+    document.querySelectorAll("[data-node-cls]").forEach(b => {
+      b.onclick = () => openNodeDetail(b.dataset.nodeCls, Number(b.dataset.nodeT));
+    });
+
+    document.querySelectorAll("[data-inc]").forEach(b => {
+      b.onclick = () => {
+        const id = b.dataset.inc;
+        if (usedPoints() < state.totalGateBudget && state.tiers[id] < 5) {
+          state.tiers[id]++;
+          state.previewMazhabId = id;
+          render();
+          showToast(`⬆ ${id} naik ke Tier ${state.tiers[id]}!`);
+        }
+      };
+    });
+
+    document.querySelectorAll("[data-dec]").forEach(b => {
+      b.onclick = () => {
+        const id = b.dataset.dec;
+        if (state.tiers[id] > 0) {
+          state.tiers[id]--;
+          render();
+          showToast(`↩ 1 poin ditarik dari ${id}.`);
+        }
+      };
+    });
+
+    document.querySelectorAll("[data-unfuse]").forEach(b => {
+      b.onclick = () => {
+        const id = b.dataset.unfuse;
+        const pts = state.tiers[id];
+        if (pts > 0) {
+          state.tiers[id] = 0;
+          if (state.freeUnfuseLeft > 0) state.freeUnfuseLeft--;
+          render();
+          showToast(`♻️ Un-fuse ${id}: ${pts} poin dikembalikan ke anggaran Gate!`);
+        }
+      };
+    });
+
+    document.querySelectorAll("[data-open-skill]").forEach(b => {
+      b.onclick = () => { state.subTab = "skill"; render(); };
+    });
+  }
+
+  function render() {
+    document.getElementById("lbl-stm").textContent = `STM ${state.stm}/${state.stmMax}`;
+    document.getElementById("btn-rest").classList.toggle("rest-warn", state.stm < 60);
+    document.getElementById("lbl-stat-pts").textContent = state.unspentStatPts;
+    const badge = document.getElementById("lbl-moral-badge");
+    badge.textContent = state.moralPending;
+    badge.style.display = state.moralPending > 0 ? "inline-flex" : "none";
+
+    document.querySelectorAll("#main-nav .nav-tab").forEach(b => {
+      b.classList.toggle("active", b.dataset.tab === state.mainTab);
+    });
+    document.querySelectorAll("#class-subnav .sub-tab").forEach(b => {
+      b.classList.toggle("active", b.dataset.sub === state.subTab);
+    });
+    renderStage();
+  }
+
+  document.querySelectorAll("#main-nav .nav-tab").forEach(b => {
+    b.onclick = () => { state.mainTab = b.dataset.tab; render(); };
+  });
+  document.querySelectorAll("#class-subnav .sub-tab").forEach(b => {
+    b.onclick = () => { state.subTab = b.dataset.sub; render(); };
+  });
+  document.getElementById("btn-rest").onclick = () => {
+    state.stm = state.stmMax;
+    render();
+    showToast("🏕️ Istirahat Panjang selesai — Stamina pulih 100%!");
+  };
+  document.getElementById("btn-stat-shortcut").onclick = () => {
+    state.mainTab = "class";
+    state.subTab = "stat";
+    render();
+  };
+  document.getElementById("btn-open-drawer").onclick = openSecondaryDrawer;
+  document.getElementById("btn-close-sheet").onclick = closeSheet;
+  document.getElementById("sheet-backdrop").onclick = e => {
+    if (e.target.id === "sheet-backdrop") closeSheet();
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
