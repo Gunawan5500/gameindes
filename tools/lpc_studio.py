@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Battle-Smith RPG — Character Appearance, Motion Filter & Weapon Motion Studio (v3)
-Perbaikan & Fitur Utama:
-  1. Kepala & Muka terpisah rapi: slot `head` khusus `head/heads/*` + slot `eyes` khusus `eyes/*`
-     (tidak tercampur telinga/hidung, kepala pasti muncul!).
-  2. Filter Gerakan Tubuh (SEMUA gerakan LPC) terpisah dari Filter Gerakan Senjata.
-  3. Editor Gerakan Senjata 5-Frame (Bisa Disetting): pilih animasi file senjata sendiri
-     + atur Offset X, Y, & Rotasi (°) per Frame 1–5 (plus Preset: Palu, Pedang, Tombak, Staf, Siaga).
-  4. 1-Klik Ekspor .webp (320x64 + 96x96) ke slot Game + Rebuild Preview.
+Battle-Smith RPG — LPC Appearance Studio v4 (Manusia Normal & Monster Default)
+Aturan Terkunci:
+  1. Animasi 100% mengikuti animasi bawaan senjata LPC asli (misal katana/greatsword/bow
+     dengan animasi jalan & serangnya masing-masing — tanpa rotasi/geser buatan).
+  2. Fokus murni ke Penampilan dalam 2 Mode terpisah:
+     - Mode 👤 Manusia Normal: male, female, muscular, pregnant (kepala/baju/celana diselaraskan otomatis).
+     - Mode 👹 Monster Default LPC: skeleton, zombie, orc, goblin, lizard, wolf, minotaur, dll.
+  3. 1-Klik Ekspor .webp (320x64 + 96x96) ke slot Game + Rebuild Preview Offline.
 """
 import argparse
 import base64
@@ -30,81 +30,25 @@ KNOWN_ANIMS = {
     "walk", "run", "idle", "combat_idle", "jump", "hurt", "sit", "climb", "emote"
 }
 
-EXPORT_SLOTS = [
-    {"id": "hero_smith",         "label": "🛡️ Hero Battle-Smith (Utama)", "sprite": "app/assets/sprites/hero_smith_5f.webp",         "portrait": "app/assets/ui/avatar_hero.webp"},
-    {"id": "apprentice_kael",    "label": "👤 Murid: Kael",               "sprite": "app/assets/sprites/apprentice_kael_5f.webp",    "portrait": "app/assets/ui/portraits/portrait_kael.webp"},
-    {"id": "apprentice_lyra",    "label": "👤 Murid: Lyra",               "sprite": "app/assets/sprites/apprentice_lyra_5f.webp",    "portrait": "app/assets/ui/portraits/portrait_lyra.webp"},
-    {"id": "apprentice_garrick", "label": "👤 Murid: Garrick",            "sprite": "app/assets/sprites/apprentice_garrick_5f.webp", "portrait": "app/assets/ui/portraits/portrait_garrick.webp"},
-    {"id": "apprentice_vesper",  "label": "👤 Murid: Vesper",             "sprite": "app/assets/sprites/apprentice_vesper_5f.webp",  "portrait": "app/assets/ui/portraits/portrait_vesper.webp"},
-    {"id": "apprentice_thorne",  "label": "👤 Murid: Thorne",             "sprite": "app/assets/sprites/apprentice_thorne_5f.webp",  "portrait": "app/assets/ui/portraits/portrait_thorne.webp"},
-    {"id": "enemy_humanoid",     "label": "🗡️ Musuh: Humanoid / Bandit",  "sprite": "app/assets/sprites/enemy_humanoid_5f.webp",     "portrait": None},
-    {"id": "enemy_undead",       "label": "💀 Musuh: Undead / Skeleton",  "sprite": "app/assets/sprites/enemy_undead_5f.webp",       "portrait": None},
-    {"id": "enemy_orc",          "label": "👹 Musuh: Orc / Goblin",       "sprite": "app/assets/sprites/enemy_orc_5f.webp",          "portrait": None},
-    {"id": "boss_humanoid",      "label": "👑 Boss: Humanoid Warlord",    "sprite": "app/assets/sprites/boss_humanoid_5f.webp",      "portrait": None},
-]
+HUMAN_BODY_TYPES = ("male", "female", "muscular", "pregnant")
+MONSTER_KEYWORDS = (
+    "skeleton", "zombie", "orc", "goblin", "lizard", "wolf", "boar",
+    "minotaur", "jack", "alien", "vampire", "demon", "troll", "ogre",
+    "kobold", "rat", "mouse", "pig", "sheep", "cat", "dog", "fox", "rabbit"
+)
 
-WEAPON_MOTION_PRESETS = {
-    "lpc_default": {
-        "label": "🎯 Bawaan LPC (Tanpa Ubah)",
-        "lock_frame": False,
-        "frames": [{"dx": 0, "dy": 0, "rot": 0} for _ in range(5)],
-    },
-    "hammer_smash": {
-        "label": "🔨 Ayun Palu / Kapak (Smash)",
-        "lock_frame": True,
-        "frames": [
-            {"dx": -4, "dy": -4, "rot": 45},
-            {"dx": -2, "dy": -6, "rot": 25},
-            {"dx":  2, "dy": -2, "rot": -15},
-            {"dx":  6, "dy":  3, "rot": -55},
-            {"dx":  2, "dy":  1, "rot": -15},
-        ],
-    },
-    "sword_arc": {
-        "label": "⚔️ Tebas Pedang (Slash Arc)",
-        "lock_frame": True,
-        "frames": [
-            {"dx": -3, "dy": -5, "rot": 55},
-            {"dx":  0, "dy": -3, "rot": 15},
-            {"dx":  5, "dy":  0, "rot": -30},
-            {"dx":  7, "dy":  3, "rot": -65},
-            {"dx":  1, "dy":  0, "rot": -10},
-        ],
-    },
-    "spear_thrust": {
-        "label": "🔱 Tusuk Tombak (Thrust)",
-        "lock_frame": True,
-        "frames": [
-            {"dx": -5, "dy":  0, "rot": 0},
-            {"dx": -3, "dy":  0, "rot": 0},
-            {"dx":  5, "dy":  0, "rot": 0},
-            {"dx":  9, "dy":  0, "rot": 0},
-            {"dx":  2, "dy":  0, "rot": 0},
-        ],
-    },
-    "staff_cast": {
-        "label": "✨ Angkat Staf Sihir (Cast)",
-        "lock_frame": True,
-        "frames": [
-            {"dx": 0, "dy":  0, "rot": 0},
-            {"dx": 1, "dy": -3, "rot": -8},
-            {"dx": 2, "dy": -7, "rot": -14},
-            {"dx": 1, "dy": -5, "rot": -8},
-            {"dx": 0, "dy": -1, "rot": 0},
-        ],
-    },
-    "idle_bob": {
-        "label": "🛡️ Siaga Diam (Idle Hold)",
-        "lock_frame": True,
-        "frames": [
-            {"dx": 0, "dy":  0, "rot": 0},
-            {"dx": 0, "dy": -1, "rot": 3},
-            {"dx": 0, "dy": -2, "rot": 5},
-            {"dx": 0, "dy": -1, "rot": 2},
-            {"dx": 0, "dy":  0, "rot": 0},
-        ],
-    },
-}
+EXPORT_SLOTS = [
+    {"id": "hero_smith",         "mode": "human",   "label": "🛡️ Hero Battle-Smith (Utama)", "sprite": "app/assets/sprites/hero_smith_5f.webp",         "portrait": "app/assets/ui/avatar_hero.webp"},
+    {"id": "apprentice_kael",    "mode": "human",   "label": "👤 Murid: Kael",               "sprite": "app/assets/sprites/apprentice_kael_5f.webp",    "portrait": "app/assets/ui/portraits/portrait_kael.webp"},
+    {"id": "apprentice_lyra",    "mode": "human",   "label": "👤 Murid: Lyra",               "sprite": "app/assets/sprites/apprentice_lyra_5f.webp",    "portrait": "app/assets/ui/portraits/portrait_lyra.webp"},
+    {"id": "apprentice_garrick", "mode": "human",   "label": "👤 Murid: Garrick",            "sprite": "app/assets/sprites/apprentice_garrick_5f.webp", "portrait": "app/assets/ui/portraits/portrait_garrick.webp"},
+    {"id": "apprentice_vesper",  "mode": "human",   "label": "👤 Murid: Vesper",             "sprite": "app/assets/sprites/apprentice_vesper_5f.webp",  "portrait": "app/assets/ui/portraits/portrait_vesper.webp"},
+    {"id": "apprentice_thorne",  "mode": "human",   "label": "👤 Murid: Thorne",             "sprite": "app/assets/sprites/apprentice_thorne_5f.webp",  "portrait": "app/assets/ui/portraits/portrait_thorne.webp"},
+    {"id": "enemy_humanoid",     "mode": "human",   "label": "🗡️ Musuh: Humanoid / Bandit",  "sprite": "app/assets/sprites/enemy_humanoid_5f.webp",     "portrait": None},
+    {"id": "enemy_undead",       "mode": "monster", "label": "💀 Musuh: Undead / Skeleton",  "sprite": "app/assets/sprites/enemy_undead_5f.webp",       "portrait": None},
+    {"id": "enemy_orc",          "mode": "monster", "label": "👹 Musuh: Orc / Goblin",       "sprite": "app/assets/sprites/enemy_orc_5f.webp",          "portrait": None},
+    {"id": "boss_humanoid",      "mode": "monster", "label": "👑 Boss: Warlord / Monster",   "sprite": "app/assets/sprites/boss_humanoid_5f.webp",      "portrait": None},
+]
 
 STATE = {
     "lpc_dir": "",
@@ -132,7 +76,7 @@ def auto_detect_lpc_dir(cli_dir=None):
 
 def parse_lpc_rel_path(rel):
     low = rel.replace("\\", "/").lower()
-    if any(skip in low for skip in ("/behind/", "_behind", "/shadow", "shadow.png", "/mask", "/bg/")):
+    if any(skip in low for skip in ("/behind/", "_behind", "/shadow", "shadow.png", "/mask", "/bg/", "/child/", "/teen/")):
         return None
     segs = low[:-4].split("/")
     if len(segs) < 2:
@@ -197,11 +141,9 @@ def scan_lpc_catalog(lpc_dir):
             if anim != "__full__":
                 found_anims.add(anim)
 
-            # Pisahkan head/heads/* (kepala asli) dari head/ears/* & head/nose/*!
             if top == "head":
                 if style.startswith("heads/"):
-                    clean_style = style[len("heads/"):]
-                    STATE["slots"]["head"][clean_style][color][anim] = full
+                    STATE["slots"]["head"][style[len("heads/"):]][color][anim] = full
                 elif style.startswith("faces/"):
                     STATE["slots"]["eyes"][style][color][anim] = full
             elif top == "eyes":
@@ -224,10 +166,36 @@ def scan_lpc_catalog(lpc_dir):
     return count
 
 
+def classify_body_or_head(style):
+    low = style.lower()
+    if any(mk in low for mk in MONSTER_KEYWORDS):
+        return "monster"
+    if "human" in low or any(f"/{bt}" in f"/{low}" or low.endswith(bt) for bt in HUMAN_BODY_TYPES):
+        return "human"
+    return "monster"
+
+
+def detect_body_type_tag(style):
+    low = f"/{style.lower()}/"
+    for bt in HUMAN_BODY_TYPES:
+        if f"/{bt}/" in low or low.endswith(f"/{bt}/"):
+            return bt
+    return "any"
+
+
 def build_ui_catalog():
     slots_out = {}
     for slot_name, styles in STATE["slots"].items():
-        slots_out[slot_name] = [{"style": st, "colors": sorted(styles[st].keys())} for st in sorted(styles.keys())]
+        items = []
+        for st in sorted(styles.keys()):
+            kind = classify_body_or_head(st) if slot_name in ("body", "head") else "shared"
+            items.append({
+                "style": st,
+                "colors": sorted(styles[st].keys()),
+                "kind": kind,
+                "body_type": detect_body_type_tag(st),
+            })
+        slots_out[slot_name] = items
 
     weapons_out = {}
     for w_cat in sorted(STATE["weapons"].keys()):
@@ -245,10 +213,10 @@ def build_ui_catalog():
         "lpc_dir": STATE["lpc_dir"],
         "file_count": STATE["file_count"],
         "animations": STATE["animations"],
+        "human_body_types": list(HUMAN_BODY_TYPES),
         "slots": slots_out,
         "weapons": weapons_out,
         "export_slots": EXPORT_SLOTS,
-        "weapon_presets": WEAPON_MOTION_PRESETS,
     }
 
 
@@ -276,38 +244,8 @@ def pick_file_for_anim(anim_map, anim_name):
     return next(iter(anim_map.values()))
 
 
-def apply_weapon_motion_strip(w_strip, w_motion, direction):
-    """Terapkan offset (dx, dy) & rotasi per-frame (0..4) khusus layer senjata."""
-    frames_cfg = w_motion.get("frames") or []
-    lock_frame = bool(w_motion.get("lock_frame"))
-    if not frames_cfg or (not lock_frame and all(f.get("dx", 0) == 0 and f.get("dy", 0) == 0 and f.get("rot", 0) == 0 for f in frames_cfg)):
-        return w_strip
-
-    out = Image.new("RGBA", (320, 64), (0, 0, 0, 0))
-    dir_sign = -1 if direction == "left" else 1
-    base_frame0 = w_strip.crop((0, 0, 64, 64))
-
-    for i in range(5):
-        src = base_frame0 if lock_frame else w_strip.crop((i * 64, 0, (i + 1) * 64, 64))
-        cfg = frames_cfg[i] if i < len(frames_cfg) else {"dx": 0, "dy": 0, "rot": 0}
-        dx = int(cfg.get("dx", 0)) * dir_sign
-        dy = int(cfg.get("dy", 0))
-        rot = float(cfg.get("rot", 0)) * dir_sign
-
-        if rot != 0:
-            src = src.rotate(rot, resample=Image.NEAREST, expand=False, center=(32, 36))
-
-        cell = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-        cell.paste(src, (dx, dy), src)
-        out.paste(cell, (i * 64, 0), cell)
-    return out
-
-
 def render_layers_from_selection(sel):
-    body_anim = sel.get("animation") or "slash"
-    wpn_anim = sel.get("weapon_animation") or body_anim
-    if wpn_anim == "__follow__":
-        wpn_anim = body_anim
+    anim = sel.get("animation") or "slash"
     direction = sel.get("direction") or "right"
     recipes_grid = {
         "grid": {
@@ -326,7 +264,6 @@ def render_layers_from_selection(sel):
     portrait_canvas = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     used = []
 
-    # Urutan tumpukan visual: body -> feet -> legs -> torso -> head -> eyes -> hair -> hat -> weapon
     for slot in ("body", "feet", "legs", "torso", "head", "eyes", "hair", "hat"):
         pick = sel.get(slot)
         if not pick or not pick.get("style"):
@@ -335,10 +272,10 @@ def render_layers_from_selection(sel):
         if not amap:
             continue
 
-        f_anim = pick_file_for_anim(amap, body_anim)
+        f_anim = pick_file_for_anim(amap, anim)
         if f_anim:
             with Image.open(f_anim).convert("RGBA") as sh:
-                part_strip = lp.extract_5frame_strip_smart(sh, body_anim, direction, recipes_grid)
+                part_strip = lp.extract_5frame_strip_smart(sh, anim, direction, recipes_grid)
                 if part_strip.getbbox() is not None:
                     strip_out.alpha_composite(part_strip)
                     used.append({"slot": slot, "file": os.path.relpath(f_anim, STATE["sp_root"]).replace("\\", "/")})
@@ -354,16 +291,15 @@ def render_layers_from_selection(sel):
                 if f0.getbbox() is not None:
                     portrait_canvas.alpha_composite(f0)
 
-    # Layer Senjata (Terpisah animasi & bisa disetting per-frame!)
+    # Senjata asli LPC (100% animasi bawaan senjata, tanpa rotasi/geser buatan)
     wpn = sel.get("weapon")
     if wpn and wpn.get("category") and wpn.get("id"):
         amap = STATE["weapons"].get(wpn["category"], {}).get(wpn["id"], {}).get(wpn.get("color") or "default")
         if amap:
-            f_wpn = pick_file_for_anim(amap, wpn_anim)
+            f_wpn = pick_file_for_anim(amap, anim)
             if f_wpn:
                 with Image.open(f_wpn).convert("RGBA") as wsh:
-                    w_strip = lp.extract_5frame_strip_smart(wsh, wpn_anim, direction, recipes_grid)
-                    w_strip = apply_weapon_motion_strip(w_strip, sel.get("weapon_motion") or {}, direction)
+                    w_strip = lp.extract_5frame_strip_smart(wsh, anim, direction, recipes_grid)
                     if w_strip.getbbox() is not None:
                         strip_out.alpha_composite(w_strip)
                         used.append({"slot": "weapon", "file": os.path.relpath(f_wpn, STATE["sp_root"]).replace("\\", "/")})
@@ -386,7 +322,7 @@ STUDIO_HTML = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Battle-Smith RPG — Character, Motion &amp; Weapon Studio v3</title>
+<title>Battle-Smith RPG — LPC Appearance Studio v4</title>
 <style>
   :root {
     --bg: #0b1118; --card: #121c27; --card2: #0d151f; --border: #25384d;
@@ -396,7 +332,7 @@ STUDIO_HTML = r"""<!DOCTYPE html>
   body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; }
   header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; background: #0f1924; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
   h1 { margin: 0; font-size: 15px; color: var(--amber); }
-  .layout { display: grid; grid-template-columns: 380px 1fr; gap: 14px; padding: 14px; max-width: 1400px; margin: 0 auto; }
+  .layout { display: grid; grid-template-columns: 390px 1fr; gap: 14px; padding: 14px; max-width: 1400px; margin: 0 auto; }
   @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
   .sec-title { font-weight: 700; font-size: 13px; color: var(--sky); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -406,6 +342,10 @@ STUDIO_HTML = r"""<!DOCTYPE html>
   button { cursor: pointer; font-weight: 600; }
   button.primary { background: #b45309; border-color: var(--amber); color: #fff; }
   button.teal { background: #0f766e; border-color: var(--teal); color: #fff; }
+  .mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mode-tab { padding: 8px; border-radius: 8px; background: var(--card2); border: 1px solid var(--border); font-weight: 700; }
+  .mode-tab.active { background: #0369a1; border-color: var(--sky); color: #fff; }
+  .bt-pills { display: flex; gap: 5px; flex-wrap: wrap; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .slot-box { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 8px; display: flex; flex-direction: column; gap: 5px; }
   .slot-grid { display: grid; grid-template-columns: 1fr 115px; gap: 6px; }
@@ -417,11 +357,8 @@ STUDIO_HTML = r"""<!DOCTYPE html>
   .strip-img { width: 320px; height: 64px; image-rendering: pixelated; border: 1px solid var(--border); border-radius: 6px; background: #0b1118; }
   .pill-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
   .pill { padding: 5px 10px; border-radius: 999px; font-size: 12px; background: var(--card2); border: 1px solid var(--border); }
+  .pill.supported { border-color: var(--teal); color: #5eead4; }
   .pill.active { background: #0369a1; border-color: var(--sky); color: #fff; }
-  .kf-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-  @media (max-width: 700px) { .kf-grid { grid-template-columns: repeat(2, 1fr); } }
-  .kf-card { background: var(--card2); border: 1px solid var(--border); border-radius: 7px; padding: 6px; display: flex; flex-direction: column; gap: 4px; font-size: 11px; }
-  .kf-card input { width: 100%; padding: 3px 5px; font-size: 11.5px; font-family: monospace; }
   .log-list { font-family: monospace; font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
   #status { font-weight: 700; color: var(--teal); font-size: 12px; }
 </style>
@@ -429,7 +366,7 @@ STUDIO_HTML = r"""<!DOCTYPE html>
 <body>
 <header>
   <div>
-    <h1>🎨 Battle-Smith RPG — Character, Motion &amp; Weapon Motion Studio v3</h1>
+    <h1>🎨 Battle-Smith RPG — LPC Appearance Studio v4</h1>
     <div id="meta" class="muted">Memindai folder Universal LPC...</div>
   </div>
   <div class="row">
@@ -439,21 +376,31 @@ STUDIO_HTML = r"""<!DOCTYPE html>
 </header>
 
 <div class="layout">
-  <!-- PANEL KIRI: PENAMPILAN KARAKTER (HEAD & EYES TERPISAH RAPI) -->
+  <!-- PANEL KIRI: 2 MODE PENAMPILAN (MANUSIA NORMAL vs MONSTER DEFAULT) -->
   <div class="card">
+    <div class="mode-tabs">
+      <button id="tab-human" class="mode-tab active">👤 Manusia Normal</button>
+      <button id="tab-monster" class="mode-tab">👹 Monster Default</button>
+    </div>
+
+    <div id="human-bt-bar" class="slot-box">
+      <div class="muted" style="font-weight:700">Tipe Tubuh Manusia Normal:</div>
+      <div id="bt-pills" class="bt-pills"></div>
+    </div>
+
     <div class="sec-title">
-      <span>👤 1. Penampilan Karakter</span>
-      <button id="btn-random">🎲 Acak</button>
+      <span id="panel-mode-title">👤 Penampilan Manusia</span>
+      <button id="btn-random">🎲 Acak Penampilan</button>
     </div>
     <div id="appearance-slots" style="display:flex;flex-direction:column;gap:7px"></div>
   </div>
 
-  <!-- PANEL KANAN -->
+  <!-- PANEL KANAN: PREVIEW + SENJATA ASLI LPC + FILTER GERAKAN -->
   <div style="display:flex;flex-direction:column;gap:12px">
     <!-- PREVIEW -->
     <div class="card">
       <div class="sec-title">
-        <span>🎬 Preview Live 5-Frame</span>
+        <span>🎬 Preview Live 5-Frame (Animasi Asli LPC)</span>
         <span id="status">Siap.</span>
       </div>
       <div class="stage">
@@ -492,18 +439,10 @@ STUDIO_HTML = r"""<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- FILTER GERAKAN TUBUH (TERPISAH) -->
+    <!-- PILIH SENJATA (MENENTUKAN ANIMASI ASLI LPC) -->
     <div class="card">
       <div class="sec-title">
-        <span>🏃 2. Filter Gerakan Tubuh Karakter (Semua Gerakan)</span>
-      </div>
-      <div id="motion-pills" class="pill-wrap"></div>
-    </div>
-
-    <!-- FILTER SENJATA + SETTING GERAKAN SENJATA TERPISAH -->
-    <div class="card">
-      <div class="sec-title">
-        <span>⚔️ 3. Senjata &amp; Pengaturan Gerakan Senjata (Terpisah dari Tubuh)</span>
+        <span>⚔️ 2. Senjata yang Digunakan (Animasi Asli LPC — Katana/Greatsword/Bow/dll.)</span>
         <button id="btn-clear-wpn">Tanpa Senjata</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
@@ -511,26 +450,22 @@ STUDIO_HTML = r"""<!DOCTYPE html>
         <label class="muted">Jenis Senjata<select id="sel-wid"></select></label>
         <label class="muted">Warna / Varian<select id="sel-wcol"></select></label>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-        <label class="muted">Sumber Animasi File Senjata (Terpisah)
-          <select id="sel-wanim"></select>
-        </label>
-        <label class="muted">Preset Gerakan Senjata (Posisi &amp; Rotasi 5-Frame)
-          <select id="sel-wpreset"></select>
-        </label>
-      </div>
-
-      <div class="row" style="justify-content:space-between">
-        <label class="muted" style="display:flex;align-items:center;gap:6px;cursor:pointer">
-          <input type="checkbox" id="chk-wlock" />
-          Kunci 1 pose senjata (Frame 0) lalu gerakkan bebas lewat keyframe X/Y/Rotasi di bawah
-        </label>
-      </div>
-      <div id="kf-grid" class="kf-grid"></div>
+      <div id="wpn-anims-hint" class="muted">Animasi bawaan senjata: -</div>
     </div>
 
-    <!-- EKSPOR -->
+    <!-- FILTER GERAKAN (OTOMATIS DISESUAIKAN DENGAN SENJATA) -->
+    <div class="card">
+      <div class="sec-title">
+        <span>🏃 3. Filter Gerakan (Sesuai Animasi Bawaan Senjata)</span>
+        <label class="muted" style="display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="chk-only-wpn-anims" checked />
+          Hanya tampilkan gerakan milik senjata terpilih
+        </label>
+      </div>
+      <div id="motion-pills" class="pill-wrap"></div>
+    </div>
+
+    <!-- EKSPOR KE GAME -->
     <div class="card">
       <div class="sec-title"><span>💾 4. Ekspor ke Game (.webp Ramah Oppo A54)</span></div>
       <div class="row">
@@ -545,16 +480,14 @@ STUDIO_HTML = r"""<!DOCTYPE html>
 
 <script>
 let CAT = null;
+let MODE = "human"; // "human" | "monster"
+let HUMAN_BT = "male"; // "male" | "female" | "muscular" | "pregnant"
+let ONLY_WPN_ANIMS = true;
 const SEL = {
-  animation: "slash",
-  weapon_animation: "__follow__",
+  animation: "walk",
   direction: "right",
   body: null, head: null, eyes: null, hair: null, hat: null, torso: null, legs: null, feet: null,
-  weapon: null,
-  weapon_motion: {
-    lock_frame: false,
-    frames: [0,1,2,3,4].map(() => ({ dx: 0, dy: 0, rot: 0 }))
-  }
+  weapon: null
 };
 let PAUSED = false;
 let MANUAL_FRAME = 0;
@@ -575,10 +508,51 @@ async function api(url, body) {
   return res.json();
 }
 
+function getFilteredSlotItems(key) {
+  const all = CAT.slots[key] || [];
+  if (key === "body" || key === "head") {
+    const byKind = all.filter(it => it.kind === MODE);
+    if (MODE === "human") {
+      // Untuk tubuh manusia: cocokkan body_type (male/female/muscular/pregnant)
+      if (key === "body") {
+        const exact = byKind.filter(it => it.body_type === HUMAN_BT);
+        return exact.length ? exact : byKind;
+      }
+      // Untuk kepala manusia: muscular pakai kepala male, pregnant pakai kepala female
+      const headBt = HUMAN_BT === "pregnant" ? "female" : (HUMAN_BT === "muscular" ? "male" : HUMAN_BT);
+      const exactH = byKind.filter(it => it.body_type === headBt || it.body_type === "any");
+      return exactH.length ? exactH : byKind;
+    }
+    return byKind.length ? byKind : all;
+  }
+  if (MODE === "human" && (key === "torso" || key === "legs" || key === "feet")) {
+    const btMatch = all.filter(it => it.body_type === HUMAN_BT || it.body_type === "any");
+    return btMatch.length ? btMatch : all;
+  }
+  return all;
+}
+
+function renderBodyTypePills() {
+  document.getElementById("human-bt-bar").style.display = MODE === "human" ? "flex" : "none";
+  document.getElementById("panel-mode-title").textContent = MODE === "human" ? `👤 Penampilan Manusia (${HUMAN_BT})` : "👹 Penampilan Monster Default LPC";
+  const el = document.getElementById("bt-pills");
+  el.innerHTML = (CAT.human_body_types || []).map(bt =>
+    `<button class="pill ${HUMAN_BT === bt ? "active" : ""}" data-bt="${bt}">${bt}</button>`
+  ).join("");
+  el.querySelectorAll("[data-bt]").forEach(b => {
+    b.onclick = () => {
+      HUMAN_BT = b.dataset.bt;
+      pickDefaultForMode();
+      renderAllControls();
+      refreshPreview();
+    };
+  });
+}
+
 function renderAppearanceSlots() {
   const wrap = document.getElementById("appearance-slots");
   wrap.innerHTML = SLOT_LABELS.map(([key, label]) => {
-    const list = CAT.slots[key] || [];
+    const list = getFilteredSlotItems(key);
     const cur = SEL[key] || { style: "", color: "" };
     const styleOpts = `<option value="">-- Tidak Dipakai --</option>` + list.map(it =>
       `<option value="${it.style}" ${it.style === cur.style ? "selected" : ""}>${it.style}</option>`
@@ -605,7 +579,7 @@ function renderAppearanceSlots() {
       const st = sel.value;
       if (!st) SEL[k] = null;
       else {
-        const item = (CAT.slots[k] || []).find(x => x.style === st);
+        const item = getFilteredSlotItems(k).find(x => x.style === st);
         SEL[k] = { style: st, color: item?.colors[0] || "default" };
       }
       renderAppearanceSlots();
@@ -617,14 +591,9 @@ function renderAppearanceSlots() {
   });
 }
 
-function renderMotionPills() {
-  const el = document.getElementById("motion-pills");
-  el.innerHTML = (CAT.animations || []).map(a =>
-    `<button class="pill ${SEL.animation === a ? "active" : ""}" data-m="${a}">${a}</button>`
-  ).join("");
-  el.querySelectorAll("[data-m]").forEach(b => {
-    b.onclick = () => { SEL.animation = b.dataset.m; renderMotionPills(); refreshPreview(); };
-  });
+function getActiveWeaponObj() {
+  if (!SEL.weapon) return null;
+  return (CAT.weapons[SEL.weapon.category] || []).find(w => w.id === SEL.weapon.id) || null;
 }
 
 function renderWeaponFilter() {
@@ -632,7 +601,6 @@ function renderWeaponFilter() {
   const elCat = document.getElementById("sel-wcat");
   const elId = document.getElementById("sel-wid");
   const elCol = document.getElementById("sel-wcol");
-  const elWAnim = document.getElementById("sel-wanim");
 
   const curCat = SEL.weapon?.category || "";
   elCat.innerHTML = `<option value="">-- Tanpa Senjata --</option>` + cats.map(c => `<option value="${c}" ${c === curCat ? "selected" : ""}>${c}</option>`).join("");
@@ -641,13 +609,21 @@ function renderWeaponFilter() {
   const curId = SEL.weapon?.id || "";
   elId.innerHTML = wList.length ? wList.map(w => `<option value="${w.id}" ${w.id === curId ? "selected" : ""}>${w.id}</option>`).join("") : `<option value="">-</option>`;
 
-  const wObj = wList.find(w => w.id === curId);
+  const wObj = getActiveWeaponObj();
   const curCol = SEL.weapon?.color || "";
   elCol.innerHTML = wObj ? wObj.colors.map(c => `<option value="${c}" ${c === curCol ? "selected" : ""}>${c}</option>`).join("") : `<option value="">-</option>`;
 
-  const wAnims = wObj ? (wObj.anims.includes("all") ? CAT.animations : wObj.anims) : CAT.animations;
-  elWAnim.innerHTML = `<option value="__follow__" ${SEL.weapon_animation === "__follow__" ? "selected" : ""}>🔗 Ikuti Gerakan Tubuh</option>` +
-    wAnims.map(a => `<option value="${a}" ${SEL.weapon_animation === a ? "selected" : ""}>${a}</option>`).join("");
+  document.getElementById("wpn-anims-hint").textContent = wObj
+    ? `Animasi bawaan senjata ini: ${wObj.anims.join(", ")}`
+    : "Tanpa senjata — seluruh gerakan tubuh tersedia.";
+
+  const syncAnimToWeapon = () => {
+    const wo = getActiveWeaponObj();
+    if (wo && !wo.anims.includes("all") && !wo.anims.includes(SEL.animation)) {
+      const pref = ["slash", "halfslash", "backslash", "thrust", "shoot", "spellcast", "walk"];
+      SEL.animation = pref.find(a => wo.anims.includes(a)) || wo.anims[0] || "walk";
+    }
+  };
 
   elCat.onchange = () => {
     if (!elCat.value) SEL.weapon = null;
@@ -655,55 +631,79 @@ function renderWeaponFilter() {
       const first = (CAT.weapons[elCat.value] || [])[0];
       SEL.weapon = first ? { category: elCat.value, id: first.id, color: first.colors[0] || "default" } : null;
     }
+    syncAnimToWeapon();
     renderWeaponFilter();
+    renderMotionPills();
     refreshPreview();
   };
   elId.onchange = () => {
     const w = (CAT.weapons[elCat.value] || []).find(x => x.id === elId.value);
     if (w) SEL.weapon = { category: elCat.value, id: w.id, color: w.colors[0] || "default" };
+    syncAnimToWeapon();
     renderWeaponFilter();
+    renderMotionPills();
     refreshPreview();
   };
   elCol.onchange = () => { if (SEL.weapon) { SEL.weapon.color = elCol.value; refreshPreview(); } };
-  elWAnim.onchange = () => { SEL.weapon_animation = elWAnim.value; refreshPreview(); };
 }
 
-function renderWeaponKeyframes() {
-  document.getElementById("chk-wlock").checked = Boolean(SEL.weapon_motion.lock_frame);
-  const grid = document.getElementById("kf-grid");
-  grid.innerHTML = SEL.weapon_motion.frames.map((f, i) => `
-    <div class="kf-card">
-      <b>Frame ${i + 1}</b>
-      <label>X <input type="number" min="-24" max="24" value="${f.dx}" data-kf="${i}" data-prop="dx" /></label>
-      <label>Y <input type="number" min="-24" max="24" value="${f.dy}" data-kf="${i}" data-prop="dy" /></label>
-      <label>Rot° <input type="number" min="-180" max="180" step="5" value="${f.rot}" data-kf="${i}" data-prop="rot" /></label>
-    </div>
-  `).join("");
-  grid.querySelectorAll("[data-kf]").forEach(inp => {
-    inp.onchange = () => {
-      const i = Number(inp.dataset.kf);
-      SEL.weapon_motion.frames[i][inp.dataset.prop] = Number(inp.value) || 0;
-      refreshPreview();
-    };
+function renderMotionPills() {
+  const el = document.getElementById("motion-pills");
+  const wObj = getActiveWeaponObj();
+  const wAnims = wObj ? wObj.anims : [];
+  let list = CAT.animations || [];
+  if (wObj && ONLY_WPN_ANIMS && !wAnims.includes("all")) {
+    const filtered = list.filter(a => wAnims.includes(a));
+    if (filtered.length) list = filtered;
+  }
+  el.innerHTML = list.map(a => {
+    const isSup = wObj && (wAnims.includes("all") || wAnims.includes(a));
+    return `<button class="pill ${isSup ? "supported" : ""} ${SEL.animation === a ? "active" : ""}" data-m="${a}">${a}</button>`;
+  }).join("");
+  el.querySelectorAll("[data-m]").forEach(b => {
+    b.onclick = () => { SEL.animation = b.dataset.m; renderMotionPills(); refreshPreview(); };
   });
 }
 
-function pickDefaultAppearance() {
-  const findFirst = (slot, prefStyle, prefColor) => {
-    const list = CAT.slots[slot] || [];
+function pickDefaultForMode() {
+  const pick = (slot, prefStyle, prefColor) => {
+    const list = getFilteredSlotItems(slot);
     if (!list.length) return null;
-    const item = list.find(x => x.style.includes(prefStyle)) || list[0];
-    const col = item.colors.find(c => c.includes(prefColor)) || item.colors[0];
+    const item = (prefStyle && list.find(x => x.style.includes(prefStyle))) || list[0];
+    const col = (prefColor && item.colors.find(c => c.includes(prefColor))) || item.colors[0];
     return { style: item.style, color: col };
   };
-  SEL.body = findFirst("body", "male", "light");
-  SEL.head = findFirst("head", "human/male", "light");
-  SEL.eyes = findFirst("eyes", "human", "brown") || findFirst("eyes", "", "");
-  SEL.hair = findFirst("hair", "short", "brown");
-  SEL.torso = findFirst("torso", "plate/male", "steel") || findFirst("torso", "male", "brown");
-  SEL.legs = findFirst("legs", "pants/male", "charcoal") || findFirst("legs", "male", "black");
-  SEL.feet = findFirst("feet", "boots", "brown");
-  SEL.hat = null;
+  if (MODE === "human") {
+    SEL.direction = "right";
+    SEL.body = pick("body", HUMAN_BT, "light");
+    SEL.head = pick("head", "human", "light");
+    SEL.eyes = pick("eyes", "human", "brown");
+    SEL.hair = pick("hair", "short", "brown");
+    SEL.torso = pick("torso", "plate", "steel") || pick("torso", "", "brown");
+    SEL.legs = pick("legs", "pants", "charcoal") || pick("legs", "", "black");
+    SEL.feet = pick("feet", "boots", "brown");
+    SEL.hat = null;
+  } else {
+    SEL.direction = "left";
+    SEL.body = pick("body", "orc", "") || pick("body", "skeleton", "") || pick("body", "", "");
+    SEL.head = pick("head", "orc", "") || pick("head", "skeleton", "") || pick("head", "", "");
+    SEL.eyes = null;
+    SEL.hair = null;
+    SEL.hat = null;
+    SEL.torso = pick("torso", "leather", "brown") || null;
+    SEL.legs = pick("legs", "pants", "brown") || null;
+    SEL.feet = null;
+  }
+  document.getElementById("sel-dir").value = SEL.direction;
+}
+
+function renderAllControls() {
+  document.getElementById("tab-human").classList.toggle("active", MODE === "human");
+  document.getElementById("tab-monster").classList.toggle("active", MODE === "monster");
+  renderBodyTypePills();
+  renderAppearanceSlots();
+  renderWeaponFilter();
+  renderMotionPills();
 }
 
 async function refreshPreview() {
@@ -713,7 +713,7 @@ async function refreshPreview() {
   document.getElementById("live-sprite").style.backgroundImage = `url('${r.strip_b64}')`;
   document.getElementById("live-strip").src = r.strip_b64;
   document.getElementById("live-portrait").src = r.portrait_b64;
-  document.getElementById("status").textContent = `✓ Tubuh:${SEL.animation} | Senjata:${SEL.weapon_animation === "__follow__" ? SEL.animation : SEL.weapon_animation} • ${(r.strip_bytes/1024).toFixed(2)} KB`;
+  document.getElementById("status").textContent = `✓ ${MODE === "human" ? "Manusia (" + HUMAN_BT + ")" : "Monster"} • ${SEL.animation} (${SEL.direction}) • ${(r.strip_bytes/1024).toFixed(2)} KB`;
   document.getElementById("used-logs").innerHTML = (r.used || []).map(u => `<div>[${u.slot}] ${u.file}</div>`).join("");
 }
 
@@ -730,6 +730,9 @@ function updateFramePlayback() {
   }
 }
 
+document.getElementById("tab-human").onclick = () => { MODE = "human"; pickDefaultForMode(); renderAllControls(); refreshPreview(); };
+document.getElementById("tab-monster").onclick = () => { MODE = "monster"; pickDefaultForMode(); renderAllControls(); refreshPreview(); };
+document.getElementById("chk-only-wpn-anims").onchange = e => { ONLY_WPN_ANIMS = e.target.checked; renderMotionPills(); };
 document.getElementById("btn-play").onclick = () => { PAUSED = !PAUSED; updateFramePlayback(); };
 document.getElementById("btn-prev-f").onclick = () => { PAUSED = true; MANUAL_FRAME = (MANUAL_FRAME + 4) % 5; updateFramePlayback(); };
 document.getElementById("btn-next-f").onclick = () => { PAUSED = true; MANUAL_FRAME = (MANUAL_FRAME + 1) % 5; updateFramePlayback(); };
@@ -739,21 +742,13 @@ document.getElementById("rng-speed").oninput = e => {
   document.getElementById("lbl-speed").textContent = sec + "s";
   document.getElementById("live-sprite").style.animationDuration = sec + "s";
 };
-document.getElementById("btn-clear-wpn").onclick = () => { SEL.weapon = null; renderWeaponFilter(); refreshPreview(); };
-document.getElementById("chk-wlock").onchange = e => { SEL.weapon_motion.lock_frame = e.target.checked; refreshPreview(); };
-
-document.getElementById("sel-wpreset").onchange = e => {
-  const p = CAT.weapon_presets[e.target.value];
-  if (!p) return;
-  SEL.weapon_motion = { lock_frame: p.lock_frame, frames: p.frames.map(f => ({ ...f })) };
-  renderWeaponKeyframes();
-  refreshPreview();
-};
+document.getElementById("btn-clear-wpn").onclick = () => { SEL.weapon = null; renderWeaponFilter(); renderMotionPills(); refreshPreview(); };
 
 document.getElementById("btn-random").onclick = () => {
   const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
-  for (const k of ["body", "head", "eyes", "hair", "torso", "legs", "feet"]) {
-    const list = CAT.slots[k] || [];
+  const keys = MODE === "human" ? ["body", "head", "eyes", "hair", "torso", "legs", "feet"] : ["body", "head", "torso", "legs"];
+  for (const k of keys) {
+    const list = getFilteredSlotItems(k);
     if (list.length) {
       const it = rnd(list);
       SEL[k] = { style: it.style, color: rnd(it.colors) };
@@ -783,14 +778,12 @@ document.getElementById("btn-scan").onclick = async () => {
 
 function initUI() {
   document.getElementById("inp-dir").value = CAT.lpc_dir || "";
-  document.getElementById("meta").textContent = `${CAT.file_count} PNG • ${CAT.slots.head.length} Kepala • ${CAT.animations.length} Gerakan • ${Object.keys(CAT.weapons).length} Kategori Senjata`;
+  const hCount = (CAT.slots.head || []).filter(x => x.kind === "human").length;
+  const mCount = (CAT.slots.head || []).filter(x => x.kind === "monster").length;
+  document.getElementById("meta").textContent = `${CAT.file_count} PNG • Kepala Manusia: ${hCount} • Kepala Monster: ${mCount} • ${Object.keys(CAT.weapons).length} Kategori Senjata`;
   document.getElementById("sel-export-slot").innerHTML = CAT.export_slots.map(s => `<option value="${s.id}">${s.label}</option>`).join("");
-  document.getElementById("sel-wpreset").innerHTML = Object.entries(CAT.weapon_presets).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("");
-  pickDefaultAppearance();
-  renderAppearanceSlots();
-  renderMotionPills();
-  renderWeaponFilter();
-  renderWeaponKeyframes();
+  pickDefaultForMode();
+  renderAllControls();
   refreshPreview();
 }
 
@@ -873,7 +866,7 @@ class StudioHandler(BaseHTTPRequestHandler):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Battle-Smith RPG Character, Motion & Weapon Motion Studio v3")
+    parser = argparse.ArgumentParser(description="Battle-Smith RPG LPC Appearance Studio v4")
     parser.add_argument("--lpc-dir", help="Path folder Universal-LPC-Spritesheet-Character-Generator")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--no-browser", action="store_true")
@@ -881,8 +874,8 @@ def main():
 
     lpc_dir = auto_detect_lpc_dir(args.lpc_dir)
     cnt = scan_lpc_catalog(lpc_dir)
-    print(f"Battle-Smith Studio v3 aktif di http://127.0.0.1:{args.port}")
-    print(f"Folder LPC: {lpc_dir or '(belum terdeteksi)'} ({cnt} PNG, {len(STATE['slots']['head'])} Kepala, {len(STATE['animations'])} Gerakan)")
+    print(f"Battle-Smith LPC Appearance Studio v4 aktif di http://127.0.0.1:{args.port}")
+    print(f"Folder LPC: {lpc_dir or '(belum terdeteksi)'} ({cnt} PNG)")
     if not args.no_browser:
         webbrowser.open(f"http://127.0.0.1:{args.port}")
     ThreadingHTTPServer(("127.0.0.1", args.port), StudioHandler).serve_forever()
