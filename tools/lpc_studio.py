@@ -518,7 +518,7 @@ let MODE = "human"; // "human" | "monster"
 let HUMAN_BT = "male"; // "male" | "female" | "muscular" | "pregnant"
 let ONLY_WPN_ANIMS = true;
 const SEL = {
-  animation: "walk",
+  animation: "idle",
   direction: "right",
   body: null, head: null, eyes: null, hair: null, hat: null, torso: null, legs: null, feet: null,
   weapon: null

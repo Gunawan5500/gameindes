@@ -1512,16 +1512,16 @@ body.mode-portrait .wizard-steps {
 }
 
 .sprite-5f.hero-anim {
-  animation-duration: 0.78s;
+  animation-duration: 1.15s;
 }
 
 .sprite-5f.enemy-anim {
-  animation-duration: 0.92s;
+  animation-duration: 1.25s;
   animation-delay: -0.35s;
 }
 
 .sprite-5f.boss-anim {
-  animation-duration: 1.05s;
+  animation-duration: 1.35s;
   animation-delay: -0.25s;
 }
 
