@@ -190,6 +190,15 @@ def detect_body_type_tag(style):
     return "any"
 
 
+CATEGORY_ANIMS = {
+    "ranged":  ["shoot", "walk", "idle", "combat_idle"],
+    "magic":   ["spellcast", "thrust", "walk", "idle", "combat_idle"],
+    "polearm": ["thrust", "slash", "walk", "idle", "combat_idle"],
+    "sword":   ["slash", "halfslash", "backslash", "thrust", "walk", "idle", "combat_idle"],
+    "blunt":   ["slash", "halfslash", "backslash", "walk", "idle", "combat_idle"],
+}
+
+
 def build_ui_catalog():
     slots_out = {}
     for slot_name, styles in STATE["slots"].items():
@@ -206,14 +215,32 @@ def build_ui_catalog():
 
     weapons_out = {}
     for w_cat in sorted(STATE["weapons"].keys()):
+        cat_default = CATEGORY_ANIMS.get(w_cat, ["slash", "walk", "idle", "combat_idle"])
         w_list = []
         for w_id in sorted(STATE["weapons"][w_cat].keys()):
             colors_map = STATE["weapons"][w_cat][w_id]
-            all_anims = set()
+            exact_anims = set()
+            has_full = False
             for amap in colors_map.values():
                 for a in amap.keys():
-                    all_anims.add("all" if a == "__full__" else a)
-            w_list.append({"id": w_id, "colors": sorted(colors_map.keys()), "anims": sorted(all_anims)})
+                    if a == "__full__":
+                        has_full = True
+                    else:
+                        exact_anims.add(a)
+            if exact_anims:
+                # Prioritaskan animasi nyata yang ada di folder senjata tsb
+                ordered = [a for a in cat_default if a in exact_anims] + sorted(exact_anims - set(cat_default))
+            elif has_full:
+                # Untuk full-sheet LPC, gunakan daftar animasi autentik sesuai kategori senjata (misal ranged -> shoot!)
+                ordered = list(cat_default)
+            else:
+                ordered = list(cat_default)
+            w_list.append({
+                "id": w_id,
+                "colors": sorted(colors_map.keys()),
+                "anims": ordered,
+                "primary_anim": ordered[0] if ordered else "walk",
+            })
         weapons_out[w_cat] = w_list
 
     return {
@@ -298,12 +325,12 @@ def render_layers_from_selection(sel):
                 if f0.getbbox() is not None:
                     portrait_canvas.alpha_composite(f0)
 
-    # Senjata asli LPC (100% animasi bawaan senjata, tanpa rotasi/geser buatan)
+    # Senjata asli LPC (100% animasi bawaan senjata, tanpa fallback ke animasi tipe lain)
     wpn = sel.get("weapon")
     if wpn and wpn.get("category") and wpn.get("id"):
         amap = STATE["weapons"].get(wpn["category"], {}).get(wpn["id"], {}).get(wpn.get("color") or "default")
         if amap:
-            f_wpn = pick_file_for_anim(amap, anim)
+            f_wpn = amap.get(anim) or amap.get("__full__")
             if f_wpn:
                 with Image.open(f_wpn).convert("RGBA") as wsh:
                     w_strip = lp.extract_5frame_strip_smart(wsh, anim, direction, recipes_grid)
@@ -626,9 +653,8 @@ function renderWeaponFilter() {
 
   const syncAnimToWeapon = () => {
     const wo = getActiveWeaponObj();
-    if (wo && !wo.anims.includes("all") && !wo.anims.includes(SEL.animation)) {
-      const pref = ["slash", "halfslash", "backslash", "thrust", "shoot", "spellcast", "walk"];
-      SEL.animation = pref.find(a => wo.anims.includes(a)) || wo.anims[0] || "walk";
+    if (wo) {
+      SEL.animation = wo.primary_anim || wo.anims[0] || "walk";
     }
   };
 
