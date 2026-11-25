@@ -70,6 +70,8 @@ function buildStandalonePreview(outPath) {
     "dist/backend_bundle.js",
     "js/asset_manifest.js",
     "js/audio_manager.js",
+    "js/perf_mode.js",
+    "js/capacitor_bridge.js",
     "js/backend_bridge.js",
     "js/screens/title_wizard.js",
     "js/screens/class_skill.js",
@@ -87,7 +89,7 @@ function buildStandalonePreview(outPath) {
   let out = indexHtml.replace(
     /<link\s+rel="stylesheet"\s+href="css\/style\.css"\s*\/?>/i,
     `<style>\n${css}\n</style>`
-  );
+  ).replace(/<link\s+rel="manifest"[^>]*>/i, "");
 
   // Replace external script tags block with inlined areas, assets, and scripts
   const scriptsBlock = [
@@ -98,7 +100,7 @@ function buildStandalonePreview(outPath) {
 
   out = out.replace(
     /<!-- 100% Offline Local Scripts[\s\S]*?<\/body>/i,
-    `<!-- 100% Offline Inlined Scripts (Fase 4 Standalone Preview) -->\n  ${scriptsBlock}\n</body>`
+    `<!-- 100% Offline Inlined Scripts (Fase 5 Standalone Preview) -->\n  ${scriptsBlock}\n</body>`
   );
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -106,5 +108,5 @@ function buildStandalonePreview(outPath) {
   console.log(`Built standalone preview: ${outPath} (${(out.length / 1024).toFixed(1)} KB, ${Object.keys(rawAreas).length} areas, ${Object.keys(inlineAssets).length} inline assets)`);
 }
 
-const outArg = process.argv[2] || path.join(ROOT, "app", "dist", "fase4_offline_preview.html");
+const outArg = process.argv[2] || path.join(ROOT, "app", "dist", "fase5_offline_preview.html");
 buildStandalonePreview(outArg);

@@ -755,11 +755,13 @@
   document.getElementById("btn-open-settings").onclick = () => {
     if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
     syncAudioControls();
+    syncPerfControls();
     setSettingsModal(true);
   };
   document.getElementById("btn-hud-settings-sm").onclick = () => {
     if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
     syncAudioControls();
+    syncPerfControls();
     setSettingsModal(true);
   };
   document.getElementById("btn-close-settings").onclick = () => setSettingsModal(false);
@@ -779,6 +781,50 @@
     }
     if (volSlider) volSlider.value = String(st.volumePct);
     if (volLbl) volLbl.textContent = `${st.volumePct}%`;
+  }
+
+  // Fase 5: Sinkronisasi & Binding Lite Mode Oppo A54 + Monitor RAM
+  function syncPerfControls() {
+    if (!global.BSRPG_PERF) return;
+    const st = global.BSRPG_PERF.getState();
+    const btnLite = document.getElementById("btn-lite-mode");
+    const ramLbl = document.getElementById("perf-ram-summary");
+    if (btnLite) {
+      btnLite.textContent = st.liteMode ? "🌿 Lite: ON" : "⚡ Lite: OFF";
+      btnLite.classList.toggle("teal", st.liteMode);
+    }
+    if (ramLbl) {
+      const heapTxt = st.jsHeapMb != null ? ` • JS Heap ${st.jsHeapMb} MB` : "";
+      ramLbl.textContent = `${st.areasInRam}/${st.totalAreas} Area di RAM${heapTxt} • 0 backdrop-filter`;
+    }
+  }
+
+  const btnLiteMode = document.getElementById("btn-lite-mode");
+  if (btnLiteMode && global.BSRPG_PERF) {
+    btnLiteMode.onclick = () => {
+      const st = global.BSRPG_PERF.toggleLiteMode();
+      syncPerfControls();
+      if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+      showToast(st.liteMode
+        ? "🌿 Lite Mode Oppo A54 AKTIF (animasi berulang dimatikan, ekstra hemat baterai/RAM)"
+        : "⚡ Mode Normal AKTIF (animasi 5-frame & efek ringan aktif)");
+    };
+  }
+  syncPerfControls();
+
+  // Fase 5: Integrasi Tombol Back Android (Capacitor APK)
+  if (global.BSRPG_CAPACITOR) {
+    global.BSRPG_CAPACITOR.registerBackHandler(() => {
+      if (uiState.itemModalOpen) { setItemModal(false); return true; }
+      if (uiState.restModalOpen) { setRestModal(false); return true; }
+      if (uiState.settingsOpen) { setSettingsModal(false); return true; }
+      if (uiState.questOpen) {
+        uiState.questOpen = false;
+        document.getElementById("quest-drawer").classList.add("hidden");
+        return true;
+      }
+      return false;
+    });
   }
 
   const btnAudioMute = document.getElementById("btn-audio-mute");

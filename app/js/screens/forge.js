@@ -643,6 +643,7 @@
         });
         if (!res.ok) return showToast(`⚠ ${res.reason}`);
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("forge_hammer");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass(".forge-banner-thumb", "fx-forge-flash", 380);
         if (res.crafted) {
           showToast(`🔥 Sukses menempa ${res.item.name} [${res.item.qualityName}]!`);
         } else {
@@ -694,6 +695,7 @@
         });
         if (!r.ok) return showToast(`⚠ ${r.reason}`);
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play(r.fusedSuccess ? "victory" : "forge_hammer");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass(".forge-banner-thumb", "fx-forge-flash", 380);
         showToast(r.fusedSuccess ? `🔮 ${r.message}` : `💥 ${r.message}`);
       };
     }
@@ -714,6 +716,7 @@
         });
         if (!r.ok) return showToast(`⚠ ${r.reason}`);
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("forge_hammer");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass(".forge-banner-thumb", "fx-forge-flash", 380);
         if (r.succeeded) {
           showToast(`⚡ SUKSES! ${r.item.name} naik ke +${r.newPlus}!`);
         } else {

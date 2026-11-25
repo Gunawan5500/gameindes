@@ -1,0 +1,17 @@
+{
+  "name": "Battle-Smith RPG",
+  "short_name": "BattleSmith",
+  "description": "100% Offline Solo RPG + Blacksmithing (Mafia Wars x Idle)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1118",
+  "theme_color": "#0b1118",
+  "icons": [
+    {
+      "src": "assets/ui/avatar_hero.webp",
+      "sizes": "96x96",
+      "type": "image/webp"
+    }
+  ]
+}

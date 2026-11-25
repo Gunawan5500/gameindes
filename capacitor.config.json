@@ -1,0 +1,15 @@
+{
+  "appId": "com.battlesmith.rpg",
+  "appName": "Battle-Smith RPG",
+  "webDir": "app",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0b1118",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  }
+}

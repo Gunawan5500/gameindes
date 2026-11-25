@@ -1,0 +1,23 @@
+{
+  "name": "battle-smith-rpg",
+  "version": "1.0.0",
+  "description": "Battle-Smith RPG — 100% Offline Solo RPG + Blacksmithing (Mafia Wars x Idle) untuk Laptop & Android Oppo A54",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:assets": "python3 tools/generate_fase4_assets.py",
+    "build:preview": "node tools/build_offline_app.mjs app/dist/fase5_offline_preview.html",
+    "verify:capacitor": "node tools/verify_capacitor_ready.mjs",
+    "cap:add:android": "npx cap add android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0"
+  }
+}

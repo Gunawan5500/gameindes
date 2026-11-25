@@ -562,6 +562,7 @@
         const r = Bridge.runIdle(cfg);
         if (r.aborted) return showToast(`⚠ ${r.reason}`);
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play(cfg.mode === "Smith" ? "forge_hammer" : "slash");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass('[data-sprite-stage="idle"]', "fx-hit-shake", 300);
         const matCount = Object.values(r.materialsLooted || {}).reduce((a, b) => a + b, 0);
         showToast(`✓ Idle selesai: +${r.battleXpGained} BTL / +${r.smithXpGained} SMT XP, +${matCount} Bahan ke Tas`);
       };
@@ -574,6 +575,7 @@
         const r = Bridge.challengeBossMission(bossId);
         if (!r.ok) return showToast(`⚠ ${r.reason}`);
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play(r.won ? "victory" : "slash");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass('[data-sprite-stage="boss"]', "fx-hit-shake", 320);
         showToast(r.won
           ? `🏆 MENANG DUEL melawan ${r.bossName}! Sisa HP ${r.duelHp.playerEndHp}/${r.duelHp.playerMaxHp}.`
           : `☠ Tumbang melawan ${r.bossName}. Cooldown ${r.cooldownDays} hari.`);
@@ -587,6 +589,7 @@
       btnGate.onclick = () => {
         const r = Bridge.challengeGateBoss({ allocateSmithPointTo: ui.gateAllocClass });
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play(r.won ? "victory" : "slash");
+        if (global.BSRPG_PERF) global.BSRPG_PERF.pulseClass('[data-sprite-stage="boss"]', "fx-hit-shake", 320);
         showToast(r.won
           ? `🏆 LULUS GATE! Cap Stat naik ke ${r.newStatCap} & +1 poin ke ${ui.gateAllocClass}!`
           : `☠ Kalah Gate Boss (Sisa HP Boss ${r.duelHp.bossEndHp}/${r.duelHp.bossMaxHp}). Kena +1 Kutukan Gate!`);
