@@ -1,10 +1,11 @@
 {
-  "version": "1.0",
-  "description": "Katalog resep deterministik Dual-Tier (Tahap 1 Pre-Bake HP Oppo A54 + Tahap 2 Mini-Pack Laptop) untuk Universal-LPC-Spritesheet-Character-Generator.",
+  "version": "2.0",
+  "description": "Katalog resep deterministik Dual-Tier (Modern LPC Per-Animasi + Legacy Full Sheet) untuk HP Oppo A54 (Stage 1) & Laptop Mini-Pack (Stage 2).",
   "grid": {
     "frame_width": 64,
     "frame_height": 64,
     "frames_per_strip": 5,
+    "dir_row_4": { "up": 0, "left": 1, "down": 2, "right": 3 },
     "animations": {
       "spellcast": { "up": 0, "left": 1, "down": 2, "right": 3 },
       "thrust":    { "up": 4, "left": 5, "down": 6, "right": 7 },
@@ -23,13 +24,14 @@
       "out_sprite": "app/assets/sprites/hero_smith_5f.webp",
       "out_portrait": "app/assets/ui/avatar_hero.webp",
       "layers": [
-        ["body/bodies/male/light.png", "body/male/light.png"],
-        ["legs/pants/male/charcoal.png", "legs/armour/plate/male/steel.png"],
-        ["feet/boots/male/brown.png", "feet/shoes/male/brown.png"],
-        ["torso/armour/plate/male/steel.png", "torso/chain/mail/male/gray.png", "torso/clothes/longsleeve/male/brown.png"],
-        ["torso/aprons/apron/male/brown.png", "torso/waist/belt_leather/male/brown.png"],
-        ["hair/short/male/brown.png", "hair/plain/male/brown.png"],
-        ["weapon/blunt/warhammer/universal/warhammer.png", "weapon/sword/longsword/universal/longsword.png"]
+        { "part": "body/bodies/male", "colors": ["light", "amber", "olive"] },
+        { "part": "head/heads/human/male", "colors": ["light", "amber", "olive"] },
+        { "part": "legs/pants/male", "colors": ["charcoal", "black", "navy", "brown"] },
+        { "part": "feet/boots", "gender": "male", "colors": ["brown", "black", "leather"] },
+        { "part": "torso/armour/plate/male", "fallback_parts": ["torso/chain/mail/male", "torso/clothes/longsleeve/male"], "colors": ["steel", "iron", "gray", "brown"] },
+        { "part": "torso/aprons", "gender": "male", "colors": ["brown", "leather", "gray"] },
+        { "part": "hair/short", "fallback_parts": ["hair/plain", "hair/messy"], "gender": "male", "colors": ["brown", "chestnut", "black"] },
+        { "part": "weapon/blunt/warhammer", "fallback_parts": ["weapon/sword/longsword", "weapon/sword/arming"], "colors": ["steel", "iron", "warhammer", "longsword"] }
       ]
     },
     {
@@ -42,11 +44,12 @@
       "out_sprite": "app/assets/sprites/apprentice_kael_5f.webp",
       "out_portrait": "app/assets/ui/portraits/portrait_kael.webp",
       "layers": [
-        ["body/bodies/male/olive.png", "body/male/tanned.png", "body/bodies/male/light.png"],
-        ["legs/pants/male/navy.png", "legs/pants/male/black.png"],
-        ["torso/armour/leather/male/brown.png", "torso/clothes/longsleeve/male/red.png"],
-        ["hair/messy1/male/black.png", "hair/short/male/black.png"],
-        ["weapon/sword/longsword/universal/longsword.png"]
+        { "part": "body/bodies/male", "colors": ["olive", "amber", "light"] },
+        { "part": "head/heads/human/male", "colors": ["olive", "amber", "light"] },
+        { "part": "legs/pants/male", "colors": ["navy", "black", "charcoal"] },
+        { "part": "torso/armour/leather/male", "fallback_parts": ["torso/clothes/longsleeve/male"], "colors": ["brown", "red", "maroon"] },
+        { "part": "hair/messy", "fallback_parts": ["hair/short", "hair/plain"], "gender": "male", "colors": ["black", "dark_brown", "brown"] },
+        { "part": "weapon/sword/longsword", "fallback_parts": ["weapon/sword/arming", "weapon/sword/dagger"], "colors": ["steel", "longsword", "iron"] }
       ]
     },
     {
@@ -59,11 +62,12 @@
       "out_sprite": "app/assets/sprites/apprentice_lyra_5f.webp",
       "out_portrait": "app/assets/ui/portraits/portrait_lyra.webp",
       "layers": [
-        ["body/bodies/female/light.png", "body/female/light.png"],
-        ["legs/skirts/plain/female/blue.png", "legs/pants/female/blue.png"],
-        ["torso/clothes/robes/female/blue.png", "torso/clothes/longsleeve/female/blue.png"],
-        ["hair/long/female/blonde.png", "hair/long/female/gold.png"],
-        ["weapon/magic/staff/universal/staff.png", "weapon/polearm/staff/universal/staff.png"]
+        { "part": "body/bodies/female", "colors": ["light", "amber"] },
+        { "part": "head/heads/human/female", "fallback_parts": ["head/heads/human/male"], "colors": ["light", "amber"] },
+        { "part": "legs/skirts/plain/female", "fallback_parts": ["legs/pants/female"], "colors": ["blue", "navy", "teal"] },
+        { "part": "torso/clothes/robes/female", "fallback_parts": ["torso/clothes/longsleeve/female", "torso/clothes/tunic/female"], "colors": ["blue", "navy", "teal"] },
+        { "part": "hair/long", "fallback_parts": ["hair/princess", "hair/ponytail"], "gender": "female", "colors": ["blonde", "gold", "sandy"] },
+        { "part": "weapon/magic/staff", "fallback_parts": ["weapon/polearm/staff", "weapon/magic/wand"], "colors": ["staff", "wood", "brown"] }
       ]
     },
     {
@@ -76,11 +80,12 @@
       "out_sprite": "app/assets/sprites/apprentice_garrick_5f.webp",
       "out_portrait": "app/assets/ui/portraits/portrait_garrick.webp",
       "layers": [
-        ["body/bodies/muscular/tanned.png", "body/bodies/male/tanned.png", "body/male/tanned.png"],
-        ["legs/armour/plate/male/steel.png", "legs/pants/male/charcoal.png"],
-        ["torso/armour/plate/male/steel.png", "torso/armour/plate/male/iron.png"],
-        ["beards/beard/male/brown.png", "facial/beard/male/brown.png"],
-        ["hair/bald/male/brown.png", "hair/short/male/brown.png"]
+        { "part": "body/bodies/muscular", "fallback_parts": ["body/bodies/male"], "colors": ["taupe", "olive", "amber", "light"] },
+        { "part": "head/heads/human/male", "colors": ["taupe", "olive", "amber", "light"] },
+        { "part": "legs/armour/plate/male", "fallback_parts": ["legs/pants/male"], "colors": ["steel", "iron", "charcoal"] },
+        { "part": "torso/armour/plate/male", "fallback_parts": ["torso/chain/mail/male"], "colors": ["steel", "iron", "gray"] },
+        { "part": "beards/beard", "fallback_parts": ["facial/beard"], "gender": "male", "colors": ["brown", "chestnut", "black"] },
+        { "part": "hair/short", "fallback_parts": ["hair/plain"], "gender": "male", "colors": ["brown", "black"] }
       ]
     },
     {
@@ -93,11 +98,12 @@
       "out_sprite": "app/assets/sprites/apprentice_vesper_5f.webp",
       "out_portrait": "app/assets/ui/portraits/portrait_vesper.webp",
       "layers": [
-        ["body/bodies/female/olive.png", "body/bodies/female/light.png"],
-        ["legs/pants/female/green.png", "legs/pants/female/brown.png"],
-        ["torso/clothes/tunic/female/green.png", "torso/armour/leather/female/brown.png"],
-        ["hat/hood/female/green.png", "hair/ponytail/female/black.png"],
-        ["weapon/ranged/bow/normal/universal/bow.png"]
+        { "part": "body/bodies/female", "colors": ["olive", "amber", "light"] },
+        { "part": "head/heads/human/female", "fallback_parts": ["head/heads/human/male"], "colors": ["olive", "amber", "light"] },
+        { "part": "legs/pants/female", "colors": ["forest", "green", "brown", "black"] },
+        { "part": "torso/clothes/tunic/female", "fallback_parts": ["torso/armour/leather/female", "torso/clothes/longsleeve/female"], "colors": ["forest", "green", "brown"] },
+        { "part": "hat/hood", "fallback_parts": ["hair/ponytail"], "gender": "female", "colors": ["forest", "green", "black"] },
+        { "part": "weapon/ranged/bow", "colors": ["normal", "bow", "wood", "brown"] }
       ]
     },
     {
@@ -110,11 +116,12 @@
       "out_sprite": "app/assets/sprites/apprentice_thorne_5f.webp",
       "out_portrait": "app/assets/ui/portraits/portrait_thorne.webp",
       "layers": [
-        ["body/bodies/male/brown.png", "body/bodies/male/tanned.png"],
-        ["legs/pants/male/brown.png", "legs/pants/male/black.png"],
-        ["torso/clothes/vest/male/maroon.png", "torso/clothes/longsleeve/male/maroon.png"],
-        ["hair/short/male/gray.png", "hair/short/male/white.png"],
-        ["weapon/blunt/mace/universal/mace.png", "weapon/blunt/warhammer/universal/warhammer.png"]
+        { "part": "body/bodies/male", "colors": ["brown", "bronze", "amber", "olive"] },
+        { "part": "head/heads/human/male", "colors": ["brown", "bronze", "amber", "olive"] },
+        { "part": "legs/pants/male", "colors": ["brown", "black", "charcoal"] },
+        { "part": "torso/clothes/vest/male", "fallback_parts": ["torso/clothes/longsleeve/male"], "colors": ["maroon", "red", "brown"] },
+        { "part": "hair/short", "fallback_parts": ["hair/plain"], "gender": "male", "colors": ["gray", "white", "ash"] },
+        { "part": "weapon/blunt/mace", "fallback_parts": ["weapon/blunt/warhammer", "weapon/sword/longsword"], "colors": ["mace", "steel", "iron"] }
       ]
     },
     {
@@ -126,11 +133,12 @@
       "out_sprite": "app/assets/sprites/enemy_humanoid_5f.webp",
       "out_portrait": null,
       "layers": [
-        ["body/bodies/male/tanned.png", "body/male/tanned.png"],
-        ["legs/pants/male/black.png"],
-        ["torso/armour/leather/male/black.png", "torso/clothes/longsleeve/male/maroon.png"],
-        ["hat/hood/male/black.png", "hat/bandana/male/red.png"],
-        ["weapon/sword/dagger/universal/dagger.png", "weapon/sword/scimitar/universal/scimitar.png"]
+        { "part": "body/bodies/male", "colors": ["olive", "amber", "light"] },
+        { "part": "head/heads/human/male", "colors": ["olive", "amber", "light"] },
+        { "part": "legs/pants/male", "colors": ["black", "charcoal", "brown"] },
+        { "part": "torso/armour/leather/male", "fallback_parts": ["torso/clothes/longsleeve/male"], "colors": ["black", "maroon", "brown"] },
+        { "part": "hat/hood", "fallback_parts": ["hat/bandana"], "gender": "male", "colors": ["black", "red", "maroon"] },
+        { "part": "weapon/sword/dagger", "fallback_parts": ["weapon/sword/scimitar", "weapon/sword/longsword"], "colors": ["dagger", "steel", "iron"] }
       ]
     },
     {
@@ -142,10 +150,11 @@
       "out_sprite": "app/assets/sprites/enemy_undead_5f.webp",
       "out_portrait": null,
       "layers": [
-        ["body/bodies/skeleton/skeleton.png", "body/skeleton/skeleton.png", "body/bodies/male/zombie.png"],
-        ["torso/clothes/robes/male/purple.png", "torso/clothes/robes/male/black.png"],
-        ["hat/hood/male/purple.png", "hat/hood/male/black.png"],
-        ["weapon/polearm/scythe/universal/scythe.png", "weapon/sword/longsword/universal/longsword.png"]
+        { "part": "body/bodies/skeleton", "fallback_parts": ["body/bodies/male"], "colors": ["skeleton", "zombie", "pale_green"] },
+        { "part": "head/heads/skeleton", "fallback_parts": ["head/heads/human/male"], "colors": ["skeleton", "zombie", "pale_green"] },
+        { "part": "torso/clothes/robes/male", "fallback_parts": ["torso/clothes/longsleeve/male"], "colors": ["purple", "black", "charcoal"] },
+        { "part": "hat/hood", "gender": "male", "colors": ["purple", "black"] },
+        { "part": "weapon/polearm/scythe", "fallback_parts": ["weapon/sword/longsword"], "colors": ["scythe", "steel", "iron"] }
       ]
     },
     {
@@ -157,10 +166,11 @@
       "out_sprite": "app/assets/sprites/enemy_orc_5f.webp",
       "out_portrait": null,
       "layers": [
-        ["body/bodies/male/orc.png", "body/male/orc.png", "body/bodies/male/green.png"],
-        ["legs/pants/male/brown.png"],
-        ["torso/armour/leather/male/brown.png"],
-        ["weapon/blunt/axe/universal/axe.png", "weapon/polearm/halberd/universal/halberd.png"]
+        { "part": "body/bodies/male", "colors": ["green", "orc", "olive_green", "fur_green"] },
+        { "part": "head/heads/orc/male", "fallback_parts": ["head/heads/goblin", "head/heads/human/male"], "colors": ["green", "orc", "olive_green"] },
+        { "part": "legs/pants/male", "colors": ["brown", "charcoal", "black"] },
+        { "part": "torso/armour/leather/male", "fallback_parts": ["torso/clothes/vest/male"], "colors": ["brown", "black"] },
+        { "part": "weapon/blunt/axe", "fallback_parts": ["weapon/polearm/halberd", "weapon/sword/scimitar"], "colors": ["axe", "steel", "iron"] }
       ]
     },
     {
@@ -172,12 +182,13 @@
       "out_sprite": "app/assets/sprites/boss_humanoid_5f.webp",
       "out_portrait": null,
       "layers": [
-        ["body/bodies/muscular/light.png", "body/bodies/male/light.png"],
-        ["legs/armour/plate/male/black.png", "legs/armour/plate/male/steel.png"],
-        ["torso/armour/plate/male/black.png", "torso/armour/plate/male/gold.png"],
-        ["cape/solid/male/red.png", "cape/tattered/male/red.png"],
-        ["hat/helmet/barbarian/male/iron.png", "hat/crown/male/gold.png"],
-        ["weapon/sword/greatsword/universal/greatsword.png", "weapon/sword/longsword/universal/longsword.png"]
+        { "part": "body/bodies/muscular", "fallback_parts": ["body/bodies/male"], "colors": ["light", "amber", "taupe"] },
+        { "part": "head/heads/human/male", "colors": ["light", "amber", "taupe"] },
+        { "part": "legs/armour/plate/male", "colors": ["black", "iron", "steel"] },
+        { "part": "torso/armour/plate/male", "colors": ["black", "gold", "steel"] },
+        { "part": "cape/solid", "fallback_parts": ["cape/tattered"], "gender": "male", "colors": ["red", "maroon", "black"] },
+        { "part": "hat/helmet/barbarian", "fallback_parts": ["hat/crown", "hat/helmet"], "gender": "male", "colors": ["iron", "gold", "steel", "black"] },
+        { "part": "weapon/sword/greatsword", "fallback_parts": ["weapon/sword/longsword"], "colors": ["greatsword", "steel", "iron"] }
       ]
     }
   ],
@@ -186,23 +197,30 @@
     "manifest_file": "app/assets/lpc_parts/manifest_lpc_parts.json",
     "slots": {
       "body": [
-        { "id": "light",  "patterns": ["body/bodies/male/light.png", "body/male/light.png"] },
-        { "id": "olive",  "patterns": ["body/bodies/male/olive.png", "body/male/tanned.png"] },
-        { "id": "brown",  "patterns": ["body/bodies/male/brown.png", "body/male/dark.png"] },
-        { "id": "orc",    "patterns": ["body/bodies/male/orc.png", "body/male/orc.png"] },
-        { "id": "skel",   "patterns": ["body/bodies/skeleton/skeleton.png", "body/skeleton/skeleton.png"] }
+        { "id": "light",  "part": "body/bodies/male", "colors": ["light"] },
+        { "id": "olive",  "part": "body/bodies/male", "colors": ["olive", "amber"] },
+        { "id": "brown",  "part": "body/bodies/male", "colors": ["brown", "bronze"] },
+        { "id": "orc",    "part": "body/bodies/male", "colors": ["green", "orc"] },
+        { "id": "skel",   "part": "body/bodies/skeleton", "colors": ["skeleton"] }
+      ],
+      "head": [
+        { "id": "light",  "part": "head/heads/human/male", "colors": ["light"] },
+        { "id": "olive",  "part": "head/heads/human/male", "colors": ["olive", "amber"] },
+        { "id": "brown",  "part": "head/heads/human/male", "colors": ["brown", "bronze"] },
+        { "id": "orc",    "part": "head/heads/orc/male", "colors": ["green", "orc"] },
+        { "id": "skel",   "part": "head/heads/skeleton", "colors": ["skeleton"] }
       ],
       "torso": [
-        { "id": "steel",   "patterns": ["torso/armour/plate/male/steel.png"] },
-        { "id": "leather", "patterns": ["torso/armour/leather/male/brown.png"] },
-        { "id": "robe",    "patterns": ["torso/clothes/robes/male/blue.png"] },
-        { "id": "maroon",  "patterns": ["torso/clothes/longsleeve/male/maroon.png"] }
+        { "id": "steel",   "part": "torso/armour/plate/male", "colors": ["steel", "iron"] },
+        { "id": "leather", "part": "torso/armour/leather/male", "colors": ["brown"] },
+        { "id": "robe",    "part": "torso/clothes/robes/male", "colors": ["blue", "navy"] },
+        { "id": "maroon",  "part": "torso/clothes/longsleeve/male", "colors": ["maroon", "red"] }
       ],
       "hair": [
-        { "id": "short_brown", "patterns": ["hair/short/male/brown.png"] },
-        { "id": "short_black", "patterns": ["hair/short/male/black.png"] },
-        { "id": "long_blonde", "patterns": ["hair/long/female/blonde.png", "hair/long/male/blonde.png"] },
-        { "id": "hood_black",  "patterns": ["hat/hood/male/black.png"] }
+        { "id": "short_brown", "part": "hair/short", "gender": "male", "colors": ["brown", "chestnut"] },
+        { "id": "short_black", "part": "hair/short", "gender": "male", "colors": ["black"] },
+        { "id": "long_blonde", "part": "hair/long", "gender": "female", "colors": ["blonde", "gold"] },
+        { "id": "hood_black",  "part": "hat/hood", "gender": "male", "colors": ["black", "charcoal"] }
       ]
     }
   }

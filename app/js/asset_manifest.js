@@ -82,9 +82,10 @@
       const h = hashSeed(seed);
       const pick = arr => (arr && arr.length ? arr[h % arr.length] : null);
       const b = pick(stage2Manifest.slots.body);
+      const hd = pick(stage2Manifest.slots.head);
       const t = pick(stage2Manifest.slots.torso);
       const hr = pick(stage2Manifest.slots.hair);
-      const layers = [b, t, hr].filter(Boolean);
+      const layers = [b, hd, t, hr].filter(Boolean);
       if (layers.length) {
         return `<span class="lpc-portrait-stack" style="position:relative;display:inline-block;width:${sizePx}px;height:${sizePx}px;border-radius:8px;overflow:hidden;border:1px solid #334b63;background:#101a27;flex-shrink:0" title="LPC Stage 2 Live (${seed})">${layers
           .map(l => `<img src="${l.file}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated" />`)
