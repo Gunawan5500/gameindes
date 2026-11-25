@@ -74,6 +74,13 @@ def auto_detect_lpc_dir(cli_dir=None):
     return ""
 
 
+NON_COLOR_FOLDERS = {
+    "male", "female", "muscular", "pregnant", "adult", "elderly_small", "thin",
+    "universal", "skeleton", "zombie", "orc", "goblin", "lizard", "minotaur",
+    "wolf", "boar", "vampire", "jack", "alien", "human"
+}
+
+
 def parse_lpc_rel_path(rel):
     low = rel.replace("\\", "/").lower()
     if any(skip in low for skip in ("/behind/", "_behind", "/shadow", "shadow.png", "/mask", "/bg/", "/child/", "/teen/")):
@@ -88,7 +95,7 @@ def parse_lpc_rel_path(rel):
 
     if last in KNOWN_ANIMS:
         anim = last
-        if len(segs) >= 4:
+        if len(segs) >= 4 and prev not in NON_COLOR_FOLDERS:
             color = prev
             style = "/".join(segs[1:-2])
         else:
