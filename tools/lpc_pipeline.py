@@ -41,43 +41,48 @@ def index_lpc_spritesheets(lpc_dir):
 def resolve_layer_for_anim(index, layer_spec, anim_name):
     """
     Cari layer PNG terbaik untuk animasi tertentu (misal 'slash' atau 'walk').
-    Prioritas:
-      1. Modern LPC v2 berwarna: <part>/<anim>/<color>.png
-      2. Modern LPC v2 tanpa warna: <part>/<anim>.png
-      3. Modern LPC v2 sub-varian (gender/folder tengah): path mengandung <part> + <anim> + <color>
-      4. Legacy full sheet: <part>/<color>.png
+    Mendukung seluruh variasi struktur Universal LPC:
+      1. <part>/<color>/<anim>.png  (struktur terbaru: body/bodies/male/light/slash.png)
+      2. <part>/<gender>/<color>/<anim>.png  (misal: hair/short/male/brown/slash.png)
+      3. <part>/<anim>/<color>.png  (struktur per-animasi lama)
+      4. Prefix search dengan kecocokan warna + animasi (hindari shadow/behind/mask)
+      5. <part>/<anim>.png (tanpa warna — fallback terakhir)
     """
     parts = [layer_spec["part"]] + list(layer_spec.get("fallback_parts", []))
     colors = [c.lower() for c in layer_spec.get("colors", [])]
     gender = (layer_spec.get("gender") or "").lower()
     anim_candidates = [anim_name]
     if anim_name == "slash":
-        anim_candidates += ["halfslash", "thrust", "walk"]
+        anim_candidates += ["halfslash", "thrust", "walk", "idle"]
     elif anim_name == "walk":
         anim_candidates += ["idle", "combat_idle"]
     elif anim_name == "spellcast":
-        anim_candidates += ["slash", "walk"]
+        anim_candidates += ["slash", "walk", "idle"]
     elif anim_name == "shoot":
-        anim_candidates += ["slash", "walk"]
+        anim_candidates += ["slash", "walk", "idle"]
 
     for part in parts:
         p = part.lower().strip("/")
-        # 1. Exact <part>/<anim>/<color>.png
+
+        # 1 & 2. Exact <part>/<color>/<anim>.png & <part>/<gender>/<color>/<anim>.png
         for a in anim_candidates:
             for c in colors:
-                exact = f"{p}/{a}/{c}.png"
-                if exact in index:
-                    return exact, index[exact]
-            # 2. Exact <part>/<anim>.png (seperti body/bodies/female/slash.png)
-            exact_no_col = f"{p}/{a}.png"
-            if exact_no_col in index:
-                return exact_no_col, index[exact_no_col]
+                for cand in (
+                    f"{p}/{c}/{a}.png",
+                    f"{p}/{gender}/{c}/{a}.png" if gender else "",
+                    f"{p}/{a}/{c}.png",
+                    f"{p}/{gender}/{a}/{c}.png" if gender else "",
+                ):
+                    if cand and cand in index:
+                        return cand, index[cand]
 
-        # 3. Prefix/token match di dalam <part>/...
+        # 3. Prefix match di dalam <part>/... (utamakan yang cocok warna & animasi)
         prefix_matches = [rel for rel in index.keys() if rel.startswith(p + "/")]
         if prefix_matches:
-            # Hindari layer "behind" / "shadow" kecuali diminta
-            clean = [r for r in prefix_matches if "/behind/" not in r and "_behind" not in r and "shadow" not in r]
+            clean = [
+                r for r in prefix_matches
+                if "/behind/" not in r and "_behind" not in r and "shadow" not in r and "mask" not in r and "/bg/" not in r
+            ]
             pool = clean or prefix_matches
             if gender:
                 g_pool = [r for r in pool if f"/{gender}/" in r or r.endswith(f"/{gender}.png")]
@@ -85,15 +90,17 @@ def resolve_layer_for_anim(index, layer_spec, anim_name):
                     pool = g_pool
 
             for a in anim_candidates:
-                a_pool = [r for r in pool if f"/{a}/" in r or r.endswith(f"/{a}.png")]
+                a_pool = [r for r in pool if r.endswith(f"/{a}.png") or f"/{a}/" in r]
                 if not a_pool:
                     continue
                 for c in colors:
                     for r in a_pool:
-                        if r.endswith(f"/{c}.png") or f"_{c}.png" in r or f"/{c}_" in r:
+                        if f"/{c}/" in r or r.endswith(f"/{c}.png") or f"_{c}." in r or f"/{c}_" in r:
                             return r, index[r]
-                # Jika tidak ada warna spesifik, ambil yang pertama di animasi tsb
-                return a_pool[0], index[a_pool[0]]
+                # Jika warna spesifik tak ketemu, pilih yang punya subfolder warna dulu dibanding file mentah
+                colored_first = [r for r in a_pool if r.count("/") > p.count("/") + 1]
+                pick = colored_first[0] if colored_first else a_pool[0]
+                return pick, index[pick]
 
             # 4. Legacy full sheet di dalam <part>/
             for c in colors:
@@ -101,6 +108,12 @@ def resolve_layer_for_anim(index, layer_spec, anim_name):
                     if r.endswith(f"/{c}.png"):
                         return r, index[r]
             return pool[0], index[pool[0]]
+
+        # 5. Fallback terakhir: <part>/<anim>.png
+        for a in anim_candidates:
+            exact_no_col = f"{p}/{a}.png"
+            if exact_no_col in index:
+                return exact_no_col, index[exact_no_col]
 
     return None, None
 
@@ -121,7 +134,6 @@ def extract_5frame_strip_smart(sheet_img, anim_name, direction, recipes):
     w, h = sheet_img.size
 
     if h == 768 and w >= 192:
-        # Oversized 192x192 weapon animation (4 rows)
         row_idx = DIR_ROW_4.get(direction, 3)
         cell = 192
         y0 = row_idx * cell
@@ -129,16 +141,13 @@ def extract_5frame_strip_smart(sheet_img, anim_name, direction, recipes):
         for i in range(frames):
             col = min(i, n_cols - 1)
             x0 = col * cell
-            # Center 64x64 karakter berada di offset (64, 64) dalam sel 192x192
             crop = sheet_img.crop((x0 + 64, y0 + 64, x0 + 128, y0 + 128))
             strip.paste(crop, (i * fw, 0), crop)
         return strip
 
     if h <= 512:
-        # Modern LPC 4-row per-animation sheet (256px) atau 1-row (64px)
         row_idx = DIR_ROW_4.get(direction, 3) if h >= 256 else 0
     else:
-        # Legacy full sheet (1344px+)
         row_idx = anims.get(anim_name, anims["slash"]).get(direction, 15)
 
     y0 = min(row_idx * fh, max(0, h - fh))
@@ -179,10 +188,11 @@ def composite_recipe(index, entry, recipes):
         # A. Layer untuk 5-frame battle strip
         rel_anim, full_anim = resolve_layer_for_anim(index, layer_spec, anim_name)
         if full_anim:
-            matched_layers.append(rel_anim)
             with Image.open(full_anim).convert("RGBA") as sheet:
                 layer_strip = extract_5frame_strip_smart(sheet, anim_name, direction, recipes)
-                strip_out.alpha_composite(layer_strip)
+                if layer_strip.getbbox() is not None:
+                    strip_out.alpha_composite(layer_strip)
+                    matched_layers.append(rel_anim)
 
         # B. Layer untuk potret menghadap depan (walk/idle down frame 0)
         rel_walk, full_walk = resolve_layer_for_anim(index, layer_spec, "walk")
@@ -194,10 +204,11 @@ def composite_recipe(index, entry, recipes):
                     tmp = Image.new("RGBA", (fw, fh), (0, 0, 0, 0))
                     tmp.paste(f0, (0, 0), f0)
                     f0 = tmp
-                portrait_canvas.alpha_composite(f0)
+                if f0.getbbox() is not None:
+                    portrait_canvas.alpha_composite(f0)
 
-    # Potong bust (40x40 tengah atas) -> upscale crisp 96x96 .webp
-    bust = portrait_canvas.crop((12, 6, 52, 46))
+    # Potong kepala + bahu (36x36 tengah atas: y=8..44) -> upscale crisp 96x96 .webp
+    bust = portrait_canvas.crop((14, 8, 50, 44))
     portrait_out = Image.new("RGBA", (96, 96), (18, 28, 42, 255))
     scaled = bust.resize((88, 88), Image.NEAREST)
     portrait_out.paste(scaled, (4, 6), scaled)
@@ -230,7 +241,8 @@ def run_stage1(lpc_dir, recipes):
         if entry.get("out_sprite"):
             _, sz = save_webp(strip, entry["out_sprite"])
             total_bytes += sz
-            print(f"  [OK] {entry['id']} sprite -> {entry['out_sprite']} ({sz/1024:.2f} KB, {len(matched)} layer)")
+            short_layers = ", ".join(m.split("/")[0] for m in matched)
+            print(f"  [OK] {entry['id']} sprite -> {entry['out_sprite']} ({sz/1024:.2f} KB, {len(matched)} layer: {short_layers})")
         if entry.get("out_portrait"):
             _, sz = save_webp(portrait, entry["out_portrait"])
             total_bytes += sz
