@@ -7,6 +7,7 @@
   "scripts": {
     "build:assets": "python3 tools/generate_fase4_assets.py",
     "import:assets": "node tools/run_import_assets.mjs",
+    "studio:assets": "node tools/run_asset_studio.mjs",
     "build:preview": "node tools/build_offline_app.mjs app/dist/fase5_offline_preview.html",
     "verify:capacitor": "node tools/verify_capacitor_ready.mjs",
     "cap:add:android": "npx cap add android",

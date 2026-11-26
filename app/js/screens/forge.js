@@ -680,11 +680,20 @@
 
   function render(container, snap, showToast = () => {}) {
     const Assets = global.BSRPG_ASSETS;
+    const dioramaUrl = Assets ? Assets.get("ui_forge_diorama") : "";
     const anvilUrl = Assets ? Assets.get("ui_forge_anvil") : "";
     const curWpnIcon = Assets && typeof Assets.getCustomIcon === "function"
       ? Assets.getCustomIcon("weapons", snap.equipment?.weapon?.recipeId || snap.equipment?.weapon?.id || "w_str_1")
       : "";
-    const forgeBannerHtml = (anvilUrl || curWpnIcon) ? `
+    const forgeBannerHtml = dioramaUrl ? `
+      <div class="card warm" style="padding:0;overflow:hidden;margin-bottom:8px">
+        <img src="${dioramaUrl}" alt="Diorama Bengkel" style="width:100%;max-height:175px;object-fit:cover;display:block;border-bottom:1.5px solid var(--bronze-border)" />
+        <div style="padding:7px 10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="card-title" style="font-size:12.5px">🔥 Bengkel Tempa &amp; Smithing Codex</div>
+          <div class="card-sub" style="margin:0">Slot Bahan: <b>${snap.forgeMaxSlots || 2}</b> • Aktif: <b>${esc(snap.equipment?.weapon?.name || "-")}</b></div>
+        </div>
+      </div>
+    ` : ((anvilUrl || curWpnIcon) ? `
       <div class="card warm" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:8px">
         <img src="${curWpnIcon || anvilUrl}" alt="Bengkel Tempa" class="forge-banner-thumb" style="object-fit:contain;background:#120e0b" />
         <div style="min-width:0;flex:1">
@@ -692,7 +701,7 @@
           <div class="card-sub">63 Resep Senjata/Armor • Slot Bahan: <b>${snap.forgeMaxSlots || 2}</b> • Senjata Aktif: <b>${esc(snap.equipment?.weapon?.name || "-")}</b></div>
         </div>
       </div>
-    ` : "";
+    ` : "");
 
     const subTabsHtml = `
       <div class="sub-tabs-grid sub-tabs-4">
