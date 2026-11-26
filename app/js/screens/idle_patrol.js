@@ -192,13 +192,13 @@
           const Assets = global.BSRPG_ASSETS;
           const heroUrl = Assets ? Assets.get("sprite_hero") : "";
           const wildsUrl = Assets ? Assets.get("ui_banner_wilds") : "";
-          const repMon = activeGroup.reg || activeGroup.spec || null;
+          const repMon = activeGroup.representativeMonster || activeGroup.reg || activeGroup.spec || { id: `lv_${activeGroup.lvl}`, name: `Monster Lv.${activeGroup.lvl}` };
           const customMonUrl = Assets && typeof Assets.getCustomMonsterUrl === "function"
             ? Assets.getCustomMonsterUrl(repMon)
             : "";
           const enemyInfo = Assets ? Assets.getEnemySpriteInfo(repMon) : { url: "", label: "Monster 5-Frame" };
           const enemyVisualHtml = customMonUrl
-            ? `<img src="${customMonUrl}" alt="${esc(repMon ? repMon.name : "Monster")}" class="custom-mon-sprite" data-sprite-role="enemy" />`
+            ? `<img src="${customMonUrl}" alt="${esc(repMon.name)}" class="custom-mon-sprite" data-sprite-role="enemy" />`
             : `<div class="sprite-5f enemy-anim" data-sprite-role="enemy" style="${enemyInfo.url ? `background-image:url('${enemyInfo.url}')` : ""}"></div>`;
           const stageBadge = customMonUrl ? "👹 Dark Bestiary .webp" : `🎬 5-Frame .webp (${esc(enemyInfo.label)})`;
           return `
@@ -378,11 +378,17 @@
           const heroUrl = Assets ? Assets.get("sprite_hero") : "";
           const bossUrl = Assets ? Assets.get("sprite_boss") : "";
           const bossBg = Assets ? Assets.get("ui_banner_boss") : "";
+          const customBossUrl = Assets && typeof Assets.getCustomMonsterUrl === "function"
+            ? Assets.getCustomMonsterUrl({ id: bName, name: bName, type: "Boss" })
+            : "";
+          const bossVisualHtml = customBossUrl
+            ? `<img src="${customBossUrl}" alt="${esc(bName)}" class="custom-mon-sprite boss-mon" data-sprite-role="boss" />`
+            : `<div class="sprite-5f boss-anim" data-sprite-role="boss" style="${bossUrl ? `background-image:url('${bossUrl}')` : ""}"></div>`;
           return `
         <div class="sprite-arena-stage boss-stage" data-sprite-stage="boss" style="${bossBg ? `background-image:url('${bossBg}')` : ""}">
           <div class="sprite-arena-head">
             <span>🔥 <b>Arena Duel 2D:</b> Head-to-Head Boss</span>
-            <span class="badge ok">🎬 5-Frame .webp Aktif</span>
+            <span class="badge ok">${customBossUrl ? "👹 Dark Bestiary Boss" : "🎬 5-Frame .webp Aktif"}</span>
           </div>
           <div class="sprite-arena-floor">
             <div class="sprite-unit-wrap">
@@ -391,7 +397,7 @@
             </div>
             <div class="sprite-clash-badge">⚡VS⚡</div>
             <div class="sprite-unit-wrap">
-              <div class="sprite-5f boss-anim" data-sprite-role="boss" style="${bossUrl ? `background-image:url('${bossUrl}')` : ""}"></div>
+              ${bossVisualHtml}
               <span class="sprite-caption">👹 ${esc(bName)}</span>
             </div>
           </div>

@@ -220,8 +220,49 @@
       }
     }
 
+    const Assets = global.BSRPG_ASSETS;
+    const selRecipeIcon = getRecipeIconUrl(recipe);
+    const matStripHtml = [0, 1, 2, 3].map(idx => {
+      const locked = idx >= maxSlots;
+      const mid = validSlotIds[idx] || "";
+      if (locked) {
+        return `<div class="forge-mat-chip locked" title="${SLOT_LABELS[idx]} (Terkunci)"><span>🔒</span></div>`;
+      }
+      if (!mid) {
+        return `<div class="forge-mat-chip empty" title="${SLOT_LABELS[idx]} (Kosong)"><span>+</span></div>`;
+      }
+      const mObj = ownedMats.find(x => x.id === mid);
+      const mIcon = Assets && typeof Assets.getCustomIcon === "function"
+        ? Assets.getCustomIcon("materials", mid)
+        : "";
+      return `
+        <div class="forge-mat-chip filled" title="${esc(mObj?.name || mid)}">
+          ${mIcon ? `<img src="${mIcon}" alt="${esc(mObj?.name || mid)}" />` : `<span>🪨</span>`}
+          <span class="forge-mat-qty">×${mObj?.qty || 1}</span>
+        </div>
+      `;
+    }).join("");
+
     return `
       ${lastBannerHtml}
+
+      <!-- KARTU SHOWCASE BENGKEL (GAYA SAMPLE: IKON SENJATA BESAR + SLOT BAHAN VISUAL + PELUANG) -->
+      <div class="card warm forge-hero-card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:11px">
+          <div class="forge-hero-slot">
+            ${selRecipeIcon ? `<img src="${selRecipeIcon}" alt="${esc(recipe.name)}" />` : `<span style="font-size:28px">${recipe.itemType === "armor" ? "🛡️" : "⚔️"}</span>`}
+            <span class="forge-hero-tier">T${esc(recipe.tier || 1)}</span>
+          </div>
+          <div style="min-width:0;flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+              <div class="card-title" style="font-size:14px">${esc(recipe.name)}</div>
+              <span class="badge ok">Peluang ${Math.round(pv.successChancePct || 75)}%</span>
+            </div>
+            <div class="card-sub">Stat Utama: <b style="color:var(--sky)">${esc(recipe.stat)}</b> • Trigger: <b style="color:var(--amber-hi)">${esc(recipe.trigger)}</b></div>
+            <div class="forge-mat-strip">${matStripHtml}</div>
+          </div>
+        </div>
+      </div>
 
       <div class="forge-two-col">
         <!-- KOLOM KIRI: PILIH CETAK BIRU & INTI ELEMEN -->

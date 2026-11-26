@@ -2306,6 +2306,104 @@ body.mode-portrait .btn {
   }
 }
 
+/* Forge Showcase Card (Gaya Sample: Ikon Senjata Besar + Slot Bahan Visual) */
+.forge-hero-card {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #2a2017 0%, #16120e 100%);
+}
+
+.forge-hero-slot {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  border: 2px solid var(--gold);
+  background: #0d0a08;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(224, 169, 79, 0.22);
+}
+
+.forge-hero-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.forge-hero-tier {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(16, 12, 9, 0.92);
+  border: 1px solid var(--gold);
+  color: var(--gold-hi);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.forge-mat-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.forge-mat-chip {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1.5px solid var(--iron-border);
+  background: #100d0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.forge-mat-chip.filled {
+  border-color: var(--bronze-border);
+}
+
+.forge-mat-chip.filled img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.forge-mat-chip.locked {
+  opacity: 0.48;
+  border-style: dashed;
+}
+
+.forge-mat-qty {
+  position: absolute;
+  bottom: 0;
+  right: 1px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgba(14, 11, 9, 0.9);
+  color: var(--gold-hi);
+  font-size: 8.5px;
+  font-weight: 800;
+}
+
+.custom-mon-sprite.boss-mon {
+  width: 82px;
+  height: 82px;
+}
+
+
 
 
 
