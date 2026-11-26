@@ -171,17 +171,27 @@
         </div>
       `;
 
+      const Assets = global.BSRPG_ASSETS;
+      const getSkillIcon = (idOrName) =>
+        Assets && typeof Assets.getCustomIcon === "function"
+          ? Assets.getCustomIcon("skills", idOrName)
+          : "";
+
       let treeContentHtml = "";
       if (state.skillTree === "weapon") {
         const ws = build.weaponSkill;
         const m = ws?.mastery || Bridge.getSkillMasteryStage(0);
         const wPct = ws ? Math.round((ws.effectiveMultiplier - 1) * 100) : 0;
+        const wIcon = ws ? getSkillIcon(ws.id || ws.name) : "";
         treeContentHtml = ws ? `
           <div class="skill-tier-card">
             <div class="card-head">
-              <div>
-                <div class="card-title">🪓 [W] ${ws.name} <span class="badge">${ws.weapon_name || snap.equipment.weapon.name}</span></div>
-                <div class="card-sub">Naungan: <b>${ws.governing_smith}</b> • Jarak: <b>${ws.tag}</b> • Cooldown: ${ws.effectiveCooldownSec}d</div>
+              <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                ${wIcon ? `<img src="${wIcon}" alt="${ws.name}" class="custom-skill-icon" />` : ""}
+                <div style="min-width:0">
+                  <div class="card-title">🪓 [W] ${ws.name} <span class="badge">${ws.weapon_name || snap.equipment.weapon.name}</span></div>
+                  <div class="card-sub">Naungan: <b>${ws.governing_smith}</b> • Jarak: <b>${ws.tag}</b> • Cooldown: ${ws.effectiveCooldownSec}d</div>
+                </div>
               </div>
               <span class="badge ${ws.unlocked ? "ok" : "pending"}">${ws.unlocked ? `+${Math.max(15, wPct)}% Trigger` : "🔒 Butuh " + ws.governing_smith + " T1"}</span>
             </div>
@@ -223,6 +233,7 @@
             const tierKey = `${cls}_T${t.tier}`;
             const pickedMorphId = p.selectedUtilities[tierKey] || t.morph_choices[0]?.id;
             const pctBonus = Math.max(10, Math.round((sk.base_multiplier - 1) * 100 + mastery.effectivenessBonusPct));
+            const skIcon = getSkillIcon(sk.id || sk.name);
 
             // Poin 1: Sembunyikan 3 kotak Morph sampai Lv.5 kecuali mode Intip aktif!
             const showMorphBoxes = (mastery.morphUnlocked && unlocked) || state.showLockedSkills;
@@ -230,12 +241,15 @@
             return `
               <div class="skill-tier-card ${unlocked ? "" : "locked"}">
                 <div class="card-head">
-                  <div>
-                    <div class="card-title">
-                      <span class="badge">T${t.tier} ${t.rank_label}</span> ${sk.name}
-                      ${t.pure_only ? `<span class="badge pending">Khusus Murni 5 Poin</span>` : ""}
+                  <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                    ${skIcon ? `<img src="${skIcon}" alt="${sk.name}" class="custom-skill-icon ${unlocked ? "" : "locked-sil"}" />` : ""}
+                    <div style="min-width:0">
+                      <div class="card-title">
+                        <span class="badge">T${t.tier} ${t.rank_label}</span> ${sk.name}
+                        ${t.pure_only ? `<span class="badge pending">Khusus Murni 5 Poin</span>` : ""}
+                      </div>
+                      <div class="card-sub">${sk.role} • Elemen: ${sk.element || "Neutral"} • Efek Aktif: <b style="color:var(--sky)">+${pctBonus}%</b></div>
                     </div>
-                    <div class="card-sub">${sk.role} • Elemen: ${sk.element || "Neutral"} • Efek Aktif: <b style="color:var(--sky)">+${pctBonus}%</b></div>
                   </div>
                   ${unlocked
                     ? `<button class="btn ${isEq ? "btn-primary" : "btn-secondary"} btn-xs" data-equip-sk="${sk.id}">

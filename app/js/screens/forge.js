@@ -21,9 +21,10 @@
   ];
 
   const ui = {
-    subTab: "craft",       // "craft" | "fusion" | "enhance"
+    subTab: "craft",       // "craft" | "fusion" | "enhance" | "codex"
     category: "weapon",    // "weapon" | "armor"
     filterKey: "ALL",      // Stat untuk senjata, Slot untuk armor
+    codexFilter: "ALL",    // "ALL" | "WEAPON" | "ARMOR" | "FORGED"
     selectedRecipeId: null,
     slotMatIds: ["", "", "", ""],
     coreElement: "petir",
@@ -544,32 +545,130 @@
     `;
   }
 
+  function getRecipeIconUrl(recipe) {
+    const Assets = global.BSRPG_ASSETS;
+    if (!Assets || typeof Assets.getCustomIcon !== "function") return "";
+    const cat = recipe?.itemType === "armor" ? "armors" : "weapons";
+    return Assets.getCustomIcon(cat, recipe?.id || recipe?.name)
+      || Assets.getCustomIcon("weapons", recipe?.id || recipe?.name)
+      || "";
+  }
+
+  function renderSmithingCodexTab(snap) {
+    const allRecipes = [
+      ...(snap.catalogs.weapons || []).map(r => ({ ...r, itemType: "weapon" })),
+      ...(snap.catalogs.armors || []).map(r => ({ ...r, itemType: "armor" }))
+    ];
+    const owned = collectAllOwnedGear(snap);
+
+    // Kumpulkan rekor tempa per recipeId (jumlah tempa, +N tertinggi, rarity terbaik)
+    const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5, Unique: 6 };
+    const records = new Map();
+    for (const entry of owned) {
+      const it = entry.item;
+      const rid = it?.recipeId || it?.id;
+      if (!rid) continue;
+      const cur = records.get(rid) || { count: 0, maxPlus: 0, bestRarity: "Common" };
+      cur.count += 1;
+      cur.maxPlus = Math.max(cur.maxPlus, Number(it.plusN || 0));
+      if ((RARITY_RANK[it.rarity] || 0) >= (RARITY_RANK[cur.bestRarity] || 0)) {
+        cur.bestRarity = it.rarity || cur.bestRarity;
+      }
+      records.set(rid, cur);
+    }
+
+    const discoveredCount = allRecipes.filter(r => records.has(r.id)).length;
+    const filtered = allRecipes.filter(r => {
+      if (ui.codexFilter === "WEAPON") return r.itemType === "weapon";
+      if (ui.codexFilter === "ARMOR") return r.itemType === "armor";
+      if (ui.codexFilter === "FORGED") return records.has(r.id);
+      return true;
+    });
+
+    const filterBtns = [
+      { id: "ALL", lbl: `Semua (${allRecipes.length})` },
+      { id: "WEAPON", lbl: `⚔️ Senjata (${(snap.catalogs.weapons || []).length})` },
+      { id: "ARMOR", lbl: `🛡️ Armor (${(snap.catalogs.armors || []).length})` },
+      { id: "FORGED", lbl: `✓ Sudah Ditempa (${discoveredCount})` }
+    ].map(f => `<button class="pill-btn ${ui.codexFilter === f.id ? "active" : ""}" data-codex-flt="${f.id}">${f.lbl}</button>`).join("");
+
+    const cardsHtml = filtered.map(r => {
+      const rec = records.get(r.id);
+      const isForged = Boolean(rec);
+      const iconUrl = getRecipeIconUrl(r);
+      const iconHtml = iconUrl
+        ? `<img src="${iconUrl}" alt="${esc(r.name)}" class="codex-item-img ${isForged ? "" : "locked-sil"}" />`
+        : `<span style="font-size:22px">${r.itemType === "armor" ? "🛡️" : "⚔️"}</span>`;
+      const rarClass = isForged ? `rar-${String(rec.bestRarity || "common").toLowerCase()}` : "locked";
+      return `
+        <div class="codex-card ${rarClass}">
+          <div class="codex-icon-box">
+            ${iconHtml}
+            ${isForged && rec.maxPlus > 0 ? `<span class="codex-plus-tag">+${rec.maxPlus}</span>` : ""}
+            ${!isForged ? `<span class="codex-lock-tag">🔒</span>` : ""}
+          </div>
+          <div style="min-width:0;flex:1">
+            <div class="codex-name">${isForged ? esc(r.name) : `${esc(r.name)}`}</div>
+            <div class="codex-meta">
+              ${r.itemType === "armor" ? `${esc(r.slot || "Armor")} • ${esc(r.stat)}` : `T${esc(r.tier || 1)} • ${esc(r.stat)} ${esc(r.tag || "")}`}
+            </div>
+            <div class="codex-status">
+              ${isForged
+                ? `<span class="badge ok">✓ ${esc(rec.bestRarity)} • ${rec.count}×</span>`
+                : `<span class="badge">Belum Ditempa</span>`}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="card warm">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📖 Smithing Codex (Bestiary Tempaan — Gaya Witcher 3)</div>
+            <div class="card-sub">Mencatat seluruh senjata &amp; armor yang berhasil Anda tempa selama perjalanan Endless Blacksmith.</div>
+          </div>
+          <span class="badge ok">${discoveredCount} / ${allRecipes.length} Tercatat</span>
+        </div>
+        <div class="filter-pills" style="margin-bottom:4px">${filterBtns}</div>
+        <div class="codex-grid">${cardsHtml || `<div class="card-sub">Belum ada tempaan pada filter ini. Mulai menempa di tab Meja Tempa!</div>`}</div>
+      </div>
+    `;
+  }
+
   function render(container, snap, showToast = () => {}) {
-    const anvilUrl = global.BSRPG_ASSETS ? global.BSRPG_ASSETS.get("ui_forge_anvil") : "";
-    const forgeBannerHtml = anvilUrl ? `
+    const Assets = global.BSRPG_ASSETS;
+    const anvilUrl = Assets ? Assets.get("ui_forge_anvil") : "";
+    const curWpnIcon = Assets && typeof Assets.getCustomIcon === "function"
+      ? Assets.getCustomIcon("weapons", snap.equipment?.weapon?.recipeId || snap.equipment?.weapon?.id || "w_str_1")
+      : "";
+    const forgeBannerHtml = (anvilUrl || curWpnIcon) ? `
       <div class="card warm" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:8px">
-        <img src="${anvilUrl}" alt="Bengkel Tempa" class="forge-banner-thumb" />
-        <div style="min-width:0">
-          <div class="card-title" style="font-size:12.5px">🔥 Bengkel Tempa &amp; Fusi Elemen</div>
-          <div class="card-sub">63 Resep Senjata/Armor • Slot Bahan: <b>${snap.forgeMaxSlots || 2}</b> • SFX Palu Offline Aktif</div>
+        <img src="${curWpnIcon || anvilUrl}" alt="Bengkel Tempa" class="forge-banner-thumb" style="object-fit:contain;background:#120e0b" />
+        <div style="min-width:0;flex:1">
+          <div class="card-title" style="font-size:12.5px">🔥 Bengkel Tempa &amp; Smithing Codex</div>
+          <div class="card-sub">63 Resep Senjata/Armor • Slot Bahan: <b>${snap.forgeMaxSlots || 2}</b> • Senjata Aktif: <b>${esc(snap.equipment?.weapon?.name || "-")}</b></div>
         </div>
       </div>
     ` : "";
 
     const subTabsHtml = `
-      <div class="sub-tabs-grid sub-tabs-3">
-        <button class="sub-tab-btn ${ui.subTab === "craft" ? "active" : ""}" data-forge-sub="craft">🔨 Meja Tempa</button>
-        <button class="sub-tab-btn ${ui.subTab === "fusion" ? "active" : ""}" data-forge-sub="fusion">🔮 Fusi Inti Kedua</button>
-        <button class="sub-tab-btn ${ui.subTab === "enhance" ? "active" : ""}" data-forge-sub="enhance">⚡ Enhance +N &amp; Galeri</button>
+      <div class="sub-tabs-grid sub-tabs-4">
+        <button class="sub-tab-btn ${ui.subTab === "craft" ? "active" : ""}" data-forge-sub="craft">🔨 Tempa</button>
+        <button class="sub-tab-btn ${ui.subTab === "fusion" ? "active" : ""}" data-forge-sub="fusion">🔮 Fusi</button>
+        <button class="sub-tab-btn ${ui.subTab === "enhance" ? "active" : ""}" data-forge-sub="enhance">⚡ +N &amp; Galeri</button>
+        <button class="sub-tab-btn ${ui.subTab === "codex" ? "active" : ""}" data-forge-sub="codex">📖 Codex</button>
       </div>
     `;
 
     let bodyHtml = "";
     if (ui.subTab === "craft") bodyHtml = renderCraftTab(snap);
     else if (ui.subTab === "fusion") bodyHtml = renderFusionTab(snap);
+    else if (ui.subTab === "codex") bodyHtml = renderSmithingCodexTab(snap);
     else bodyHtml = renderEnhanceAndGalleryTab(snap);
 
-    container.innerHTML = forgeBannerHtml + subTabsHtml + renderStatBenefitsCard(snap) + bodyHtml;
+    container.innerHTML = forgeBannerHtml + subTabsHtml + (ui.subTab === "codex" ? "" : renderStatBenefitsCard(snap)) + bodyHtml;
 
     const btnGuide = container.querySelector("#btn-toggle-forge-stat-guide");
     if (btnGuide) {
@@ -584,6 +683,15 @@
       btn.onclick = () => {
         if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
         ui.subTab = btn.getAttribute("data-forge-sub");
+        render(container, Bridge.getSnapshot(), showToast);
+      };
+    });
+
+    // Codex filter switch
+    container.querySelectorAll("[data-codex-flt]").forEach(btn => {
+      btn.onclick = () => {
+        if (global.BSRPG_AUDIO) global.BSRPG_AUDIO.play("ui_click");
+        ui.codexFilter = btn.getAttribute("data-codex-flt");
         render(container, Bridge.getSnapshot(), showToast);
       };
     });

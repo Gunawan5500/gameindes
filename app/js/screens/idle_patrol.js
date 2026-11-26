@@ -193,12 +193,19 @@
           const heroUrl = Assets ? Assets.get("sprite_hero") : "";
           const wildsUrl = Assets ? Assets.get("ui_banner_wilds") : "";
           const repMon = activeGroup.reg || activeGroup.spec || null;
+          const customMonUrl = Assets && typeof Assets.getCustomMonsterUrl === "function"
+            ? Assets.getCustomMonsterUrl(repMon)
+            : "";
           const enemyInfo = Assets ? Assets.getEnemySpriteInfo(repMon) : { url: "", label: "Monster 5-Frame" };
+          const enemyVisualHtml = customMonUrl
+            ? `<img src="${customMonUrl}" alt="${esc(repMon ? repMon.name : "Monster")}" class="custom-mon-sprite" data-sprite-role="enemy" />`
+            : `<div class="sprite-5f enemy-anim" data-sprite-role="enemy" style="${enemyInfo.url ? `background-image:url('${enemyInfo.url}')` : ""}"></div>`;
+          const stageBadge = customMonUrl ? "👹 Dark Bestiary .webp" : `🎬 5-Frame .webp (${esc(enemyInfo.label)})`;
           return `
         <div class="sprite-arena-stage" data-sprite-stage="idle" style="${wildsUrl ? `background-image:url('${wildsUrl}')` : ""}">
           <div class="sprite-arena-head">
-            <span>🎬 <b>Panggung Idle 2D:</b> ${esc(p.name)} vs ${esc(repMon ? repMon.name : `Monster Lv.${activeGroup.lvl}`)}</span>
-            <span class="badge ok">🎬 5-Frame .webp (${esc(enemyInfo.label)})</span>
+            <span>⚔️ <b>Arena Grinding:</b> ${esc(p.name)} vs ${esc(repMon ? repMon.name : `Monster Lv.${activeGroup.lvl}`)}</span>
+            <span class="badge ok">${stageBadge}</span>
           </div>
           <div class="sprite-arena-floor">
             <div class="sprite-unit-wrap">
@@ -207,7 +214,7 @@
             </div>
             <div class="sprite-clash-badge">⚔️</div>
             <div class="sprite-unit-wrap">
-              <div class="sprite-5f enemy-anim" data-sprite-role="enemy" style="${enemyInfo.url ? `background-image:url('${enemyInfo.url}')` : ""}"></div>
+              ${enemyVisualHtml}
               <span class="sprite-caption">🐾 Lv.${activeGroup.lvl} ${esc(repMon ? repMon.name : "Monster")}</span>
             </div>
           </div>

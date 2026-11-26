@@ -82,6 +82,18 @@
     // Jika belum pernah buat karakter sama sekali dan mode masih 'title', tetap tampilkan menu awal yang jelas
     if (draft.mode === "title") {
       const p = snap.player;
+      const Assets = global.BSRPG_ASSETS;
+      const continueImg = Assets ? Assets.get("ui_gothic_continue_button_with_crimson_ornaments") : "";
+      const playImg = Assets ? Assets.get("ui_gothic_bloodsteel_play_button") : "";
+
+      const continueBtnHtml = continueImg
+        ? `<button id="btn-continue-game" class="bloodsteel-img-btn" title="Lanjutkan Permainan"><img src="${continueImg}" alt="Continue" /></button>`
+        : `<button id="btn-continue-game" class="btn btn-primary" style="width:100%;padding:9px">▶️ Masuk ke Permainan</button>`;
+
+      const playBtnHtml = playImg
+        ? `<button id="btn-open-wizard" class="bloodsteel-img-btn" title="Buat Karakter Baru"><img src="${playImg}" alt="Play" /></button>`
+        : `<button id="btn-open-wizard" class="btn btn-primary" style="flex:1;padding:9px">✨ Buat Karakter Baru</button>`;
+
       const savedCardHtml = snap.hasSavedGame
         ? `
           <div class="card warm">
@@ -96,7 +108,7 @@
               Lokasi: <b>${snap.location?.location_name || "Tidewrack Village"}</b> • Kas: <b style="color:var(--amber-hi)">${snap.bronzeFormatted}</b> • Thn ${snap.calendar.year} Hari ${snap.calendar.day}
             </div>
             <div>
-              <button id="btn-continue-game" class="btn btn-primary" style="width:100%;padding:9px">▶️ Masuk ke Permainan</button>
+              ${continueBtnHtml}
             </div>
           </div>
         `
@@ -113,7 +125,7 @@
             <div>
               <div style="font-size:10.5px;color:var(--amber-hi);font-weight:800;letter-spacing:1px;text-transform:uppercase">100% Offline • Battle-Smith RPG</div>
               <h1 style="margin:3px 0;font-size:20px;color:#fff">⚒️ Dunia Emberhold</h1>
-              <div style="font-size:11.5px;color:var(--muted)">Mode Mafia Wars × Idle Blacksmithing (Skala Penuh Lv.1–150)</div>
+              <div style="font-size:11.5px;color:var(--muted)">Endless Blacksmith × Mafia Wars (Skala Penuh Lv.1–150)</div>
             </div>
             <button id="btn-start-toggle-portrait" class="chip-btn teal">
               ${isPortrait ? "💻 Tampilan Laptop" : "📱 Uji HP Portrait"}
@@ -131,7 +143,7 @@
               <span class="badge">Lv.1 • 13 Poin</span>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button id="btn-open-wizard" class="btn btn-primary" style="flex:1;padding:9px">✨ Buat Karakter Baru</button>
+              ${playBtnHtml}
             </div>
           </div>
         </div>
