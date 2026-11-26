@@ -94,6 +94,91 @@ def should_skip_zip_member(member_path: str, category: str) -> tuple[bool, str |
     return False, slugify(p.stem)
 
 
+def find_spans(counts: list[int], min_len: int = 8) -> list[tuple[int, int]]:
+    spans = []
+    start = None
+    for i, c in enumerate(counts):
+        if c > 0 and start is None:
+            start = i
+        elif c == 0 and start is not None:
+            if i - start >= min_len:
+                spans.append((start, i))
+            start = None
+    if start is not None and len(counts) - start >= min_len:
+        spans.append((start, len(counts)))
+    return spans
+
+
+def auto_slice_monster_sheet(img_bytes: bytes) -> list[bytes]:
+    """
+    Deteksi otomatis lembar sprite sheet monster (mis. Dark Bestiary 448 Monsters):
+    Jika gambar berukuran > 256px dan memiliki celah transparan antar baris/kolom,
+    potong otomatis setiap monster menjadi gambar kotak terpisah.
+    """
+    im = Image.open(io.BytesIO(img_bytes))
+    w, h = im.size
+    if max(w, h) <= 256:
+        return [img_bytes]
+
+    rgba = im.convert("RGBA")
+    alpha = rgba.getchannel("A")
+    a_min, _ = alpha.getextrema()
+    if a_min > 15:
+        # Tidak ada transparansi -> kembalikan utuh agar tidak salah potong
+        return [img_bytes]
+
+    # Gunakan data alpha untuk mendeteksi baris (row bands) & kolom (cell spans)
+    a_bytes = alpha.tobytes()
+    row_counts = [0] * h
+    for y in range(h):
+        off = y * w
+        row_slice = a_bytes[off:off + w]
+        # Hitung cepat apakah baris punya piksel solid
+        if max(row_slice) > 15:
+            row_counts[y] = 1
+
+    row_spans = find_spans(row_counts, min_len=12)
+    if len(row_spans) <= 1:
+        # Cek kolom jika 1 baris panjang (strip horizontal)
+        col_counts = [0] * w
+        for y in range(h):
+            off = y * w
+            for x in range(w):
+                if a_bytes[off + x] > 15:
+                    col_counts[x] = 1
+        col_spans = find_spans(col_counts, min_len=12)
+        if len(col_spans) <= 1:
+            return [img_bytes]
+        row_spans = [(0, h)]
+
+    sliced = []
+    for y0, y1 in row_spans:
+        col_counts = [0] * w
+        for y in range(y0, y1):
+            off = y * w
+            for x in range(w):
+                if a_bytes[off + x] > 15:
+                    col_counts[x] = 1
+        col_spans = find_spans(col_counts, min_len=12)
+        for x0, x1 in col_spans:
+            cell = rgba.crop((x0, y0, x1, y1))
+            bbox = cell.getbbox()
+            if not bbox:
+                continue
+            cell = cell.crop(bbox)
+            cw, ch = cell.size
+            if cw < 12 or ch < 12:
+                continue
+            side = max(cw, ch) + 4
+            square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+            square.paste(cell, ((side - cw) // 2, (side - ch) // 2))
+            buf = io.BytesIO()
+            square.save(buf, "PNG")
+            sliced.append(buf.getvalue())
+
+    return sliced if len(sliced) > 1 else [img_bytes]
+
+
 def convert_and_save(img_bytes: bytes, dest_path: Path, cfg: dict) -> tuple[int, tuple[int, int]]:
     im = Image.open(io.BytesIO(img_bytes))
     has_alpha = im.mode in ("RGBA", "LA") or ("transparency" in im.info)
@@ -124,6 +209,16 @@ def iter_category_sources(raw_dir: Path, category: str):
     if not raw_dir.exists():
         return
 
+    def emit_item(base_slug: str, raw_bytes: bytes):
+        if category == "monsters":
+            parts = auto_slice_monster_sheet(raw_bytes)
+            if len(parts) > 1:
+                print(f"  [SLICE] {base_slug}: otomatis dipotong menjadi {len(parts)} monster!")
+                for idx, part_bytes in enumerate(parts, start=1):
+                    yield f"{base_slug}_{idx:02d}", part_bytes
+                return
+        yield base_slug, raw_bytes
+
     # 1. File gambar langsung (termasuk subfolder hasil ekstrak manual)
     for f in sorted(raw_dir.rglob("*")):
         if not f.is_file():
@@ -133,7 +228,7 @@ def iter_category_sources(raw_dir: Path, category: str):
             skip, custom_slug = should_skip_zip_member(rel_str, category)
             if skip:
                 continue
-            yield custom_slug or slugify(f.stem), f.read_bytes()
+            yield from emit_item(custom_slug or slugify(f.stem), f.read_bytes())
         elif f.suffix.lower() == ".zip":
             with zipfile.ZipFile(f, "r") as zf:
                 names = zf.namelist()
@@ -146,7 +241,7 @@ def iter_category_sources(raw_dir: Path, category: str):
                     skip, custom_slug = should_skip_zip_member(member, category)
                     if skip:
                         continue
-                    yield custom_slug or slugify(Path(member).stem), zf.read(member)
+                    yield from emit_item(custom_slug or slugify(Path(member).stem), zf.read(member))
 
 
 def write_manifest_js(relative_paths: dict, custom_packs: dict):
