@@ -1,0 +1,79 @@
+{
+  "version": "2.0",
+  "mode": "laptop_stage2_minipack",
+  "slots": {
+    "body": [
+      {
+        "id": "light",
+        "file": "assets/lpc_parts/body_light.webp",
+        "source": "body/bodies/male/walk.png"
+      },
+      {
+        "id": "olive",
+        "file": "assets/lpc_parts/body_olive.webp",
+        "source": "body/bodies/male/walk.png"
+      },
+      {
+        "id": "brown",
+        "file": "assets/lpc_parts/body_brown.webp",
+        "source": "body/bodies/male/walk.png"
+      },
+      {
+        "id": "orc",
+        "file": "assets/lpc_parts/body_orc.webp",
+        "source": "body/bodies/male/walk.png"
+      },
+      {
+        "id": "skel",
+        "file": "assets/lpc_parts/body_skel.webp",
+        "source": "body/bodies/skeleton/walk.png"
+      }
+    ],
+    "head": [
+      {
+        "id": "light",
+        "file": "assets/lpc_parts/head_light.webp",
+        "source": "head/heads/human/male/walk.png"
+      },
+      {
+        "id": "olive",
+        "file": "assets/lpc_parts/head_olive.webp",
+        "source": "head/heads/human/male/walk.png"
+      },
+      {
+        "id": "brown",
+        "file": "assets/lpc_parts/head_brown.webp",
+        "source": "head/heads/human/male/walk.png"
+      },
+      {
+        "id": "orc",
+        "file": "assets/lpc_parts/head_orc.webp",
+        "source": "head/heads/orc/male/walk.png"
+      },
+      {
+        "id": "skel",
+        "file": "assets/lpc_parts/head_skel.webp",
+        "source": "head/heads/skeleton/adult/walk.png"
+      }
+    ],
+    "torso": [
+      {
+        "id": "steel",
+        "file": "assets/lpc_parts/torso_steel.webp",
+        "source": "torso/armour/plate/male/walk.png"
+      },
+      {
+        "id": "leather",
+        "file": "assets/lpc_parts/torso_leather.webp",
+        "source": "torso/armour/leather/male/walk.png"
+      }
+    ],
+    "hair": [
+      {
+        "id": "long_blonde",
+        "file": "assets/lpc_parts/hair_long_blonde.webp",
+        "source": "hair/long/adult/walk.png"
+      }
+    ]
+  }
+}

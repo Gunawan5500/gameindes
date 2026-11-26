@@ -1,0 +1,32 @@
+Battle-Smith RPG — Universal LPC Spritesheet Attribution (CC-BY-SA 3.0 / GPL 3.0)
+Source: https://github.com/liberatedpixelcup/Universal-LPC-Spritesheet-Character-Generator
+
+- beards/beard/winter/male/slash.png
+- body/bodies/female/shoot.png
+- body/bodies/female/spellcast.png
+- body/bodies/male/slash.png
+- body/bodies/muscular/slash.png
+- body/bodies/skeleton/slash.png
+- cape/solid/fg/slash.png
+- feet/boots/basic/male/slash.png
+- hair/long/adult/spellcast.png
+- hair/plain/adult/slash.png
+- hair/ponytail/adult/fg/shoot.png
+- hat/helmet/barbarian/adult/slash.png
+- head/heads/human/female/shoot.png
+- head/heads/human/female/spellcast.png
+- head/heads/human/male/slash.png
+- head/heads/orc/male/slash.png
+- head/heads/skeleton/adult/slash.png
+- legs/armour/plate/male/slash.png
+- legs/pants/male/slash.png
+- torso/aprons/apron/male/slash/brown.png
+- torso/armour/leather/male/slash.png
+- torso/armour/plate/male/slash.png
+- torso/clothes/tunic/female/shoot/forest.png
+- torso/clothes/tunic/female/spellcast/blue.png
+- torso/clothes/vest/male/slash/maroon.png
+- weapon/blunt/mace/thrust/mace.png
+- weapon/magic/wand/female/slash/wand.png
+- weapon/polearm/scythe/walk/scythe.png
+- weapon/sword/dagger/slash/dagger.png
