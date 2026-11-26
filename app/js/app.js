@@ -11,7 +11,7 @@
 
   const uiState = {
     inGameplay: false,
-    route: "battle",
+    route: "map",
     itemModalOpen: false,
     settingsOpen: false,
     restModalOpen: false,

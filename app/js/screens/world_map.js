@@ -10,7 +10,7 @@
 
   const state = {
     subTab: "routes",     // "routes" | "ecosystem" | "dungeons"
-    mapLayer: "world",    // "world" | "city"
+    mapLayer: "city",     // "city" (Home Hub default) | "world"
     selectedAreaId: null,
     tierFilter: "ALL",
     ecoView: "levels",    // "levels" | "bosses" | "bestiary"
@@ -22,6 +22,76 @@
     showSengketaLegend: false,
     contestedPopupLocId: null
   };
+
+  // Pemetaan 16 Area ke 6 Template Bioma Peta Kota (hemat aset: 1 World Map + 6 Bioma Kota)
+  const BIOME_PROFILES = {
+    coast: {
+      id: "coast",
+      badge: "⚓ Bioma Pelabuhan",
+      flavor: "Dermaga kayu, kapal dagang & jalur laut terbuka",
+      worldLabel: "⚓ Dermaga (World)",
+      assetKey: "ui_map_city_coast"
+    },
+    desert: {
+      id: "desert",
+      badge: "🌴 Bioma Gurun & Oasis",
+      flavor: "Mata air oasis, tenda kafilah & tungku pasir panas",
+      worldLabel: "🌴 Pos Oasis (World)",
+      assetKey: "ui_map_city_desert"
+    },
+    mountain: {
+      id: "mountain",
+      badge: "⛰️ Bioma Pegunungan",
+      flavor: "Mulut tambang bijih, benteng batu & angin puncak",
+      worldLabel: "⛰️ Jalur Tambang (World)",
+      assetKey: "ui_map_city_mountain"
+    },
+    forest: {
+      id: "forest",
+      badge: "🌲 Bioma Hutan Rimba",
+      flavor: "Menara jaga kayu, pohon raksasa & jalur pemburu",
+      worldLabel: "🌲 Gerbang Rimba (World)",
+      assetKey: "ui_map_city_forest"
+    },
+    highland: {
+      id: "highland",
+      badge: "🏰 Bioma Benteng & Dataran",
+      flavor: "Dinding batu faksi, balai guild & jalan raya kerajaan",
+      worldLabel: "🏰 Gerbang Utama (World)",
+      assetKey: "ui_map_city_highland"
+    },
+    swamp: {
+      id: "swamp",
+      badge: "🌫️ Bioma Rawa Gelap",
+      flavor: "Dermaga berkabut, pasar gelap & jalur bayangan",
+      worldLabel: "🌫️ Dermaga Rawa (World)",
+      assetKey: "ui_map_city_swamp"
+    }
+  };
+
+  const AREA_TO_BIOME = {
+    saltgrave_coast: "coast",
+    cinderwatch_isles: "coast",
+    wraithtide_isles: "coast",
+    emberwaste: "desert",
+    ashwind_steppe: "desert",
+    wyrmspine_mountains: "mountain",
+    hollowfrost_range: "mountain",
+    crownfrost_isle: "mountain",
+    elderwake_grove: "forest",
+    rustleaf_weald: "forest",
+    bonethorn_peninsula: "forest",
+    frostpine_taiga: "forest",
+    greymoor_downs: "highland",
+    hollowbarrow_highlands: "highland",
+    briarfall_marches: "highland",
+    blackmere_fens: "swamp"
+  };
+
+  function getBiomeProfile(areaId) {
+    const key = AREA_TO_BIOME[areaId] || "coast";
+    return BIOME_PROFILES[key] || BIOME_PROFILES.coast;
+  }
 
   // Koordinat geografis 16 Area (persentase responsif terhadap app/assets/ui/map_world.webp)
   const WORLD_AREA_COORDS = {
@@ -63,13 +133,13 @@
     ["blackmere_fens", "wraithtide_isles"]
   ];
 
-  // Titik interaktif pada Peta Kota/Desa bergaya Final Fantasy Tactics (map_city.webp)
+  // Titik interaktif pada Peta Kota/Desa bergaya Final Fantasy Tactics (bioma dinamis)
   const CITY_LANDMARKS = [
     { id: "forge",  x: 24, y: 58, label: "🔥 Bengkel Tempa",     action: "route", target: "forge" },
-    { id: "market", x: 56, y: 50, label: "⚖️ Pasar S&D",         action: "route", target: "market" },
-    { id: "shop",   x: 74, y: 25, label: "🏪 Balai Murid & Inn", action: "route", target: "shop" },
-    { id: "battle", x: 34, y: 19, label: "⚔️ Patroli & Dungeon", action: "route", target: "battle" },
-    { id: "world",  x: 76, y: 76, label: "⚓ Pelabuhan (World)",  action: "world", target: "world" }
+    { id: "market", x: 56, y: 50, label: "⚖️ Pasar & Syndicate", action: "route", target: "market" },
+    { id: "shop",   x: 74, y: 25, label: "🏪 Murid & Cabang",    action: "route", target: "shop" },
+    { id: "battle", x: 34, y: 19, label: "⚔️ Gerbang Grinding",  action: "route", target: "battle" },
+    { id: "world",  x: 76, y: 76, label: "⚓ Dermaga (World)",   action: "world", target: "world" }
   ];
 
   const SETTLEMENT_ICONS = {
@@ -91,27 +161,32 @@
     const curLoc = snap.location;
     const Assets = global.BSRPG_ASSETS;
     const worldUrl = Assets ? Assets.get("ui_map_world") : "";
-    const cityUrl = Assets ? Assets.get("ui_map_city") : "";
+    const curBiome = getBiomeProfile(curLoc?.area_id);
+    const cityUrl = Assets ? (Assets.get(curBiome.assetKey) || Assets.get("ui_map_city")) : "";
     const activeAreaId = state.selectedAreaId || curLoc?.area_id || "saltgrave_coast";
     const selArea = areas.find(a => a.area_id === activeAreaId) || areas[0];
     const selAreaLocs = locsByArea[activeAreaId] || [];
 
     const layerSwitchHtml = `
       <div class="sub-tabs-grid" style="margin-bottom:8px">
-        <button class="sub-tab-btn ${state.mapLayer === "world" ? "active" : ""}" data-imap-layer="world">🗺️ 1. World Map (16 Area)</button>
-        <button class="sub-tab-btn ${state.mapLayer === "city" ? "active" : ""}" data-imap-layer="city">🏘️ 2. City / Village Map (Gaya FFT)</button>
+        <button class="sub-tab-btn ${state.mapLayer === "city" ? "active" : ""}" data-imap-layer="city">🏘️ 1. Hub Kota (${esc(curLoc?.location_name || "Kota")})</button>
+        <button class="sub-tab-btn ${state.mapLayer === "world" ? "active" : ""}" data-imap-layer="world">🗺️ 2. World Map (16 Area)</button>
       </div>
     `;
 
     if (state.mapLayer === "city") {
-      const cityPinsHtml = CITY_LANDMARKS.map(lm => `
-        <button type="button" class="imap-pin city-node" style="left:${lm.x}%;top:${lm.y}%"
-          data-city-pin-action="${lm.action}" data-city-pin-target="${lm.target}">
-          ${lm.label}
-        </button>
-      `).join("");
+      const cityPinsHtml = CITY_LANDMARKS.map(lm => {
+        const lbl = lm.id === "world" ? curBiome.worldLabel : lm.label;
+        return `
+          <button type="button" class="imap-pin city-node pin-${lm.id}" style="left:${lm.x}%;top:${lm.y}%"
+            data-city-pin-action="${lm.action}" data-city-pin-target="${lm.target}">
+            ${lbl}
+          </button>
+        `;
+      }).join("");
 
-      const townChipsHtml = selAreaLocs.map(l => {
+      const curAreaLocs = locsByArea[curLoc?.area_id] || selAreaLocs;
+      const townChipsHtml = curAreaLocs.map(l => {
         const isHere = curLoc?.location_id === l.location_id;
         return isHere
           ? `<span class="badge ok">📍 ${esc(l.location_name)} (${esc(l.settlement_type)})</span>`
@@ -122,18 +197,38 @@
         <div class="card warm imap-shell">
           <div class="card-head">
             <div>
-              <div class="card-title">🏘️ Peta Kota / Desa — ${esc(curLoc?.location_name || "-")}</div>
-              <div class="card-sub">Gaya ilustratif Final Fantasy Tactics • Klik bangunan untuk langsung masuk fitur, atau klik ⚓ Pelabuhan ke World Map.</div>
+              <div class="card-title">🏘️ ${esc(curLoc?.location_name || "Tidewrack Village")} <span class="badge">${esc(curLoc?.settlement_type || "Village")}</span></div>
+              <div class="card-sub">${curBiome.badge} • ${curBiome.flavor}</div>
             </div>
-            <span class="badge ok">${esc(curLoc?.settlement_type || "Village")}</span>
+            <span class="badge ok">Tier ${esc(curLoc?.tier || 1)}</span>
           </div>
+
+          <div class="mode-hub-bar" aria-label="Pilih Mode Sesi">
+            <button type="button" class="mode-hub-btn smith" data-city-pin-action="route" data-city-pin-target="forge">
+              <span class="mode-hub-ic">🔥</span>
+              <span class="mode-hub-txt">
+                <strong>Mode Smith</strong>
+                <small>Tempa, Enhance &amp; Dagang</small>
+              </span>
+            </button>
+            <button type="button" class="mode-hub-btn grind" data-city-pin-action="route" data-city-pin-target="battle">
+              <span class="mode-hub-ic">⚔️</span>
+              <span class="mode-hub-txt">
+                <strong>Mode Grinding</strong>
+                <small>Patroli Cepat &amp; Bahan</small>
+              </span>
+            </button>
+          </div>
+
           ${layerSwitchHtml}
-          <div class="imap-canvas city-ratio" data-imap="city">
-            ${cityUrl ? `<img src="${cityUrl}" alt="Peta Kota" class="imap-bg" />` : ""}
+          <div class="imap-canvas city-ratio biome-${curBiome.id}" data-imap="city">
+            ${cityUrl ? `<img src="${cityUrl}" alt="Peta Kota ${esc(curBiome.badge)}" class="imap-bg" />` : ""}
+            <div class="imap-biome-tint" aria-hidden="true"></div>
+            <span class="imap-biome-tag">${curBiome.badge}</span>
             ${cityPinsHtml}
           </div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-            <span style="font-size:10.5px;color:var(--muted)">Kota/Desa di ${esc(selArea?.area_name || "-")}:</span>
+            <span style="font-size:10.5px;color:var(--muted)">Permukiman di ${esc(curLoc?.area_name || "-")}:</span>
             ${townChipsHtml}
           </div>
         </div>
