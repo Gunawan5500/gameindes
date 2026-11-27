@@ -164,32 +164,51 @@ def load_game_slots() -> dict:
     return slots
 
 
-def scan_available_assets() -> dict:
-    """Memindai semua gambar yang tersedia di app/assets/ dan assets/itch_raw/."""
-    app_imgs = []
-    if APP_ASSETS.exists():
-        for f in sorted(APP_ASSETS.rglob("*")):
-            if f.is_file() and f.suffix.lower() in IMAGE_EXTS:
-                rel = str(f.relative_to(APP_DIR)).replace("\\", "/")
-                folder = str(f.parent.relative_to(APP_ASSETS)).replace("\\", "/")
-                app_imgs.append({"path": rel, "name": f.name, "folder": folder, "kb": round(f.stat().st_size / 1024, 1)})
+ROOT_ASSETS = REPO_ROOT / "assets"
+SORTED_OUT = APP_ASSETS / "sorted"
 
-    raw_sheets = []
-    for base_label, base_dir in [("itch_raw", RAW_DIR), ("app_assets", APP_ASSETS)]:
+
+def scan_available_assets() -> dict:
+    """Memindai SEMUA gambar di assets/ (root) DAN app/assets/ agar seluruh aset lokal laptop langsung terbaca."""
+    gallery_imgs = []
+    sheets = []
+    seen_repo = set()
+
+    for source_label, base_dir in [("assets", ROOT_ASSETS), ("app/assets", APP_ASSETS)]:
         if not base_dir.exists():
             continue
         for f in sorted(base_dir.rglob("*")):
-            if f.is_file() and f.suffix.lower() in IMAGE_EXTS:
-                try:
-                    with Image.open(f) as im:
-                        w, h = im.size
-                except Exception:
-                    continue
-                if max(w, h) >= 256:
-                    rel = str(f.relative_to(REPO_ROOT)).replace("\\", "/")
-                    raw_sheets.append({"repoPath": rel, "name": f.name, "source": base_label, "w": w, "h": h})
+            if not f.is_file() or f.suffix.lower() not in IMAGE_EXTS:
+                continue
+            repo_rel = str(f.relative_to(REPO_ROOT)).replace("\\", "/")
+            if repo_rel in seen_repo:
+                continue
+            seen_repo.add(repo_rel)
 
-    return {"appImages": app_imgs, "sheets": raw_sheets}
+            sub_folder = str(f.parent.relative_to(base_dir)).replace("\\", "/")
+            folder_display = source_label if sub_folder == "." else f"{source_label}/{sub_folder}"
+            kb = round(f.stat().st_size / 1024, 1)
+
+            # Jika sudah di dalam app/assets/, appPath terisi; jika masih di assets/, akan otomatis dikonversi saat Simpan!
+            app_rel = str(f.relative_to(APP_DIR)).replace("\\", "/") if source_label == "app/assets" else ""
+            gallery_imgs.append({
+                "repoPath": repo_rel,
+                "appPath": app_rel,
+                "name": f.name,
+                "folder": folder_display,
+                "source": source_label,
+                "kb": kb,
+            })
+
+            try:
+                with Image.open(f) as im:
+                    w, h = im.size
+                if max(w, h) >= 256:
+                    sheets.append({"repoPath": repo_rel, "name": f.name, "source": folder_display, "w": w, "h": h})
+            except Exception:
+                pass
+
+    return {"appImages": gallery_imgs, "sheets": sheets}
 
 
 def load_assignments() -> dict:
@@ -201,9 +220,67 @@ def load_assignments() -> dict:
     return {"ui_forge": {}, "weapons": {}, "armors": {}, "skills": {}, "materials": {}, "monsters": {}}
 
 
+def ensure_in_app_assets(path_val: str, category: str, slot_id: str) -> str:
+    """
+    Jika user memilih file dari folder root assets/ (bukan app/assets/),
+    otomatis konversi & salin ke app/assets/sorted/<category>/<slot_id>.webp
+    dengan ukuran ringan aman Oppo A54 (< 150 MB RAM).
+    """
+    if not path_val:
+        return ""
+    norm = path_val.replace("\\", "/")
+    # Sudah berupa path relatif di dalam app/assets/
+    if norm.startswith("assets/") and (APP_DIR / norm).exists():
+        return norm
+
+    src = (REPO_ROOT / norm).resolve()
+    if not src.exists() or not str(src).startswith(str(REPO_ROOT)):
+        return norm
+
+    # Jika file sumber kebetulan memang sudah di dalam app/assets/
+    try:
+        rel_in_app = str(src.relative_to(APP_DIR)).replace("\\", "/")
+        if rel_in_app.startswith("assets/"):
+            return rel_in_app
+    except ValueError:
+        pass
+
+    # Konversi dari root assets/ -> app/assets/sorted/<category>/<slot_id>.webp
+    max_px_map = {"ui_forge": 760, "monsters": 128, "weapons": 128, "armors": 128, "skills": 96, "materials": 96}
+    max_px = max_px_map.get(category, 128)
+    dest = SORTED_OUT / slugify(category) / f"{slugify(slot_id)}.webp"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    im = Image.open(src)
+    has_alpha = im.mode in ("RGBA", "LA") or ("transparency" in im.info)
+    im = im.convert("RGBA" if has_alpha else "RGB")
+    w, h = im.size
+    if max(w, h) > max_px:
+        scale = max_px / float(max(w, h))
+        new_sz = (max(1, int(round(w * scale))), max(1, int(round(h * scale))))
+        resample = Image.Resampling.NEAREST if (category == "monsters" and max(w, h) <= 128) else Image.Resampling.LANCZOS
+        im = im.resize(new_sz, resample)
+
+    if category == "monsters" and max(im.size) <= 160 and has_alpha:
+        im.save(dest, "WEBP", lossless=True, method=6)
+    else:
+        im.save(dest, "WEBP", quality=84, method=5)
+
+    return str(dest.relative_to(APP_DIR)).replace("\\", "/")
+
+
 def save_assignments_and_generate_js(data: dict):
+    # Konversi otomatis semua pilihan dari root assets/ ke app/assets/sorted/ agar langsung jalan di APK!
+    resolved_for_game = {}
+    for cat, mapping in (data or {}).items():
+        resolved_for_game[cat] = {}
+        for slot_id, val in (mapping or {}).items():
+            if not val:
+                continue
+            resolved_for_game[cat][slot_id] = ensure_in_app_assets(val, cat, slot_id)
+
     ASSIGNMENTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ASSIGNMENTS_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    ASSIGNMENTS_FILE.write_text(json.dumps(resolved_for_game, indent=2, ensure_ascii=False), encoding="utf-8")
 
     js = f"""/**
  * Battle-Smith RPG — Manual Visual Asset Overrides
@@ -213,7 +290,7 @@ def save_assignments_and_generate_js(data: dict):
 (function (global) {{
   "use strict";
 
-  const OVERRIDES = {json.dumps(data, indent=2, ensure_ascii=False)};
+  const OVERRIDES = {json.dumps(resolved_for_game, indent=2, ensure_ascii=False)};
 
   function slug(str) {{
     return String(str || "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -529,6 +606,16 @@ function populateFolders() {
     folders.map(f => `<option value="${f}">${f}</option>`).join("");
 }
 
+function previewUrlFor(val) {
+  if (!val) return "";
+  // Jika sudah path relatif di dalam app/ (assets/...) dan bukan file mentah root
+  if (val.startsWith("app/")) return "/repo-file/" + encodeURIComponent(val);
+  // Cek apakah ada di gallery appImages sebagai repoPath
+  const hit = (STATE.assets.appImages || []).find(x => x.repoPath === val || x.appPath === val);
+  if (hit) return "/repo-file/" + encodeURIComponent(hit.repoPath);
+  return "/app-file/" + val;
+}
+
 function renderSlots() {
   const q = (document.getElementById("slot-search").value || "").toLowerCase();
   const list = STATE.slots[curCat] || [];
@@ -539,7 +626,7 @@ function renderSlots() {
   const filtered = list.filter(s => !q || s.label.toLowerCase().includes(q) || s.id.toLowerCase().includes(q));
   document.getElementById("slot-list").innerHTML = filtered.map(s => {
     const assigned = map[s.id] || "";
-    const thumb = assigned ? `<img class="slot-thumb" src="/app-file/${assigned}" />` : `<div class="slot-thumb">—</div>`;
+    const thumb = assigned ? `<img class="slot-thumb" src="${previewUrlFor(assigned)}" />` : `<div class="slot-thumb">—</div>`;
     return `
       <button class="slot-row ${selectedSlotId === s.id ? "selected" : ""} ${assigned ? "filled" : ""}" onclick="pickSlot('${s.id}')">
         ${thumb}
@@ -564,15 +651,19 @@ function renderGallery() {
   const curAssigned = (STATE.assignments[curCat] || {})[selectedSlotId] || "";
   const imgs = STATE.assets.appImages.filter(x =>
     (folder === "ALL" || x.folder === folder) &&
-    (!q || x.name.toLowerCase().includes(q) || x.path.toLowerCase().includes(q))
+    (!q || x.name.toLowerCase().includes(q) || x.repoPath.toLowerCase().includes(q))
   );
   document.getElementById("gal-count").textContent = `${imgs.length} gambar`;
-  document.getElementById("gallery-grid").innerHTML = imgs.map(x => `
-    <div class="asset-card ${curAssigned === x.path ? "picked" : ""}" onclick="assignAsset('${x.path}')">
-      <img src="/app-file/${x.path}" loading="lazy" />
-      <div class="asset-name" title="${x.path}">${x.name}</div>
-    </div>
-  `).join("");
+  document.getElementById("gallery-grid").innerHTML = imgs.map(x => {
+    const pickVal = x.appPath || x.repoPath;
+    const isPicked = curAssigned === x.appPath || curAssigned === x.repoPath;
+    return `
+      <div class="asset-card ${isPicked ? "picked" : ""}" onclick="assignAsset('${pickVal.replace(/'/g, "\\'")}')">
+        <img src="/repo-file/${encodeURIComponent(x.repoPath)}" loading="lazy" />
+        <div class="asset-name" title="${x.repoPath}">${x.name}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 function assignAsset(path) {
